@@ -1,0 +1,136 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro"
+import Footer from "../components/Footer.astro"
+import Header from "../components/Header.astro"
+---
+
+<BaseLayout
+    title="Cotizar proyecto | SOLUCIA"
+    description="Cuéntanos sobre tu proyecto de arquitectura y construcción."
+>
+    <Header />
+
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+        <section
+            class="grid gap-8 pt-4 md:grid-cols-[0.85fr_1.15fr] md:items-start lg:gap-10 lg:pb-20"
+        >
+            <div class="space-y-5">
+                <span class="text-sm font-semibold text-[#c23b22]">
+                    Hablemos de tu proyecto
+                </span>
+                <h1
+                    class="max-w-md text-3xl font-black uppercase leading-tight text-slate-900 sm:text-4xl"
+                >
+                    Solicita una cotización
+                </h1>
+                <p class="max-w-md text-base leading-relaxed text-slate-600">
+                    Cuéntanos qué tienes en mente. Al enviar la información se
+                    abrirá un chat directo en WhatsApp con todos los detalles de
+                    tu proyecto.
+                </p>
+                <a
+                    href="/"
+                    class="inline-flex items-center gap-2 text-sm font-bold
+                text-[#c23b22] transition-colors hover:text-red-700"
+                >
+                    ← Volver al inicio</a
+                >
+            </div>
+
+            <form
+                id="cotizar-form"
+                class="grid gap-5 rounded-2xl border border-slate-200/80 bg-slate-50/50 p-5 shadow-lg sm:p-8 md:col-start-2 md:grid-cols-2"
+            >
+                <label
+                    class="grid gap-2 text-xs font-bold uppercase tracking-wide text-slate-700"
+                >
+                    Nombre
+                    <input
+                        required
+                        type="text"
+                        name="name"
+                        placeholder="Ej: Juan Pérez"
+                        class="rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm font-normal normal-case text-slate-900 outline-none transition-colors focus:border-[#c23b22]"
+                    />
+                </label>
+
+                <label
+                    class="grid gap-2 text-xs font-bold uppercase tracking-wide text-slate-700 md:col-span-2"
+                >
+                    Tipo de proyecto
+                    <select
+                        name="tipo"
+                        class="rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm font-normal normal-case text-slate-900 outline-none transition-colors focus:border-[#c23b22]"
+                    >
+                        <option value="Diseño arquitectónico"
+                            >Diseño arquitectónico</option
+                        >
+                        <option value="Diseño urbano">Diseño urbano</option>
+                        <option value="Cálculo estructural"
+                            >Cálculo estructural</option
+                        >
+                        <option value="Construcción">Construcción</option>
+                        <option value="Trámite de licencias"
+                            >Trámite de licencias</option
+                        >
+                        <option value="Comercialización"
+                            >Comercialización</option
+                        >
+                        <option value="Otro">Otro</option>
+                    </select>
+                </label>
+
+                <label
+                    class="grid gap-2 text-xs font-bold uppercase tracking-wide text-slate-700 md:col-span-2"
+                >
+                    Cuéntanos más
+                    <textarea
+                        required
+                        name="message"
+                        rows="5"
+                        placeholder="Escribe aquí los detalles o necesidades principales..."
+                        class="resize-y rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm font-normal normal-case text-slate-900 outline-none transition-colors focus:border-[#c23b22]"
+                    ></textarea>
+                </label>
+
+                <button
+                    type="submit"
+                    class="w-full rounded-lg bg-[#c23b22] px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-white transition-all hover:bg-red-700 md:col-span-2"
+                >
+                    ENVIAR POR WHATSAPP
+                </button>
+            </form>
+        </section>
+    </main>
+</BaseLayout>
+
+<Footer />
+
+<script>
+    const form = document.getElementById("cotizar-form") as HTMLFormElement
+
+    const PHONE_NUMBER = "573116353290"
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault()
+
+        const formData = new FormData(form)
+        const name = formData.get("name") as string
+        const tipo = formData.get("tipo") as string
+        const message = formData.get("message") as string
+
+        const whatsappMessage =
+            `*Nueva Solicitud de Cotización - SOLUCIA*%0A%0A` +
+            `*Nombre:* ${encodeURIComponent(name)}%0A` +
+            `*Tipo de Proyecto:* ${encodeURIComponent(tipo)}%0A%0A` +
+            `*Mensaje:*%0A${encodeURIComponent(message)}`
+
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+        const whatsappUrl = isMobile
+            ? `whatsapp://send?phone=${PHONE_NUMBER}&text=${whatsappMessage}`
+            : `https://web.whatsapp.com/send?phone=${PHONE_NUMBER}&text=${whatsappMessage}`
+
+        window.open(whatsappUrl, "_blank")
+    })
+</script>

@@ -1,0 +1,177 @@
+---
+const pathname = Astro.url.pathname.replace(/\/\$/, "") || "/"
+
+const isActive = (path: string) => {
+    const normalizedPath = path.replace(/\/\$/, "") || "/"
+    if (normalizedPath === "/") {
+        return pathname === "/"
+    }
+    return pathname.startsWith(normalizedPath)
+}
+---
+
+<header class="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+        <a
+            href="/"
+            data-scroll-target="inicio"
+            aria-label="SOLUCIA, volver al inicio"
+            class="z-50"
+        >
+            <img
+                src="/logo.png"
+                alt="SOLUCIA S.A.S."
+                class="h-8 sm:h-10"
+            />
+        </a>
+
+        <!-- Menú de Escritorio -->
+        <nav
+            class="hidden items-center gap-6 text-sm font-medium md:flex"
+            aria-label="Navegación principal"
+        >
+            <a
+                href="/"
+                data-scroll-target="inicio"
+                class={`transition-colors ${isActive("/") ? "text-red-600 font-semibold" : "text-slate-700 hover:text-red-600"}`}
+            >
+                Inicio
+            </a>
+            <a
+                href="/nosotros/"
+                class={`transition-colors ${isActive("/nosotros") ? "text-red-600 font-semibold" : "text-slate-700 hover:text-red-600"}`}
+            >
+                Nosotros
+            </a>
+            <a
+                href="/servicios/"
+                class={`transition-colors ${isActive("/servicios") ? "text-red-600 font-semibold" : "text-slate-700 hover:text-red-600"}`}
+            >
+                Servicios
+            </a>
+        </nav>
+
+        <!-- Botón Cotizar (Escritorio) y Botón de Menú Móvil -->
+        <div class="flex items-center gap-4">
+            <a
+                href="/cotizar/"
+                class="hidden rounded-sm bg-[#c23b22] px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-red-700 sm:block"
+            >
+                COTIZAR PROYECTO
+            </a>
+
+            <!-- Botón de Menú (Solo visible en móviles) -->
+            <button
+                id="menu-toggle"
+                class="z-50 flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-md border border-gray-200 text-slate-700 md:hidden"
+                aria-label="Abrir menú de navegación"
+                aria-expanded="false"
+            >
+                <span
+                    class="h-0.5 w-6 bg-current transition-transform duration-300"
+                    id="line1"
+                ></span>
+                <span
+                    class="h-0.5 w-6 bg-current transition-opacity duration-300"
+                    id="line2"
+                ></span>
+                <span
+                    class="h-0.5 w-6 bg-current transition-transform duration-300"
+                    id="line3"
+                ></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Menú Desplegable Móvil -->
+    <div
+        id="mobile-menu"
+        class="fixed inset-0 z-40 flex -translate-y-full flex-col bg-white px-4 pt-20 transition-transform duration-300 ease-in-out sm:px-6 sm:pt-24 md:hidden"
+    >
+        <nav class="flex flex-col gap-4 text-lg font-medium sm:gap-6">
+            <a
+                href="/"
+                data-scroll-target="inicio"
+                class={`mobile-link border-b border-gray-100 pb-2 ${isActive("/") ? "text-red-600 font-semibold" : "text-slate-700"}`}
+            >
+                Inicio
+            </a>
+            <a
+                href="/nosotros/"
+                class={`mobile-link border-b border-gray-100 pb-2 ${isActive("/nosotros") ? "text-red-600 font-semibold" : "text-slate-700"}`}
+            >
+                Nosotros
+            </a>
+            <a
+                href="/servicios/"
+                class={`mobile-link border-b border-gray-100 pb-2 ${isActive("/servicios") ? "text-red-600 font-semibold" : "text-slate-700"}`}
+            >
+                Servicios
+            </a>
+            <a
+                href="/cotizar/"
+                class="mt-4 rounded-sm bg-[#c23b22] py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-red-700"
+            >
+                COTIZAR PROYECTO
+            </a>
+        </nav>
+    </div>
+</header>
+
+<script>
+    // Lógica para abrir/cerrar el menú móvil e interacciones
+    const menuToggle = document.getElementById("menu-toggle")
+    const mobileMenu = document.getElementById("mobile-menu")
+    const line1 = document.getElementById("line1")
+    const line2 = document.getElementById("line2")
+    const line3 = document.getElementById("line3")
+
+    function toggleMenu() {
+        const isExpanded = menuToggle?.getAttribute("aria-expanded") === "true"
+        menuToggle?.setAttribute("aria-expanded", (!isExpanded).toString())
+
+        // Desplegar menú
+        mobileMenu?.classList.toggle("-translate-y-full")
+
+        // Animación del botón hamburguesa a una "X"
+        line1?.classList.toggle("translate-y-2")
+        line1?.classList.toggle("rotate-45")
+        line2?.classList.toggle("opacity-0")
+        line3?.classList.toggle("-translate-y-2")
+        line3?.classList.toggle("-rotate-45")
+
+        // Previene el scroll del fondo cuando el menú está abierto
+        document.body.classList.toggle("overflow-hidden")
+    }
+
+    menuToggle?.addEventListener("click", toggleMenu)
+
+    // Cerrar el menú al dar clic en un enlace de navegación móvil
+    document.querySelectorAll(".mobile-link").forEach((link) => {
+        link.addEventListener("click", () => {
+            if (!mobileMenu?.classList.contains("-translate-y-full")) {
+                toggleMenu()
+            }
+        })
+    })
+
+    // Lógica de Scroll Suave existente
+    document
+        .querySelectorAll<HTMLElement>("[data-scroll-target]")
+        .forEach((link) => {
+            link.addEventListener("click", (event) => {
+                const targetId = link.dataset.scrollTarget
+                const target = targetId
+                    ? document.getElementById(targetId)
+                    : null
+
+                if (target && window.location.pathname === "/") {
+                    event.preventDefault()
+                    target.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                    })
+                }
+            })
+        })
+</script>

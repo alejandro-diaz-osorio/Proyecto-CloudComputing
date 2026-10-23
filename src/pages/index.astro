@@ -1,0 +1,91 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro"
+import Footer from "../components/Footer.astro"
+import Header from "../components/Header.astro"
+import Hero from "../components/Hero.astro"
+
+import {
+	PencilRuler,
+	Map,
+	Cog,
+	Building,
+	FileText,
+	BriefcaseBusiness,
+} from "@lucide/astro"
+
+const services = [
+	{ label: "Diseño Arquitectónico", icon: PencilRuler },
+	{ label: "Diseño Urbano", icon: Map },
+	{ label: "Cálculo Estructural", icon: Cog },
+	{ label: "Construcción", icon: Building },
+	{ label: "Trámite de Licencias", icon: FileText },
+	{ label: "Comercialización", icon: BriefcaseBusiness },
+]
+---
+
+<BaseLayout>
+	<Header />
+
+	<main class="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
+		<Hero />
+
+		<section
+			id="nosotros"
+			class="grid gap-8 border-b border-gray-300/60 py-14 md:grid-cols-[0.8fr_1.2fr] md:items-end"
+		>
+			<div>
+				<p
+					class="mb-3 text-xs font-bold uppercase tracking-wider text-[#c23b22]"
+				>
+					Quiénes somos
+				</p>
+				<h2
+					class="max-w-sm text-2xl font-extrabold uppercase leading-tight text-slate-900"
+				>
+					Una visión integral para cada proyecto
+				</h2>
+			</div>
+			<p class="max-w-2xl text-sm leading-relaxed text-slate-600">
+				Acompañamos cada etapa, desde la idea y el diseño hasta la
+				ejecución. Nuestro equipo conecta decisiones técnicas, gestión y
+				experiencia de obra para crear proyectos sólidos, funcionales y
+				coherentes con su entorno.
+			</p>
+		</section>
+
+		<section
+			id="servicios"
+			class="border-b border-gray-300/60 py-12"
+			aria-labelledby="services-title"
+		>
+			<h2
+				id="services-title"
+				class="mb-8 text-lg font-bold uppercase tracking-wider text-slate-900"
+			>
+				Nuestros Servicios
+			</h2>
+
+			<div
+				class="grid grid-cols-1 gap-8 text-center sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+			>
+				{
+					services.map(({ label, icon: Icon }) => (
+						<a
+							href="/servicios"
+							class="group space-y-2 transition-transform duration-300 hover:scale-105"
+						>
+							<div class="flex justify-center text-slate-800 transition-colors duration-300 group-hover:text-[#c23b22]">
+								<Icon size="48" />
+							</div>
+							<h3 class="text-xs font-bold uppercase text-slate-900 transition-colors duration-300 group-hover:text-[#c23b22]">
+								{label}
+							</h3>
+						</a>
+					))
+				}
+			</div>
+		</section>
+	</main>
+
+	<Footer />
+</BaseLayout>

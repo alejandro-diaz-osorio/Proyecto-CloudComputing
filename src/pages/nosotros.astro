@@ -1,0 +1,124 @@
+---
+import Footer from "../components/Footer.astro"
+import Header from "../components/Header.astro"
+import BaseLayout from "../layouts/BaseLayout.astro"
+---
+
+<BaseLayout
+	title="Nosotros | SOLUCIA"
+	description="Conoce la visión integral de SOLUCIA S.A.S. para proyectos de arquitectura y construcción."
+>
+	<Header />
+
+	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+		<section
+			class="grid gap-8 px-4 py-10 sm:gap-10 sm:px-8 sm:py-16 md:grid-cols-[0.8fr_1.2fr] md:items-end"
+		>
+			<div class="space-y-4">
+				<p
+					class="text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+				>
+					SOLUCIA S.A.S.
+				</p>
+				<h1
+					class="max-w-md text-3xl font-black uppercase leading-tight text-slate-900 sm:text-4xl"
+				>
+					Diseñamos con visión, construimos con propósito.
+				</h1>
+			</div>
+			<p class="max-w-xl text-base leading-relaxed text-slate-600">
+				Somos un equipo multidisciplinario que acompaña cada proyecto
+				desde la conceptualización hasta la entrega final, combinando
+				criterio técnico, claridad de proceso y atención real a las
+				necesidades del cliente.
+			</p>
+		</section>
+
+		<section
+			class="grid gap-8 bg-[#c23b22] px-4 py-10 sm:gap-10 sm:px-8 sm:py-16 md:grid-cols-[0.8fr_1.2fr] md:items-end"
+		>
+			<div class="space-y-4">
+				<p
+					class="text-xs font-bold uppercase tracking-[0.2em] text-slate-900"
+				>
+					Quiénes somos
+				</p>
+				<h1
+					class="max-w-md text-3xl font-black uppercase leading-tight text-[#F5F3EC] sm:text-4xl"
+				>
+					Una visión integral para cada proyecto.
+				</h1>
+			</div>
+			<p class="max-w-xl text-base leading-relaxed text-[#F5F3EC]">
+				Acompañamos cada etapa, desde la idea y el diseño hasta la
+				ejecución. Nuestro equipo conecta decisiones técnicas, gestión y
+				experiencia de obra para crear proyectos sólidos, funcionales y
+				coherentes con su entorno.
+			</p>
+		</section>
+
+		<section class="px-4 py-12 sm:px-8 sm:py-16 lg:py-20">
+			<div class="mb-10 max-w-lg">
+				<p
+					class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+				>
+					Nuestro enfoque
+				</p>
+				<h3
+					class="text-2xl font-extrabold uppercase leading-tight text-slate-900 sm:text-3xl"
+				>
+					Lo que define nuestra forma de trabajar
+				</h3>
+			</div>
+
+			<div class="grid gap-5 sm:gap-8 md:grid-cols-3">
+				<div
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="mb-4 h-1 w-12 bg-[#c23b22]"></div>
+					<h4
+						class="mb-2 text-base font-bold uppercase text-slate-900"
+					>
+						Integración
+					</h4>
+					<p class="text-sm leading-relaxed text-slate-600">
+						Unimos diseño, técnica y ejecución para transformar una
+						idea en un proyecto claro y viable.
+					</p>
+				</div>
+
+				<div
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="mb-4 h-1 w-12 bg-[#c23b22]"></div>
+					<h4
+						class="mb-2 text-base font-bold uppercase text-slate-900"
+					>
+						Experiencia
+					</h4>
+					<p class="text-sm leading-relaxed text-slate-600">
+						Aplicamos criterio profesional en cada decisión para que
+						cada espacio sea funcional, durable y bien pensado.
+					</p>
+				</div>
+
+				<div
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="mb-4 h-1 w-12 bg-[#c23b22]"></div>
+					<h4
+						class="mb-2 text-base font-bold uppercase text-slate-900"
+					>
+						Compromiso
+					</h4>
+					<p class="text-sm leading-relaxed text-slate-600">
+						Trabajamos junto al cliente con rigor, atención y
+						sentido de responsabilidad en cada etapa del proceso.
+					</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<Footer />
+</BaseLayout>

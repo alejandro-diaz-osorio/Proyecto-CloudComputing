@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+html {
+	 scroll-behavior: smooth;
+}
+
+body {
+	min-width: 320px;
+	overflow-x: hidden;
+}

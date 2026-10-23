@@ -1,0 +1,281 @@
+---
+import Footer from "../components/Footer.astro"
+import Header from "../components/Header.astro"
+import BaseLayout from "../layouts/BaseLayout.astro"
+
+import {
+	PencilRuler,
+	Map,
+	Cog,
+	Building,
+	FileText,
+	BriefcaseBusiness,
+} from "@lucide/astro"
+---
+
+<BaseLayout
+	title="Servicios | SOLUCIA"
+	description="Servicios integrales de diseño, ingeniería, construcción y gestión de proyectos."
+>
+	<Header />
+
+	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+		<!-- Hero Section -->
+		<section
+			class="grid gap-8 bg-[#c23b22] px-4 py-10 sm:gap-10 sm:px-8 sm:py-14 md:grid-cols-[0.8fr_1.2fr] md:items-center"
+		>
+			<div class="space-y-4 border-l-4 border-[#F5F3EC]/40 pl-4 sm:pl-6">
+				<p class="text-sm font-semibold text-[#F5F3EC]/80">
+					Lo que hacemos
+				</p>
+				<h1
+					class="max-w-md text-3xl font-black uppercase leading-[1.05] text-[#F5F3EC] sm:text-4xl lg:text-5xl"
+				>
+					Soluciones para cada etapa del proyecto
+				</h1>
+			</div>
+			<p class="max-w-xl text-base leading-relaxed text-[#F5F3EC]/90">
+				Ponemos a tu disposición un equipo multidisciplinario para pasar
+				de la planeación a la ejecución con claridad, coordinación y
+				respaldo técnico.
+			</p>
+		</section>
+
+		<!-- Lista de Servicios -->
+		<section
+			id="servicios"
+			class="px-4 py-12 sm:px-8 sm:py-16 lg:py-20"
+			aria-labelledby="services-title"
+		>
+			<div class="mb-10 max-w-lg">
+				<p
+					class="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+				>
+					Nuestros servicios
+				</p>
+				<h2
+					id="services-title"
+					class="text-2xl font-extrabold uppercase leading-tight text-slate-900"
+				>
+					Especialidades integrales
+				</h2>
+			</div>
+
+			<div class="flex flex-col gap-6 sm:gap-10">
+				<!-- Servicio 1 -->
+				<article
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="grid items-center gap-8 md:grid-cols-12">
+						<div class="space-y-3 md:col-span-8 md:pr-6">
+							<span
+								class="text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+								>01. Diseño</span
+							>
+							<h3
+								class="text-xl font-bold uppercase text-slate-900"
+							>
+								Diseño Arquitectónico
+							</h3>
+							<p class="text-sm leading-relaxed text-slate-600">
+								Desarrollamos propuestas conceptuales y
+								definitivas enfocadas en la funcionalidad,
+								estética y eficiencia espacial, adaptando cada
+								obra al contexto visual e intenciones del
+								cliente.
+							</p>
+						</div>
+						<div
+							class="flex items-center justify-center md:col-span-4 md:border-l md:border-slate-200 md:pl-6"
+						>
+							<div
+								class="rounded-sm bg-white p-6 text-slate-800 shadow-sm"
+							>
+								<PencilRuler size="56" />
+							</div>
+						</div>
+					</div>
+				</article>
+
+				<!-- Servicio 2 -->
+				<article
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="grid items-center gap-8 md:grid-cols-12">
+						<div
+							class="order-2 flex items-center justify-center md:order-1 md:col-span-4 md:border-r md:border-slate-200 md:pr-6"
+						>
+							<div
+								class="rounded-sm bg-white p-6 text-slate-800 shadow-sm"
+							>
+								<Map size="56" />
+							</div>
+						</div>
+						<div
+							class="order-1 space-y-3 md:order-2 md:col-span-8 md:pl-6"
+						>
+							<span
+								class="text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+								>02. Planeación</span
+							>
+							<h3
+								class="text-xl font-bold uppercase text-slate-900"
+							>
+								Diseño Urbano
+							</h3>
+							<p class="text-sm leading-relaxed text-slate-600">
+								Planificamos intervenciones a escala urbana
+								organizando vías, zonas públicas y áreas
+								construidas para lograr un desarrollo sostenible
+								e integrado al entorno social y territorial.
+							</p>
+						</div>
+					</div>
+				</article>
+
+				<!-- Servicio 3 -->
+				<article
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="grid items-center gap-8 md:grid-cols-12">
+						<div class="space-y-3 md:col-span-8 md:pr-6">
+							<span
+								class="text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+								>03. Ingeniería</span
+							>
+							<h3
+								class="text-xl font-bold uppercase text-slate-900"
+							>
+								Cálculo Estructural
+							</h3>
+							<p class="text-sm leading-relaxed text-slate-600">
+								Realizamos análisis técnicos rigurosos que
+								garantizan la estabilidad, resistencia y
+								seguridad sísmica de la edificación, optimizando
+								recursos y materiales según la normativa
+								vigente.
+							</p>
+						</div>
+						<div
+							class="flex items-center justify-center md:col-span-4 md:border-l md:border-slate-200 md:pl-6"
+						>
+							<div
+								class="rounded-sm bg-white p-6 text-slate-800 shadow-sm"
+							>
+								<Cog size="56" />
+							</div>
+						</div>
+					</div>
+				</article>
+
+				<!-- Servicio 4 -->
+				<article
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="grid items-center gap-8 md:grid-cols-12">
+						<div
+							class="order-2 flex items-center justify-center md:order-1 md:col-span-4 md:border-r md:border-slate-200 md:pr-6"
+						>
+							<div
+								class="rounded-sm bg-white p-6 text-slate-800 shadow-sm"
+							>
+								<Building size="56" />
+							</div>
+						</div>
+						<div
+							class="order-1 space-y-3 md:order-2 md:col-span-8 md:pl-6"
+						>
+							<span
+								class="text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+								>04. Ejecución</span
+							>
+							<h3
+								class="text-xl font-bold uppercase text-slate-900"
+							>
+								Construcción
+							</h3>
+							<p class="text-sm leading-relaxed text-slate-600">
+								Ejecutamos la obra física bajo estrictos
+								controles de calidad, tiempos y presupuestos,
+								asegurando la materialización fiel de los planos
+								y proyectos aprobados.
+							</p>
+						</div>
+					</div>
+				</article>
+
+				<!-- Servicio 5 -->
+				<article
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="grid items-center gap-8 md:grid-cols-12">
+						<div class="space-y-3 md:col-span-8 md:pr-6">
+							<span
+								class="text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+								>05. Legal</span
+							>
+							<h3
+								class="text-xl font-bold uppercase text-slate-900"
+							>
+								Trámite de Licencias
+							</h3>
+							<p class="text-sm leading-relaxed text-slate-600">
+								Gestionamos los permisos urbanísticos y
+								licencias requeridas ante Curadurías o entidades
+								regulatorias, asegurando el cumplimiento legal
+								antes del inicio de obra.
+							</p>
+						</div>
+						<div
+							class="flex items-center justify-center md:col-span-4 md:border-l md:border-slate-200 md:pl-6"
+						>
+							<div
+								class="rounded-sm bg-white p-6 text-slate-800 shadow-sm"
+							>
+								<FileText size="56" />
+							</div>
+						</div>
+					</div>
+				</article>
+
+				<!-- Servicio 6 -->
+				<article
+					class="group rounded-sm border border-slate-200 bg-slate-50 p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#c23b22]/40 hover:bg-white hover:shadow-sm"
+				>
+					<div class="grid items-center gap-8 md:grid-cols-12">
+						<div
+							class="order-2 flex items-center justify-center md:order-1 md:col-span-4 md:border-r md:border-slate-200 md:pr-6"
+						>
+							<div
+								class="rounded-sm bg-white p-6 text-slate-800 shadow-sm"
+							>
+								<BriefcaseBusiness size="56" />
+							</div>
+						</div>
+						<div
+							class="order-1 space-y-3 md:order-2 md:col-span-8 md:pl-6"
+						>
+							<span
+								class="text-xs font-bold uppercase tracking-[0.2em] text-[#c23b22]"
+								>06. Negocios</span
+							>
+							<h3
+								class="text-xl font-bold uppercase text-slate-900"
+							>
+								Comercialización
+							</h3>
+							<p class="text-sm leading-relaxed text-slate-600">
+								Estructuramos la estrategia comercial y de
+								posicionamiento del proyecto inmobiliario para
+								conectar de forma efectiva las obras finalizadas
+								con sus clientes o inversionistas finales.
+							</p>
+						</div>
+					</div>
+				</article>
+			</div>
+		</section>
+	</main>
+
+	<Footer />
+</BaseLayout>
