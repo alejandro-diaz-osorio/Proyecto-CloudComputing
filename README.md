@@ -1,43 +1,40 @@
-# Astro Starter Kit: Minimal
+# Solucia S.A.S. — Frontend
+
+Frontend estático construido con Astro y servido por NGINX. NGINX también envía las solicitudes a `/api/` al servicio Express.
+
+## Ejecutar el entorno completo
+
+Desde la raíz del proyecto, crea el archivo local de variables y cambia sus valores:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Usa contraseñas y un `JWT_SECRET` aleatorios en `.env`; no publiques ese archivo. Luego inicia los servicios:
+
+```powershell
+docker compose up --build -d
+```
+
+- Sitio: `http://localhost:8080` (o el puerto `FRONTEND_PORT`).
+- phpMyAdmin: `http://localhost:8081` (o el puerto `PHPMYADMIN_PORT`).
+- API: disponible internamente mediante `/api/`; su comprobación de salud está en `/api/health`.
+
+MySQL guarda sus datos en el volumen `db_data`; los archivos subidos por la API usan el volumen `uploads`. Para detener los contenedores sin borrar los datos:
+
+```powershell
+docker compose down
+```
+
+## Desarrollo local del frontend
 
 ```sh
-pnpm create astro@latest -- --template minimal
+pnpm install
+pnpm dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Para generar los archivos estáticos que NGINX sirve en producción:
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```sh
+pnpm build
 ```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
