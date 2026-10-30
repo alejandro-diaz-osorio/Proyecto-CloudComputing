@@ -1,0 +1,28 @@
+---
+// Layout propio de las pantallas de acceso: sin navbar/footer del sitio público.
+import '../styles/auth.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = 'SOLUCIA · Portal de proyectos', description = 'Accede o crea tu cuenta en SOLUCIA para solicitar y seguir tu cotización.' } = Astro.props;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  </head>
+  <body class="auth-body">
+    <main class="auth-grid">
+      <slot />
+    </main>
+  </body>
+</html>

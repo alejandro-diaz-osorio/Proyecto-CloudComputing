@@ -1,0 +1,187 @@
+---
+import { RUTAS } from '../../../lib/routes.js';
+import Field from './Field.astro';
+import InputBox from './InputBox.astro';
+import PasswordField from './PasswordField.astro';
+import Alert from './Alert.astro';
+import Icon from './Icon.astro';
+
+const camposTexto = [
+  { id: 'reg-nombre', name: 'nombre', label: 'Nombre', type: 'text', autocomplete: 'given-name', placeholder: 'Ej. Carlos', maxlength: 80, icon: 'user' },
+  { id: 'reg-apellido', name: 'apellido', label: 'Apellido', type: 'text', autocomplete: 'family-name', placeholder: 'Ej. Restrepo', maxlength: 80, icon: 'user' },
+  { id: 'reg-email', name: 'email', label: 'Correo electrónico', type: 'email', inputmode: 'email', autocomplete: 'email', placeholder: 'nombre@correo.com', maxlength: 190, icon: 'mail' },
+] as const;
+---
+<!-- Tras registrarse, el usuario continúa en la pantalla de inicio de sesión. -->
+<form id="register-form" class="auth-form" novalidate>
+  <Alert id="register-alert" />
+
+  {camposTexto.map(({ label, ...campo }) => (
+    <Field id={campo.id} name={campo.name} label={label}>
+      <InputBox {...campo} />
+    </Field>
+  ))}
+
+  <div>
+    <PasswordField
+      id="reg-password"
+      name="password"
+      label="Contraseña"
+      placeholder="Mínimo 8 caracteres"
+      autocomplete="new-password"
+      hintId="reg-password-hint"
+    />
+    <p class="auth-rules auth-rules--vacia" id="reg-password-hint">
+      <span class="auth-rules__dot" aria-hidden="true"></span>
+      Usa 8 caracteres, una mayúscula y un número
+      <span class="sr-only">. Aún no cumple todos los requisitos.</span>
+    </p>
+  </div>
+
+  <PasswordField
+    id="reg-confirmar"
+    name="confirmar"
+    label="Confirmar contraseña"
+    placeholder="Repite tu contraseña"
+    autocomplete="new-password"
+  />
+
+  <Field id="reg-telefono" name="telefono" label="Teléfono">
+    <span slot="aside" class="auth-optional">Opcional</span>
+    <InputBox
+      id="reg-telefono"
+      name="telefono"
+      type="tel"
+      inputmode="tel"
+      autocomplete="tel-national"
+      placeholder="300 000 0000"
+      prefix="+57"
+    />
+  </Field>
+
+  <div>
+    <label class="auth-check">
+      <input type="checkbox" name="terminos" />
+      <span>
+        Acepto los <a class="auth-link" href={RUTAS.terminos} target="_blank" rel="noopener">términos de uso</a> y
+        la <a class="auth-link" href={RUTAS.privacidad} target="_blank" rel="noopener">política de privacidad</a>.
+      </span>
+    </label>
+    <p class="auth-field__error" id="reg-terminos-error" data-error-for="terminos" hidden></p>
+  </div>
+
+  <button
+    type="submit"
+    class="auth-submit"
+    data-label-idle="Crear mi cuenta"
+    data-label-busy="Creando tu cuenta…"
+  >
+    <span class="auth-spinner" aria-hidden="true" hidden></span>
+    <span data-label>Crear mi cuenta</span>
+    <Icon name="user-plus" data-icon />
+  </button>
+</form>
+
+<script>
+  import { authApi } from '../api.js';
+  import { RUTAS } from '../../../lib/routes.js';
+  import {
+    validarRegistro, reglasPassword, formatearTelefono, telefonoParaApi, erroresDelServidor,
+  } from '../validation.js';
+  import {
+    setFieldError, mostrarErrores, mostrarAlerta, setEnviando, enfocarPrimerError,
+  } from '../forms.js';
+
+  const CAMPOS = ['nombre', 'apellido', 'email', 'password', 'confirmar', 'telefono', 'terminos'];
+  const form = document.querySelector<HTMLFormElement>('#register-form');
+
+  if (form) {
+    const alerta = form.querySelector<HTMLElement>('#register-alert');
+    const boton = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const reglasEl = form.querySelector<HTMLElement>('#reg-password-hint')!;
+    const reglasSr = reglasEl.querySelector<HTMLElement>('.sr-only')!;
+    let enviando = false;
+
+    const campo = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+    const valores = () => ({
+      nombre: campo('nombre').value,
+      apellido: campo('apellido').value,
+      email: campo('email').value,
+      password: campo('password').value,
+      confirmar: campo('confirmar').value,
+      telefono: campo('telefono').value,
+      terminos: campo('terminos').checked,
+    });
+
+    function actualizarReglas() {
+      const pw = campo('password').value;
+      const cumplidas = Object.values(reglasPassword(pw)).filter(Boolean).length;
+      const estado = !pw ? 'vacia' : cumplidas === 3 ? 'ok' : 'pendiente';
+      reglasEl.className = `auth-rules auth-rules--${estado}`;
+      reglasSr.textContent =
+        estado === 'ok' ? '. Cumple los requisitos.' : '. Aún no cumple todos los requisitos.';
+    }
+
+    form.addEventListener('input', (e) => {
+      const el = e.target as HTMLInputElement;
+      if (!CAMPOS.includes(el.name)) return;
+      if (el.name === 'telefono') el.value = formatearTelefono(el.value);
+      if (el.name === 'password') actualizarReglas();
+      setFieldError(form, el.name, '');
+    });
+
+    form.addEventListener('focusout', (e) => {
+      const el = e.target as HTMLInputElement;
+      if (!CAMPOS.includes(el.name) || el.name === 'terminos') return;
+      // 'confirmar' solo se valida si ya se escribió algo (evita gritar al salir del campo vacío)
+      if (el.name === 'confirmar' && !el.value) return;
+      setFieldError(form, el.name, validarRegistro(valores())[el.name]);
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (enviando) return;
+
+      const errs = validarRegistro(valores());
+      mostrarErrores(form, CAMPOS, errs);
+      mostrarAlerta(alerta, '');
+      if (enfocarPrimerError(form, errs)) return;
+
+      const v = valores();
+      enviando = true;
+      setEnviando(boton, true);
+      try {
+        await authApi.register({
+          nombre: v.nombre,
+          apellido: v.apellido,
+          email: v.email,
+          password: v.password,
+          telefono: telefonoParaApi(v.telefono),
+        });
+        window.location.replace(`${RUTAS.login}?registro=exitoso`);
+      } catch (err: any) {
+        const delServidor = erroresDelServidor(err);
+        if (err.status === 409 && !delServidor.email) {
+          delServidor.email = 'Ya existe una cuenta con este correo. Inicia sesión.';
+        }
+        const hayErrores = Object.keys(delServidor).length > 0;
+        if (hayErrores) mostrarErrores(form, CAMPOS, delServidor);
+        mostrarAlerta(
+          alerta,
+          hayErrores
+            ? 'Revisa los campos marcados.'
+            : err.mensaje || 'No pudimos crear tu cuenta. Inténtalo de nuevo.',
+        );
+        enviando = false;
+        setEnviando(boton, false);
+      }
+    });
+
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) {
+        enviando = false;
+        setEnviando(boton, false);
+      }
+    });
+  }
+</script>

@@ -16,7 +16,7 @@ Usa contraseñas y un `JWT_SECRET` aleatorios en `.env`; no publiques ese archiv
 docker compose up --build -d
 ```
 
-- Sitio: `http://localhost:8080` (o el puerto `FRONTEND_PORT`).
+- Sitio: `http://localhost` (o el puerto configurado en `FRONTEND_PORT`).
 - phpMyAdmin: `http://localhost:8081` (o el puerto `PHPMYADMIN_PORT`).
 - API: disponible internamente mediante `/api/`; su comprobación de salud está en `/api/health`.
 

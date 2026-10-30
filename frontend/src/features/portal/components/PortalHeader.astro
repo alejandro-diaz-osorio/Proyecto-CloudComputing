@@ -1,0 +1,54 @@
+---
+import { Menu, Bell, ChevronDown } from '@lucide/astro';
+import { RUTAS } from '../../../lib/routes.js';
+---
+
+<header class="phead">
+  <button type="button" class="phead__menu" data-nav-toggle aria-label="Abrir menú">
+    <Menu size={22} strokeWidth={1.8} />
+  </button>
+
+  <a href={RUTAS.portal} class="phead__logo">
+    <img src="/logo.png" alt="SOLUCIA · Diseño y construcción" />
+  </a>
+
+  <div class="phead__actions">
+    <button type="button" class="phead__bell" aria-label="Notificaciones">
+      <Bell size={20} strokeWidth={1.6} />
+    </button>
+    <div class="phead__user">
+      <span class="phead__avatar" data-user-initials>··</span>
+      <span class="phead__who">
+        <strong data-user-short>&nbsp;</strong>
+        <small data-user-role>&nbsp;</small>
+      </span>
+      <ChevronDown size={16} strokeWidth={1.8} />
+    </div>
+  </div>
+</header>
+
+<style>
+  .phead {
+    position: fixed; inset: 0 0 auto 0; height: 70px; z-index: 30;
+    display: flex; align-items: center; gap: 1rem; padding: 0 1.25rem;
+    background: #fffdf9; border-bottom: 1px solid var(--p-line);
+  }
+  .phead__menu { display: none; background: none; border: 0; color: var(--p-ink); cursor: pointer; }
+  .phead__logo img { height: 52px; width: auto; display: block; }
+  .phead__actions { margin-left: auto; display: flex; align-items: center; gap: 1.25rem; }
+  .phead__bell { background: none; border: 0; color: var(--p-ink); cursor: pointer; }
+  .phead__user { display: flex; align-items: center; gap: .6rem; color: var(--p-muted); }
+  .phead__avatar {
+    display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+    background: #ece8df; color: var(--p-ink); font-size: 12px; font-weight: 700;
+  }
+  .phead__who { display: flex; flex-direction: column; line-height: 1.2; }
+  .phead__who strong { font-size: 13px; color: var(--p-ink); font-weight: 600; }
+  .phead__who small { font-size: 11px; color: var(--p-muted); }
+
+  @media (max-width: 1023px) { .phead__menu { display: block; } }
+  @media (max-width: 767px) {
+    .phead__who { display: none; }
+    .phead__logo img { height: 42px; }
+  }
+</style>

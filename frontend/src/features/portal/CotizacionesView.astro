@@ -1,0 +1,402 @@
+---
+import { Plus, FileText, Clock, Mail, MapPin, ArrowRight, Check, SlidersHorizontal } from '@lucide/astro';
+import { RUTAS } from '../../lib/routes.js';
+---
+
+<section class="cot">
+  <div class="c-top">
+    <div>
+      <p class="c-eyebrow">Área de cliente</p>
+      <h1>Mis cotizaciones</h1>
+      <p class="c-sub">Consulta el avance y las respuestas de tus proyectos.</p>
+    </div>
+    <a class="c-btn c-btn--primary" href={RUTAS.cotizar}>
+      <Plus size={16} strokeWidth={2} /> Nueva solicitud
+    </a>
+  </div>
+
+  <p class="c-msg" id="cot-msg" role="status">Cargando tus solicitudes…</p>
+
+  <div id="cot-cuerpo" hidden>
+    <div class="c-stats">
+      <div class="c-stat">
+        <span class="c-stat__ico c-stat__ico--blue"><FileText size={20} strokeWidth={1.6} /></span>
+        <div><b>Total solicitudes</b><small id="st-desde">&nbsp;</small></div>
+        <strong id="st-total">0</strong>
+      </div>
+      <div class="c-stat">
+        <span class="c-stat__ico c-stat__ico--warn"><Clock size={20} strokeWidth={1.6} /></span>
+        <div><b>En proceso</b><small>Respuesta estimada: 2 días</small></div>
+        <strong id="st-proceso">0</strong>
+      </div>
+      <div class="c-stat">
+        <span class="c-stat__ico c-stat__ico--accent"><Mail size={20} strokeWidth={1.6} /></span>
+        <div><b>Por confirmar</b><small>Requiere tu atención</small></div>
+        <strong id="st-confirmar">0</strong>
+      </div>
+    </div>
+
+    <div class="c-cols">
+      <aside class="c-card">
+        <header class="c-list__head">
+          <div>
+            <h2>Solicitudes recientes</h2>
+            <small id="st-count">0 proyectos</small>
+          </div>
+          <button type="button" class="c-iconbtn" aria-label="Filtrar" disabled>
+            <SlidersHorizontal size={18} strokeWidth={1.6} />
+          </button>
+        </header>
+        <div id="cot-lista"></div>
+      </aside>
+
+      <div class="c-card c-detail" id="cot-detalle" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- Íconos Lucide para el HTML que se pinta desde JS -->
+  <template id="ico-pin"><MapPin size={12} strokeWidth={1.8} /></template>
+  <template id="ico-flecha"><ArrowRight size={16} strokeWidth={1.6} /></template>
+  <template id="ico-check"><Check size={14} strokeWidth={2.4} /></template>
+  <template id="ico-reloj"><Clock size={22} strokeWidth={1.6} /></template>
+  <template id="ico-file"><FileText size={18} strokeWidth={1.6} /></template>
+</section>
+
+<script>
+  import { initSession, getSesion, suscribirSesion } from '../auth/session.js';
+  import { RUTAS } from '../../lib/routes.js';
+  import {
+    listarMisSolicitudes,
+    cotizacionVigente,
+    confirmarCotizacion,
+    PASOS,
+    ESTADOS,
+    moneda,
+  } from './api.js';
+
+  initSession(); // idempotente: este script corre antes que el del layout
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) =>
+    String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const ico = (n) => $(`ico-${n}`)?.innerHTML ?? '';
+
+  const msg = $('cot-msg');
+  const cuerpo = $('cot-cuerpo');
+  const listaEl = $('cot-lista');
+  const detalleEl = $('cot-detalle');
+
+  let solicitudes = [];
+  let activa = null;
+  let cargado = false;
+  const cache = new Map(); // solicitudId -> cotización | null
+
+  function mensaje(texto) {
+    msg.hidden = false;
+    msg.textContent = texto;
+  }
+
+  // ── Resumen ────────────────────────────────────────────────────────────
+  function pintarStats() {
+    const cuenta = (...e) => solicitudes.filter((s) => e.includes(s.estado)).length;
+    $('st-total').textContent = solicitudes.length;
+    $('st-proceso').textContent = cuenta('enviada', 'evaluacion');
+    $('st-confirmar').textContent = cuenta('respondida');
+    $('st-count').textContent = `${solicitudes.length} proyecto${solicitudes.length === 1 ? '' : 's'}`;
+
+    const fechas = solicitudes.map((s) => s.creada).filter(Boolean);
+    $('st-desde').textContent = fechas.length
+      ? `Desde ${new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' }).format(new Date(Math.min(...fechas)))}`
+      : '\u00a0';
+  }
+
+  // ── Lista ──────────────────────────────────────────────────────────────
+  function pintarLista() {
+    if (!solicitudes.length) {
+      listaEl.innerHTML = `<p class="c-vacio">Aún no tienes solicitudes. <a href="${RUTAS.cotizar}">Crea la primera</a>.</p>`;
+      return;
+    }
+    listaEl.innerHTML = solicitudes
+      .map((s) => {
+        const e = ESTADOS[s.estado];
+        return `
+        <button type="button" class="c-item" data-id="${esc(s.id)}" aria-current="${s.id === activa?.id}">
+          <span class="c-row">
+            <small class="c-mono">${esc(s.codigo)}</small>
+            <span class="c-pill c-pill--${e.tono}"><i class="c-dot"></i>${e.label}</span>
+          </span>
+          <strong>${esc(s.titulo)}</strong>
+          <small class="c-loc">${ico('pin')}${esc(s.ubicacion)}</small>
+          <span class="c-row"><small>${esc(s.servicio)}</small>${ico('flecha')}</span>
+        </button>`;
+      })
+      .join('');
+  }
+
+  // ── Detalle ────────────────────────────────────────────────────────────
+  const BANNERS = {
+    enviada: ['Recibimos tu solicitud', 'Una administradora la revisará y te avisaremos por correo.'],
+    evaluacion: ['Estamos evaluando tu proyecto', 'Te notificaremos por correo cuando la cotización esté lista.'],
+  };
+
+  function htmlBloque(s, cot, estadoCot) {
+    if (estadoCot === 'cargando') return `<p class="c-msg">Cargando cotización…</p>`;
+    if (estadoCot === 'error') return `<p class="c-msg c-msg--error">No pudimos cargar la cotización. Intenta de nuevo más tarde.</p>`;
+
+    if (cot) {
+      const titulo = s.estado === 'confirmada' ? 'Cotización confirmada' : 'Cotización disponible';
+      return `
+      <div class="c-quote">
+        <div class="c-quote__head">
+          <span class="c-quote__ico">${ico('file')}</span>
+          <div>
+            <small class="c-accent c-caps">${titulo}</small>
+            <strong>Propuesta comercial${cot.version > 1 ? ` · versión ${cot.version}` : ''}</strong>
+          </div>
+        </div>
+        <div class="c-quote__val">
+          <div><small>Valor de la propuesta</small>${cot.vigencia ? `<small>Vigencia de ${esc(cot.vigencia)} días</small>` : ''}</div>
+          <strong>$${moneda.format(cot.valor)}</strong>
+        </div>
+        ${cot.descripcion ? `<p class="c-quote__desc">${esc(cot.descripcion)}</p>` : ''}
+        ${
+          s.estado === 'respondida'
+            ? `<div class="c-quote__actions">
+                 <button type="button" class="c-btn c-btn--primary" data-confirmar="${esc(cot.id)}">${ico('check')} Confirmar cotización</button>
+                 <button type="button" class="c-btn c-btn--ghost" disabled title="Próximamente">Hacer una consulta</button>
+               </div>
+               <p class="c-msg c-msg--error" id="cot-error" hidden></p>`
+            : ''
+        }
+      </div>`;
+    }
+
+    if (s.estado === 'respondida' || s.estado === 'confirmada') {
+      return `<p class="c-msg">No encontramos la cotización de esta solicitud.</p>`;
+    }
+
+    const [t, sub] = BANNERS[s.estado] ?? BANNERS.enviada;
+    return `
+      <div class="c-banner">
+        <span>${ico('reloj')}</span>
+        <div><strong>${t}</strong><small>${sub}</small></div>
+      </div>`;
+  }
+
+  function pintarDetalle(s, cot, estadoCot) {
+    const e = ESTADOS[s.estado];
+    const idx = PASOS.findIndex((p) => p.id === s.estado);
+    const sub = { done: 'Completado', current: 'Estado actual', todo: 'Pendiente' };
+
+    const pasos = PASOS.map((p, i) => {
+      const st = s.estado === 'confirmada' || i < idx ? 'done' : i === idx ? 'current' : 'todo';
+      return `
+        <li class="c-step c-step--${st}">
+          <span class="c-step__dot">${st === 'done' ? ico('check') : i + 1}</span>
+          <span class="c-step__txt"><b>${p.label}</b><small>${sub[st]}</small></span>
+        </li>`;
+    }).join('');
+
+    detalleEl.innerHTML = `
+      <header class="c-detail__head">
+        <div>
+          <small class="c-mono c-accent">${esc(s.codigo)}</small>
+          <h2>${esc(s.titulo)}</h2>
+          ${s.fecha ? `<small>Solicitud enviada el ${esc(s.fecha)}</small>` : ''}
+        </div>
+        <span class="c-pill c-pill--${e.tono} c-pill--big"><i class="c-dot"></i>${e.label}</span>
+      </header>
+
+      <ol class="c-steps">${pasos}</ol>
+
+      <h3 class="c-sect"><span>01</span> Información del proyecto</h3>
+      <dl class="c-info">
+        <div><dt>Servicio</dt><dd>${esc(s.servicio)}</dd></div>
+        <div><dt>Área aproximada</dt><dd>${esc(s.area)}</dd></div>
+        <div><dt>Ubicación</dt><dd>${esc(s.ubicacion)}</dd></div>
+        <div><dt>Presupuesto estimado</dt><dd>${esc(s.presupuesto)}</dd></div>
+      </dl>
+
+      ${htmlBloque(s, cot, estadoCot)}`;
+  }
+
+  async function seleccionar(id) {
+    const s = solicitudes.find((x) => String(x.id) === String(id));
+    if (!s) return;
+    activa = s;
+    pintarLista();
+
+    const necesitaCot = s.estado === 'respondida' || s.estado === 'confirmada';
+    if (!necesitaCot) return pintarDetalle(s, null, 'ok');
+
+    if (cache.has(s.id)) return pintarDetalle(s, cache.get(s.id), 'ok');
+
+    pintarDetalle(s, null, 'cargando');
+    try {
+      const cot = await cotizacionVigente(s.id);
+      cache.set(s.id, cot);
+      if (activa?.id === s.id) pintarDetalle(s, cot, 'ok');
+    } catch {
+      if (activa?.id === s.id) pintarDetalle(s, null, 'error');
+    }
+  }
+
+  // ── Carga inicial / refresco ───────────────────────────────────────────
+  async function cargar(idActivo = null) {
+    try {
+      solicitudes = await listarMisSolicitudes();
+    } catch (err) {
+      mensaje(err?.message || 'No pudimos cargar tus solicitudes. Recarga la página.');
+      return;
+    }
+    msg.hidden = true;
+    cuerpo.hidden = false;
+    pintarStats();
+
+    if (!solicitudes.length) {
+      pintarLista();
+      detalleEl.innerHTML = `<p class="c-vacio">Selecciona una solicitud para ver su detalle.</p>`;
+      return;
+    }
+    seleccionar(idActivo ?? solicitudes[0].id);
+  }
+
+  // ── Eventos ────────────────────────────────────────────────────────────
+  listaEl.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-id]');
+    if (!b) return;
+    seleccionar(b.dataset.id);
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+      detalleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  detalleEl.addEventListener('click', async (e) => {
+    const btn = e.target.closest('[data-confirmar]');
+    if (!btn || btn.disabled) return;
+    if (!window.confirm('¿Confirmar esta cotización? Esta acción no se puede deshacer.')) return;
+
+    btn.disabled = true;
+    try {
+      await confirmarCotizacion(btn.dataset.confirmar);
+      const id = activa?.id;
+      cache.clear();
+      await cargar(id);
+    } catch (err) {
+      btn.disabled = false;
+      const caja = $('cot-error');
+      if (caja) {
+        caja.hidden = false;
+        caja.textContent = err?.message || 'No se pudo confirmar la cotización. Intenta de nuevo.';
+      }
+    }
+  });
+
+  // ── Sesión: pedir datos solo cuando hay usuario autenticado ────────────
+  function alCambiarSesion(sesion) {
+    if (sesion.status !== 'authenticated' || cargado) return;
+    cargado = true;
+    cargar();
+  }
+  alCambiarSesion(getSesion());
+  suscribirSesion(alCambiarSesion);
+</script>
+
+<!-- Global porque parte del HTML se genera desde JS -->
+<style is:global>
+  .cot h1 { font-size: clamp(1.9rem, 3vw, 2.6rem); font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.1; }
+  .cot h2 { font-size: 15px; font-weight: 600; }
+  .cot small { font-size: 11px; color: var(--p-muted); }
+  .cot .c-mono { letter-spacing: .08em; }
+  .cot .c-accent { color: var(--p-accent); }
+  .cot .c-caps { text-transform: uppercase; font-size: 9px; font-weight: 700; letter-spacing: .06em; }
+  .cot .c-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 28px; }
+  .cot .c-eyebrow { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--p-accent); margin-bottom: 6px; }
+  .cot .c-sub { margin-top: 6px; font-size: 13px; color: var(--p-muted); }
+  .cot .c-msg { padding: 16px; font-size: 13px; color: var(--p-muted); }
+  .cot .c-msg--error { color: var(--p-accent); }
+  .cot .c-vacio { padding: 24px 20px; font-size: 12px; color: var(--p-muted); }
+  .cot .c-vacio a { color: var(--p-accent); }
+
+  .cot .c-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 3px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; border: 1px solid transparent; }
+  .cot .c-btn--primary { background: var(--p-accent); color: #fff; box-shadow: 0 6px 14px rgb(192 48 31 / .25); }
+  .cot .c-btn--ghost { background: var(--p-card); color: var(--p-ink); border-color: var(--p-line); font-weight: 600; }
+  .cot .c-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+  .cot .c-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+  .cot .c-stat { display: flex; align-items: center; gap: 14px; padding: 18px; background: var(--p-card); border: 1px solid var(--p-line); }
+  .cot .c-stat div { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .cot .c-stat b { font-size: 11px; font-weight: 500; }
+  .cot .c-stat strong { font-size: 24px; font-weight: 800; align-self: flex-start; }
+  .cot .c-stat__ico { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 4px; }
+  .cot .c-stat__ico--blue { background: #e4ecf5; color: #3f6aa0; }
+  .cot .c-stat__ico--warn { background: #f3ead4; color: #9a7421; }
+  .cot .c-stat__ico--accent { background: #f9e3df; color: var(--p-accent); }
+
+  .cot .c-cols { display: grid; grid-template-columns: minmax(300px, 427px) 1fr; gap: 18px; align-items: start; }
+  .cot .c-card { background: var(--p-card); border: 1px solid var(--p-line); }
+  .cot .c-list__head { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--p-line); }
+  .cot .c-list__head h2 { font-size: 13px; text-transform: uppercase; }
+  .cot .c-iconbtn { width: 34px; height: 34px; display: grid; place-items: center; background: #fff; border: 1px solid var(--p-line); border-radius: 4px; color: var(--p-ink); }
+  .cot .c-iconbtn:disabled { opacity: .5; }
+
+  .cot .c-item { position: relative; display: flex; flex-direction: column; gap: 8px; width: 100%; text-align: left; padding: 18px 20px; background: none; border: 0; border-bottom: 1px solid var(--p-line); cursor: pointer; color: var(--p-ink); font: inherit; }
+  .cot .c-item strong { font-size: 13px; font-weight: 600; }
+  .cot .c-item:hover { background: #f8f5ee; }
+  .cot .c-item[aria-current='true'] { background: #f3efe6; }
+  .cot .c-item[aria-current='true']::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--p-accent); }
+  .cot .c-row { display: flex; justify-content: space-between; align-items: center; }
+  .cot .c-loc { display: flex; align-items: center; gap: 6px; }
+
+  .cot .c-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 600; }
+  .cot .c-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .cot .c-pill--accent { background: #f9e3df; color: var(--p-accent); }
+  .cot .c-pill--warn { background: #f3ead4; color: #8a6a1f; }
+  .cot .c-pill--ok { background: #dcebe2; color: #2f6b4a; }
+  .cot .c-pill--info { background: #e4ecf5; color: #3f6aa0; }
+  .cot .c-pill--big { align-self: flex-start; padding: 6px 12px; }
+
+  .cot .c-detail { padding: 28px; }
+  .cot .c-detail__head { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 28px; }
+  .cot .c-detail__head h2 { font-size: 22px; font-weight: 600; margin: 6px 0; }
+
+  .cot .c-steps { list-style: none; margin: 0 0 28px; padding: 0 0 28px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; border-bottom: 1px solid var(--p-line); }
+  .cot .c-step { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--p-line); }
+  .cot .c-step--done, .cot .c-step--current { border-color: var(--p-accent); }
+  .cot .c-step__dot { display: grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 50%; font-size: 10px; font-weight: 700; border: 1px solid var(--p-line); color: var(--p-muted); background: #fff; }
+  .cot .c-step--done .c-step__dot, .cot .c-step--current .c-step__dot { background: var(--p-accent); border-color: var(--p-accent); color: #fff; }
+  .cot .c-step--current .c-step__dot { box-shadow: 0 0 0 4px #f9e3df; }
+  .cot .c-step__txt { display: flex; flex-direction: column; font-size: 10px; }
+
+  .cot .c-sect { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0 0 18px; }
+  .cot .c-sect span { color: var(--p-accent); margin-right: 8px; font-size: 10px; }
+  .cot .c-info { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; margin: 0 0 28px; }
+  .cot .c-info dt { font-size: 10px; color: var(--p-muted); margin-bottom: 4px; }
+  .cot .c-info dd { margin: 0; font-size: 12px; font-weight: 600; }
+
+  .cot .c-banner { display: flex; gap: 14px; padding: 20px; background: #fdf8e8; border: 1px solid #efe2b8; color: #8a6a1f; }
+  .cot .c-banner div { display: flex; flex-direction: column; gap: 4px; }
+  .cot .c-banner strong { font-size: 12px; font-weight: 600; }
+  .cot .c-banner small { color: #9a8340; }
+
+  .cot .c-quote { padding: 18px; background: #fbf1ee; border: 1px solid #ecd2cc; }
+  .cot .c-quote__head { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid #ecd2cc; }
+  .cot .c-quote__head div { display: flex; flex-direction: column; gap: 2px; }
+  .cot .c-quote__head strong { font-size: 13px; font-weight: 600; }
+  .cot .c-quote__ico { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 4px; background: var(--p-accent); color: #fff; }
+  .cot .c-quote__val { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; border-bottom: 1px solid #ecd2cc; }
+  .cot .c-quote__val div { display: flex; flex-direction: column; gap: 4px; }
+  .cot .c-quote__val strong { font-size: 24px; font-weight: 800; }
+  .cot .c-quote__desc { font-size: 10px; color: var(--p-muted); margin: 14px 0; }
+  .cot .c-quote__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+  @media (max-width: 1023px) { .cot .c-cols { grid-template-columns: 1fr; } }
+  @media (max-width: 767px) {
+    .cot .c-stats { grid-template-columns: 1fr; }
+    .cot .c-steps { grid-template-columns: 1fr 1fr; }
+    .cot .c-info { grid-template-columns: 1fr; }
+    .cot .c-detail { padding: 20px; }
+    .cot .c-detail__head { flex-direction: column-reverse; }
+    .cot .c-quote__val { flex-direction: column; align-items: flex-start; gap: 8px; }
+  }
+</style>

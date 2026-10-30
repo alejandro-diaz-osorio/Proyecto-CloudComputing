@@ -1,0 +1,89 @@
+---
+import { RUTAS } from '../../../lib/routes.js';
+import LoginForm from './LoginForm.astro';
+import RegisterForm from './RegisterForm.astro';
+import GoogleButton from './GoogleButton.astro';
+import Alert from './Alert.astro';
+import Icon from './Icon.astro';
+
+const TEXTOS = {
+  login: {
+    eyebrow: 'Bienvenido de nuevo',
+    titulo: 'Accede a tus proyectos',
+    sub: 'Consulta tus solicitudes, cotizaciones y conversaciones con el equipo.',
+  },
+  registro: {
+    eyebrow: 'Comienza aquí',
+    titulo: 'Crea tu espacio en SOLUCIA',
+    sub: 'Regístrate para solicitar una cotización y dar seguimiento a tu proyecto.',
+  },
+} as const;
+
+interface Props {
+  mode?: 'login' | 'registro';
+}
+/** Panel derecho de /login y /registro. */
+const { mode = 'login' } = Astro.props;
+const t = TEXTOS[mode];
+---
+<section class="auth-panel" data-mode={mode}>
+  <div class="auth-panel__inner">
+    <nav class="auth-tabs" aria-label="Acceso">
+      <a href={RUTAS.login} class:list={[{ 'is-active': mode === 'login' }]} aria-current={mode === 'login' ? 'page' : undefined}>
+        Iniciar sesión
+      </a>
+      <a href={RUTAS.registro} class:list={[{ 'is-active': mode === 'registro' }]} aria-current={mode === 'registro' ? 'page' : undefined}>
+        Crear cuenta
+      </a>
+    </nav>
+
+    <header class="auth-heading">
+      <p class="auth-eyebrow">{t.eyebrow}</p>
+      <h1>{t.titulo}</h1>
+      <p class="auth-sub">{t.sub}</p>
+    </header>
+
+    <Alert tone="info" id="auth-aviso" />
+    <GoogleButton avisoId="auth-aviso" />
+
+    <div class="auth-divider"><span>o continúa con tu correo</span></div>
+
+    {mode === 'login' ? <LoginForm /> : <RegisterForm />}
+
+    <p class="auth-switch">
+      {mode === 'login' ? (
+        <>¿Aún no tienes una cuenta? <a class="auth-link" href={RUTAS.registro}>Regístrate gratis</a></>
+      ) : (
+        <>¿Ya tienes una cuenta? <a class="auth-link" href={RUTAS.login}>Inicia sesión</a></>
+      )}
+    </p>
+
+    <p class="auth-secure"><Icon name="shield" /> Conexión segura · Tus datos están protegidos</p>
+  </div>
+</section>
+
+<script>
+  import { initSession, getSesion, suscribirSesion } from '../session.js';
+  import { destinoDespuesDeAuth } from '../redirect.js';
+
+  const panel = document.querySelector<HTMLElement>('.auth-panel');
+  if (panel?.dataset.mode === 'login' && new URLSearchParams(window.location.search).get('registro') === 'exitoso') {
+    const aviso = document.querySelector<HTMLElement>('#auth-aviso');
+    if (aviso) {
+      aviso.textContent = 'Tu cuenta se creó correctamente. Inicia sesión para continuar.';
+      aviso.hidden = false;
+    }
+  }
+
+  // Si ya hay sesión (token válido guardado), no tiene sentido ver el login: redirige.
+  let redirigiendo = false;
+  function revisar({ status, user }: { status: string; user: unknown }) {
+    if (redirigiendo || status !== 'authenticated' || !user) return;
+    redirigiendo = true;
+    window.location.replace(destinoDespuesDeAuth(user));
+  }
+
+  suscribirSesion(revisar);
+  initSession();
+  revisar(getSesion());
+</script>

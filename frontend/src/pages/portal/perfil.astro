@@ -1,0 +1,45 @@
+---
+import PortalLayout from '../../layouts/PortalLayout.astro';
+---
+
+<PortalLayout title="Mi perfil · SOLUCIA" rol="cliente">
+  <section class="perfil">
+    <p class="perfil__eyebrow">Área de cliente</p>
+    <h1>Mi perfil</h1>
+
+    <dl class="perfil__card">
+      <div><dt>Nombre</dt><dd data-perfil="nombre">—</dd></div>
+      <div><dt>Correo electrónico</dt><dd data-perfil="email">—</dd></div>
+      <div><dt>Teléfono</dt><dd data-perfil="telefono">—</dd></div>
+      <div><dt>Tipo de cuenta</dt><dd>Cliente</dd></div>
+    </dl>
+  </section>
+</PortalLayout>
+
+<script>
+  import { getSesion, suscribirSesion } from '../../features/auth/session.js';
+
+  function pintar(sesion: any) {
+    const u = sesion?.user;
+    if (sesion?.status !== 'authenticated' || !u) return;
+    const set = (campo: string, valor: string) => {
+      const el = document.querySelector(`[data-perfil="${campo}"]`);
+      if (el) el.textContent = valor || '—';
+    };
+    set('nombre', [u.nombre, u.apellido].filter(Boolean).join(' '));
+    set('email', u.email);
+    set('telefono', u.telefono);
+  }
+
+  pintar(getSesion());
+  suscribirSesion(pintar);
+</script>
+
+<style is:global>
+  .perfil h1 { font-size: clamp(1.9rem, 3vw, 2.6rem); font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.1; margin: 0 0 28px; }
+  .perfil__eyebrow { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--p-accent); margin: 0 0 6px; }
+  .perfil__card { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 720px; margin: 0; padding: 28px; background: var(--p-card); border: 1px solid var(--p-line); }
+  .perfil__card dt { font-size: 11px; color: var(--p-muted); margin-bottom: 4px; }
+  .perfil__card dd { margin: 0; font-size: 14px; font-weight: 600; word-break: break-word; }
+  @media (max-width: 767px) { .perfil__card { grid-template-columns: 1fr; } }
+</style>

@@ -1,8 +1,10 @@
 ---
-const pathname = Astro.url.pathname.replace(/\/\$/, "") || "/"
+import AuthButton from "./AuthButton.astro"
+
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/"
 
 const isActive = (path: string) => {
-    const normalizedPath = path.replace(/\/\$/, "") || "/"
+    const normalizedPath = path.replace(/\/$/, "") || "/"
     if (normalizedPath === "/") {
         return pathname === "/"
     }
@@ -51,8 +53,11 @@ const isActive = (path: string) => {
             </a>
         </nav>
 
-        <!-- Botón Cotizar (Escritorio) y Botón de Menú Móvil -->
+        <!-- Acceso + Cotizar (Escritorio) y Botón de Menú Móvil -->
         <div class="flex items-center gap-4">
+            <!-- Iniciar sesión / Mi portal (visible desde sm; en móvil va dentro del menú) -->
+            <AuthButton class="hidden sm:flex" />
+
             <a
                 href="/cotizar/"
                 class="hidden rounded-sm bg-[#c23b22] px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-red-700 sm:block"
@@ -108,9 +113,13 @@ const isActive = (path: string) => {
             >
                 Servicios
             </a>
+
+            <!-- Iniciar sesión / Mi portal (móvil) -->
+            <AuthButton class="mt-2 [&>a]:flex-1 [&>a]:py-3" />
+
             <a
                 href="/cotizar/"
-                class="mt-4 rounded-sm bg-[#c23b22] py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-red-700"
+                class="rounded-sm bg-[#c23b22] py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-red-700"
             >
                 COTIZAR PROYECTO
             </a>

@@ -1,0 +1,86 @@
+---
+import { FileText, User, CircleHelp, LogOut } from '@lucide/astro';
+import { NAV_PORTAL } from '../nav.js';
+
+interface Props {
+  pathname: string;
+  items?: typeof NAV_PORTAL;
+}
+const { pathname, items = NAV_PORTAL } = Astro.props;
+
+const actual = pathname.replace(/\/+$/, '');
+const activo = (href: string) => actual === href || actual.startsWith(`${href}/`);
+
+const ICONOS = { file: FileText, user: User };
+---
+
+<aside class="side" id="portal-sidebar">
+  <p class="side__title">Mi espacio</p>
+
+  <nav class="side__nav" aria-label="Menú del portal">
+    {items.map((item) => {
+      const Icono = ICONOS[item.icon];
+      return (
+        <a
+          href={item.href}
+          class:list={['side__link', { 'is-active': activo(item.href) }]}
+          aria-current={activo(item.href) ? 'page' : undefined}
+        >
+          <Icono size={18} strokeWidth={1.6} />
+          {item.label}
+        </a>
+      );
+    })}
+  </nav>
+
+  <div class="side__foot">
+    <div class="side__help">
+      <CircleHelp size={20} strokeWidth={1.6} />
+      <div>
+        <strong>¿Necesitas ayuda?</strong>
+        <a href="/nosotros">Contáctanos</a>
+      </div>
+    </div>
+    <button type="button" class="side__logout" id="portal-salir">
+      <LogOut size={18} strokeWidth={1.6} />
+      Cerrar sesión
+    </button>
+  </div>
+</aside>
+
+<style>
+  .side {
+    position: fixed; top: 70px; bottom: 0; left: 0; width: 216px; z-index: 20;
+    display: flex; flex-direction: column; padding: 28px 12px 16px;
+    background: #fffdf9; border-right: 1px solid var(--p-line);
+    transition: transform .2s ease;
+  }
+  .side__title { padding: 0 12px; margin-bottom: 14px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--p-muted); }
+  .side__nav { display: flex; flex-direction: column; gap: 4px; }
+  .side__link {
+    position: relative; display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-radius: 4px; font-size: 13px; color: var(--p-ink); text-decoration: none;
+  }
+  .side__link:hover { background: #f3efe6; }
+  .side__link.is-active { background: #f9e3df; color: var(--p-accent); }
+  .side__link.is-active::before {
+    content: ''; position: absolute; left: -12px; top: 0; bottom: 0; width: 3px; background: var(--p-accent);
+  }
+  .side__foot { margin-top: auto; display: flex; flex-direction: column; gap: 14px; }
+  .side__help {
+    display: flex; gap: 10px; align-items: center; padding: 12px;
+    border: 1px solid var(--p-line); border-radius: 6px; font-size: 11px; color: var(--p-muted);
+  }
+  .side__help strong { display: block; color: var(--p-ink); font-weight: 600; }
+  .side__help a { color: var(--p-accent); text-decoration: none; }
+  .side__logout {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    background: none; border: 0; cursor: pointer; font-size: 12px; color: var(--p-muted);
+  }
+  .side__logout:hover { color: var(--p-ink); }
+
+  @media (max-width: 1023px) {
+    .side { transform: translateX(-100%); box-shadow: 4px 0 24px rgb(0 0 0 / .12); }
+    :global(.portal-shell[data-nav-open='true']) .side { transform: none; }
+  }
+</style>

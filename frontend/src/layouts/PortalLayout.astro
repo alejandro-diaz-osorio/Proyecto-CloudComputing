@@ -1,0 +1,108 @@
+---
+// Plantilla del portal (cliente y administración): cabecera fija + menú lateral + contenido.
+// Es autónoma (no depende de AuthLayout/BaseLayout) y protege la página según el rol.
+import '../styles/global.css';
+import PortalHeader from '../features/portal/components/PortalHeader.astro';
+import PortalSidebar from '../features/portal/components/PortalSidebar.astro';
+import { NAV_PORTAL, NAV_ADMIN } from '../features/portal/nav.js';
+import { RUTAS } from '../lib/routes.js';
+
+interface Props {
+  title?: string;
+  /** Rol que puede ver la página. */
+  rol?: 'cliente' | 'admin';
+}
+
+const { title = 'Portal · SOLUCIA', rol = 'cliente' } = Astro.props;
+const items = rol === 'admin' ? NAV_ADMIN : NAV_PORTAL;
+const inicio = rol === 'admin' ? RUTAS.portalAdmin : RUTAS.portal;
+---
+
+<!doctype html>
+<html lang="es" data-auth-pending data-rol={rol}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.ico" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="portal-shell" data-nav-open="false">
+      <PortalHeader inicio={inicio} />
+      <PortalSidebar pathname={Astro.url.pathname} items={items} />
+      <div class="portal-backdrop" data-nav-close></div>
+      <main class="portal-main">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
+
+<script>
+  import { protegerPagina } from '../lib/guard.js';
+  import { cerrarSesion } from '../features/auth/session.js';
+
+  const rol = document.documentElement.dataset.rol === 'admin' ? 'admin' : 'cliente';
+  const shell = document.querySelector<HTMLElement>('.portal-shell');
+  const setNav = (abierto: boolean) => shell?.setAttribute('data-nav-open', String(abierto));
+
+  // ── Menú móvil ───────────────────────────────────────────────────────
+  document.querySelectorAll('[data-nav-toggle]').forEach((b) =>
+    b.addEventListener('click', () => setNav(shell?.dataset.navOpen !== 'true')),
+  );
+  document.querySelector('[data-nav-close]')?.addEventListener('click', () => setNav(false));
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && setNav(false));
+
+  // ── Cerrar sesión (la guarda se encarga de llevar a /login/) ────────
+  document.getElementById('portal-salir')?.addEventListener('click', () => cerrarSesion());
+
+  // ── Datos del usuario en la cabecera ────────────────────────────────
+  const ETIQUETA_ROL = { cliente: 'Cliente', admin: 'Administración' };
+
+  function pintarUsuario(u: any) {
+    const nombre = String(u?.nombre ?? '').trim();
+    const apellido = String(u?.apellido ?? '').trim();
+    const iniciales = ((nombre[0] ?? '') + (apellido[0] ?? '')).toUpperCase() || '··';
+    const corto = [nombre.split(/\s+/)[0], apellido ? `${apellido[0]}.` : ''].filter(Boolean).join(' ');
+
+    document.querySelectorAll('[data-user-initials]').forEach((el) => (el.textContent = iniciales));
+    document.querySelectorAll('[data-user-short]').forEach((el) => (el.textContent = corto || u?.email || ''));
+    document.querySelectorAll('[data-user-role]').forEach((el) => (el.textContent = ETIQUETA_ROL[rol]));
+  }
+
+  protegerPagina(rol, pintarUsuario);
+</script>
+
+<style is:global>
+  :root {
+    --p-bg: #f6f3ec;
+    --p-card: #fffdf9;
+    --p-line: #e7e1d4;
+    --p-ink: #1d2433;
+    --p-muted: #8a8678;
+    --p-accent: #c0301f;
+  }
+
+  /* Oculta el portal hasta confirmar sesión y rol (evita el parpadeo antes de redirigir) */
+  html[data-auth-pending] .portal-shell { visibility: hidden; }
+
+  body { margin: 0; background: var(--p-bg); color: var(--p-ink); }
+
+  .portal-main {
+    margin-left: 216px;
+    padding: 70px 0 0;
+    min-height: 100vh;
+  }
+  .portal-main > * { padding: 36px 48px 56px; }
+
+  .portal-backdrop { display: none; }
+
+  @media (max-width: 1023px) {
+    .portal-main { margin-left: 0; }
+    .portal-main > * { padding: 28px 20px 48px; }
+    .portal-shell[data-nav-open='true'] .portal-backdrop {
+      display: block; position: fixed; inset: 70px 0 0 0; z-index: 15; background: rgb(20 24 34 / .35);
+    }
+  }
+</style>

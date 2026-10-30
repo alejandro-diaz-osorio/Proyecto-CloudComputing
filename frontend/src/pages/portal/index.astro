@@ -1,0 +1,28 @@
+---
+// /portal/ no tiene contenido propio: manda a cada usuario a SU portal según el rol.
+import { RUTAS } from '../../lib/routes.js';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Portal · SOLUCIA</title>
+    <noscript><meta http-equiv="refresh" content={`0;url=${RUTAS.login}`} /></noscript>
+  </head>
+  <body>
+    <p>Redirigiendo…</p>
+  </body>
+</html>
+
+<script>
+  import { RUTAS } from '../../lib/routes.js';
+  import { initSession, getSesion } from '../../features/auth/session.js';
+  import { destinoPorRol } from '../../lib/guard.js';
+
+  initSession();
+  const sesion = getSesion();
+  window.location.replace(sesion.status === 'authenticated' ? destinoPorRol(sesion.user) : RUTAS.login);
+</script>

@@ -1,0 +1,18 @@
+---
+import PortalLayout from '../../../layouts/PortalLayout.astro';
+---
+
+<!-- Marcador de posición: aquí irá el panel de administración. Solo entra el rol 'admin'. -->
+<PortalLayout title="Administración · SOLUCIA" rol="admin">
+  <section class="adm">
+    <p class="adm__eyebrow">Administración</p>
+    <h1>Panel de administración</h1>
+    <p class="adm__txt">Este espacio está en construcción.</p>
+  </section>
+</PortalLayout>
+
+<style is:global>
+  .adm h1 { font-size: clamp(1.9rem, 3vw, 2.6rem); font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.1; margin: 0 0 12px; }
+  .adm__eyebrow { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--p-accent); margin: 0 0 6px; }
+  .adm__txt { font-size: 13px; color: var(--p-muted); margin: 0; }
+</style>

@@ -1,0 +1,15 @@
+---
+// Si se renderiza sin contenido queda oculta; los scripts la rellenan y la muestran.
+interface Props {
+  tone?: 'error' | 'info';
+  id?: string;
+}
+const { tone = 'error', id } = Astro.props;
+const tieneContenido = Astro.slots.has('default');
+---
+<div
+  id={id}
+  class={`auth-alert auth-alert--${tone}`}
+  role={tone === 'error' ? 'alert' : 'status'}
+  hidden={!tieneContenido}
+><slot /></div>

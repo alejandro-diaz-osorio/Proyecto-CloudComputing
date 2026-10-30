@@ -1,0 +1,17 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
+
+/** Caja de input con icono a la izquierda, prefijo (+57) o elemento a la derecha (slot "trailing"). */
+interface Props extends HTMLAttributes<'input'> {
+  icon?: 'mail' | 'lock' | 'user';
+  prefix?: string;
+}
+const { icon, prefix, ...inputProps } = Astro.props;
+---
+<div class:list={['auth-input', { 'has-prefix': Boolean(prefix) }]}>
+  {icon && <span class="auth-input__icon"><Icon name={icon} /></span>}
+  {prefix && <span class="auth-input__prefix">{prefix}</span>}
+  <input {...inputProps} />
+  <slot name="trailing" />
+</div>

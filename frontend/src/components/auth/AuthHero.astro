@@ -1,0 +1,57 @@
+---
+// Panel izquierdo (estático, sin JavaScript). Reemplaza el SVG del logo por tu archivo real.
+const pasos = [
+  { n: '01', titulo: 'Describe tu idea', sub: 'Sin términos técnicos' },
+  { n: '02', titulo: 'Evaluación profesional', sub: 'Por un arquitecto' },
+  { n: '03', titulo: 'Recibe tu cotización', sub: 'Clara y detallada' },
+];
+const avatares = ['CR', 'LG', 'MV'];
+---
+<aside class="auth-hero">
+  <div class="auth-hero__top">
+    <a class="auth-brand" href="/" aria-label="SOLUCIA, ir al inicio">
+      <svg class="auth-brand__icon" viewBox="0 0 48 52" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M3 21 24 3l21 18v28H3z" />
+        <rect x="15" y="23" width="18" height="20" rx="1.5" />
+        <path d="M20 29h8M20 34h8M20 39h8" />
+        <path d="M3 51h10" stroke="#c63a24" stroke-width="3" />
+      </svg>
+      <span class="auth-brand__text">
+        <strong>SOLUCIA</strong>
+        <small>Diseño &amp; Construcción</small>
+      </span>
+    </a>
+    <a class="auth-pill" href="/">Portal de proyectos</a>
+  </div>
+
+  <div class="auth-hero__content">
+    <p class="auth-hero__eyebrow"><span></span>Tu proyecto, paso a paso</p>
+    <p class="auth-hero__title">
+      Construimos confianza <em>desde la primera idea.</em>
+    </p>
+    <p class="auth-hero__lead">
+      Un espacio claro para organizar tu proyecto, conversar con nuestro equipo y seguir cada avance hasta recibir tu cotización.
+    </p>
+    <ol class="auth-steps">
+      {pasos.map((p) => (
+        <li>
+          <span class="auth-steps__n">{p.n}</span>
+          <span><strong>{p.titulo}</strong><small>{p.sub}</small></span>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <div class="auth-hero__footer">
+    <div class="auth-avatars" aria-hidden="true">
+      {avatares.map((a) => <span>{a}</span>)}
+    </div>
+    <p><strong>Más de 120 proyectos</strong><small>acompañados por nuestro equipo</small></p>
+  </div>
+
+  <svg class="auth-hero__art" viewBox="0 0 400 260" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+    <path d="M10 40h210v150H10zM220 20h120v120H220zM60 210h300v50H60z" />
+    <path d="M110 40v150M10 110h210M280 20v120" />
+    <text x="120" y="82" fill="currentColor" stroke="none" font-size="9">258 m²</text>
+  </svg>
+</aside>

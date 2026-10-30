@@ -1,0 +1,17 @@
+---
+/** Etiqueta + control (slot por defecto) + mensaje de error accesible. El slot "aside" va a la derecha de la etiqueta. */
+interface Props {
+  id: string;
+  name: string; // coincide con el name del input; lo usa forms.js para localizar el error
+  label: string;
+}
+const { id, name, label } = Astro.props;
+---
+<div class="auth-field">
+  <div class="auth-field__head">
+    <label for={id}>{label}</label>
+    <slot name="aside" />
+  </div>
+  <slot />
+  <p class="auth-field__error" id={`${id}-error`} data-error-for={name} hidden></p>
+</div>

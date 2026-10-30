@@ -1,0 +1,70 @@
+---
+// Botón de acceso para el Header público.
+//  - Sin sesión: "Iniciar sesión" (→ /login)
+//  - Con sesión: "Mi portal" con el nombre del usuario + "Salir"
+// El HTML del servidor siempre pinta el estado "sin sesión"; el script lo cambia al leer la sesión guardada.
+import { RUTAS } from '../lib/routes.js';
+
+interface Props {
+  class?: string;
+}
+const { class: clase = '' } = Astro.props;
+---
+<div class:list={['flex items-center gap-2', clase]} data-auth-button>
+  <!-- Sin sesión -->
+  <a
+    href={RUTAS.login}
+    data-estado="anonimo"
+    class="inline-flex items-center justify-center gap-2 [&[hidden]]:hidden border border-[#c23b22] px-4 py-2 text-sm font-bold text-[#c23b22] transition-colors hover:bg-[#c23b22] hover:text-white"
+  >
+    Iniciar sesión
+  </a>
+
+  <!-- Con sesión -->
+  <a
+    href={RUTAS.portal}
+    data-estado="autenticado"
+    data-portal
+    hidden
+    class="inline-flex items-center justify-center gap-2 [&[hidden]]:hidden bg-[#c23b22] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-red-700"
+  >
+    <span data-nombre>Mi portal</span>
+  </a>
+  <button
+    type="button"
+    data-estado="autenticado"
+    data-salir
+    hidden
+    class="[&[hidden]]:hidden px-2 py-2 text-sm font-semibold text-slate-600 transition-colors hover:text-[#c23b22]"
+  >
+    Salir
+  </button>
+</div>
+
+<script>
+  import { initSession, getSesion, suscribirSesion, cerrarSesion } from '../features/auth/session.js';
+  import { RUTAS } from '../lib/routes.js';
+
+  function pintar({ status, user }: { status: string; user: any }) {
+    const autenticado = status === 'authenticated' && user;
+    document.querySelectorAll<HTMLElement>('[data-auth-button]').forEach((cont) => {
+      cont.querySelectorAll<HTMLElement>('[data-estado="anonimo"]').forEach((el) => (el.hidden = Boolean(autenticado)));
+      cont.querySelectorAll<HTMLElement>('[data-estado="autenticado"]').forEach((el) => (el.hidden = !autenticado));
+
+      if (autenticado) {
+        const portal = cont.querySelector<HTMLAnchorElement>('[data-portal]');
+        const nombre = cont.querySelector<HTMLElement>('[data-nombre]');
+        if (portal) portal.href = user.rol === 'admin' ? RUTAS.portalAdmin : RUTAS.portal;
+        if (nombre) nombre.textContent = user.nombre ? `Hola, ${user.nombre}` : 'Mi portal';
+      }
+    });
+  }
+
+  suscribirSesion(pintar);
+  initSession();
+  pintar(getSesion());
+
+  document.addEventListener('click', (e) => {
+    if ((e.target as Element).closest('[data-salir]')) cerrarSesion();
+  });
+</script>

@@ -1,0 +1,39 @@
+---
+import { API_BASE, GOOGLE_AUTH_ENABLED } from '../../../lib/config.js';
+
+// TODO: reemplaza la "G" por el logo oficial de Google siguiendo sus guías de marca
+// (developers.google.com/identity/branding-guidelines). Aquí va una letra neutra a propósito.
+interface Props {
+  /** id de la <Alert> donde se muestra el aviso cuando Google aún no está disponible */
+  avisoId?: string;
+}
+const { avisoId = 'auth-aviso' } = Astro.props;
+---
+<button
+  type="button"
+  class="auth-google"
+  data-google-auth
+  data-habilitado={GOOGLE_AUTH_ENABLED ? 'true' : 'false'}
+  data-href={`${API_BASE}/auth/google`}
+  data-aviso-id={avisoId}
+>
+  <span class="auth-google__mark" aria-hidden="true">G</span>
+  Continuar con Google
+</button>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-google-auth]').forEach((boton) => {
+    boton.addEventListener('click', () => {
+      if (boton.dataset.habilitado === 'true') {
+        window.location.assign(boton.dataset.href!); // el backend inicia el flujo OAuth
+        return;
+      }
+      const aviso = document.getElementById(boton.dataset.avisoId!);
+      if (aviso) {
+        aviso.textContent =
+          'El acceso con Google estará disponible pronto. Por ahora usa tu correo y contraseña.';
+        aviso.hidden = false;
+      }
+    });
+  });
+</script>
