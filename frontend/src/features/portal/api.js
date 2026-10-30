@@ -44,6 +44,34 @@ const fmtFecha = (v) => {
         .replace(/\./g, '');
 };
 
+// El servicio puede llegar como texto o como lista [{ id, nombre }] (detalle de la solicitud).
+function serviciosTexto(v) {
+  if (Array.isArray(v)) {
+    return v.map((x) => (typeof x === 'string' ? x : x?.nombre)).filter(Boolean).join(', ') || '—';
+  }
+  return typeof v === 'string' && v.trim() ? v : '—';
+}
+
+// ⚠ Nombres de campo supuestos: depende de que el backend una la solicitud con `usuarios`.
+function datosCliente(s) {
+  const c = s.cliente && typeof s.cliente === 'object' ? s.cliente : {};
+  const nombre = [s.cliente_nombre ?? c.nombre, s.cliente_apellido ?? c.apellido]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+  return {
+    cliente: nombre || (typeof s.cliente === 'string' ? s.cliente : '') || s.nombre_cliente || null,
+    clienteEmail: s.cliente_email ?? c.email ?? s.email_cliente ?? '',
+  };
+}
+
+const fmtBytes = (n) => {
+  const b = Number(n);
+  if (!Number.isFinite(b) || b <= 0) return '';
+  const f = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 1 });
+  return b >= 1048576 ? `${f.format(b / 1048576)} MB` : `${f.format(Math.max(b / 1024, 0.1))} KB`;
+};
+
 function presupuesto(s) {
   const tieneMin = s.presupuesto_min !== null && s.presupuesto_min !== undefined;
   const tieneMax = s.presupuesto_max !== null && s.presupuesto_max !== undefined;
@@ -78,7 +106,9 @@ function mapSolicitud(s) {
     tipoProyecto: TIPOS_PROYECTO[s.tipo_proyecto] ?? s.tipo_proyecto ?? '—',
     descripcion: s.descripcion ?? '—',
     ubicacion: s.ubicacion ?? '—',
-    servicio: s.servicios ?? s.servicio_nombre ?? s.servicio?.nombre ?? (typeof s.servicio === 'string' ? s.servicio : '—'),
+    servicio: serviciosTexto(s.servicios ?? s.servicio_nombre ?? s.servicio?.nombre ?? s.servicio),
+    clienteId: s.cliente_id ?? null,
+    ...datosCliente(s),
     area: area !== null && area !== undefined ? `${moneda.format(Number(area))} m²` : '—',
     presupuesto: presupuesto(s),
     plazoInicio: PLAZOS_INICIO[s.plazo_inicio] ?? s.plazo_inicio ?? '—',
@@ -102,6 +132,15 @@ function mapCotizacion(c) {
   };
 }
 
+function mapArchivo(a) {
+  return {
+    id: a.id,
+    nombre: a.nombre_original ?? a.nombre ?? 'Archivo',
+    categoria: String(a.categoria ?? 'referencia').toLowerCase(),
+    tamano: fmtBytes(a.tamano_bytes),
+  };
+}
+
 // ── Endpoints ────────────────────────────────────────────────────────────────
 
 /** Solicitudes del cliente (sin borradores), de la más reciente a la más antigua. */
@@ -119,3 +158,24 @@ export async function cotizacionVigente(solicitudId) {
 }
 
 export const confirmarCotizacion = (cotizacionId) => post(`/cotizaciones/${cotizacionId}/confirmar`);
+
+// ── Administración ───────────────────────────────────────────────────────────
+
+/** Todas las solicitudes enviadas (sin borradores), de la más reciente a la más antigua. */
+export async function listarSolicitudesAdmin() {
+  const filas = lista(await get('/solicitudes')).map(mapSolicitud);
+  return filas.filter((s) => s.estado !== 'borrador').sort((a, b) => b.orden - a.orden);
+}
+
+/** Detalle de una solicitud: sus datos, archivos del cliente y la última cotización (o null). */
+export async function detalleSolicitudAdmin(id) {
+  const r = await get(`/solicitudes/${id}`);
+  const cotizaciones = (r?.cotizaciones ?? [])
+    .map(mapCotizacion)
+    .sort((a, b) => b.version - a.version || Number(b.id) - Number(a.id));
+  return {
+    ...mapSolicitud(r),
+    archivos: (r?.archivos ?? []).map(mapArchivo),
+    cotizacion: cotizaciones[0] ?? null,
+  };
+}

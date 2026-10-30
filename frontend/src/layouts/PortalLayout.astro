@@ -11,10 +11,13 @@ interface Props {
   title?: string;
   /** Rol que puede ver la página. */
   rol?: 'cliente' | 'admin';
+  /** Menú lateral propio de la página. Si no se pasa, se usa el del rol. */
+  items?: typeof NAV_PORTAL;
 }
 
-const { title = 'Portal · SOLUCIA', rol = 'cliente' } = Astro.props;
-const items = rol === 'admin' ? NAV_ADMIN : NAV_PORTAL;
+const { title = 'Portal · SOLUCIA', rol = 'cliente', items: itemsPropios } = Astro.props;
+const items = itemsPropios ?? (rol === 'admin' ? NAV_ADMIN : NAV_PORTAL);
+const tituloMenu = rol === 'admin' ? 'Gestión' : 'Mi espacio';
 const inicio = rol === 'admin' ? RUTAS.portalAdmin : RUTAS.portal;
 ---
 
@@ -30,7 +33,7 @@ const inicio = rol === 'admin' ? RUTAS.portalAdmin : RUTAS.portal;
   <body>
     <div class="portal-shell" data-nav-open="false">
       <PortalHeader inicio={inicio} />
-      <PortalSidebar pathname={Astro.url.pathname} items={items} />
+      <PortalSidebar pathname={Astro.url.pathname} items={items} titulo={tituloMenu} />
       <div class="portal-backdrop" data-nav-close></div>
       <main class="portal-main">
         <slot />

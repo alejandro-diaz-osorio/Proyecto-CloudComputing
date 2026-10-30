@@ -5,17 +5,22 @@ import { NAV_PORTAL } from '../nav.js';
 interface Props {
   pathname: string;
   items?: typeof NAV_PORTAL;
+  titulo?: string;
 }
-const { pathname, items = NAV_PORTAL } = Astro.props;
+const { pathname, items = NAV_PORTAL, titulo = 'Mi espacio' } = Astro.props;
 
-const actual = pathname.replace(/\/+$/, '');
-const activo = (href: string) => actual === href || actual.startsWith(`${href}/`);
+const sinBarra = (ruta: string) => ruta.replace(/\/+$/, '');
+const actual = sinBarra(pathname);
+const activo = (href: string) => {
+  const h = sinBarra(href);
+  return actual === h || actual.startsWith(`${h}/`);
+};
 
 const ICONOS = { file: FileText, user: User };
 ---
 
 <aside class="side" id="portal-sidebar">
-  <p class="side__title">Mi espacio</p>
+  <p class="side__title">{titulo}</p>
 
   <nav class="side__nav" aria-label="Menú del portal">
     {items.map((item) => {
