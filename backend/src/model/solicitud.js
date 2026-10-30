@@ -7,7 +7,9 @@ const Notificacion = require('./notificacion');
 
 // Base de las listas: solicitud + nombre del cliente + arquitecta + servicios en texto
 const SELECT_LISTA = `
-  SELECT s.id, s.codigo, s.titulo, s.tipo_proyecto, s.ubicacion, s.estado, s.enviada_en, s.created_at,
+  SELECT s.id, s.codigo, s.titulo, s.tipo_proyecto, s.descripcion, s.ubicacion,
+         s.area_m2, s.presupuesto_min, s.presupuesto_max, s.plazo_inicio,
+         s.estado, s.enviada_en, s.created_at,
          s.cliente_id,    CONCAT(c.nombre, ' ', c.apellido) AS cliente_nombre,
          s.arquitecto_id, CONCAT(a.nombre, ' ', a.apellido) AS arquitecto_nombre,
          (SELECT GROUP_CONCAT(sv.nombre ORDER BY sv.nombre SEPARATOR ', ')

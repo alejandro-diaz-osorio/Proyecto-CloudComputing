@@ -45,25 +45,43 @@ const fmtFecha = (v) => {
 };
 
 function presupuesto(s) {
-  if (typeof s.presupuesto === 'string' && s.presupuesto) return s.presupuesto;
-  const min = Number(s.presupuesto_min);
-  const max = Number(s.presupuesto_max);
-  if (!min && !max) return '—';
-  if (min >= 1e6 && max >= 1e6) return `$${+(min / 1e6).toFixed(1)} - ${+(max / 1e6).toFixed(1)} M`;
-  return `$${moneda.format(min)} - $${moneda.format(max)}`;
+  const tieneMin = s.presupuesto_min !== null && s.presupuesto_min !== undefined;
+  const tieneMax = s.presupuesto_max !== null && s.presupuesto_max !== undefined;
+  const formato = (valor) => `$${moneda.format(Number(valor))}`;
+  if (!tieneMin && !tieneMax) return '—';
+  if (!tieneMin) return `Hasta ${formato(s.presupuesto_max)}`;
+  if (!tieneMax) return `Desde ${formato(s.presupuesto_min)}`;
+  return `${formato(s.presupuesto_min)} - ${formato(s.presupuesto_max)}`;
 }
+
+const TIPOS_PROYECTO = {
+  vivienda: 'Vivienda',
+  comercial: 'Comercial',
+  otro: 'Otro',
+};
+
+const PLAZOS_INICIO = {
+  proximo_mes: 'Próximo mes',
+  proximos_3_meses: 'Próximos 3 meses',
+  proximos_6_meses: 'Próximos 6 meses',
+  mas_adelante: 'Más adelante',
+  sin_definir: 'Sin definir',
+};
 
 function mapSolicitud(s) {
   const creada = s.fecha_envio ?? s.enviada_en ?? s.created_at ?? s.fecha_creacion;
-  const area = s.area_m2 ?? s.area;
+  const area = s.area_m2;
   return {
     id: s.id,
     codigo: s.codigo ?? `SOL-${String(s.id).padStart(4, '0')}`,
     titulo: s.titulo ?? s.nombre_proyecto ?? s.nombre ?? 'Proyecto sin nombre',
-    ubicacion: s.ubicacion ?? ([s.ciudad, s.departamento].filter(Boolean).join(', ') || '—'),
-    servicio: s.servicio_nombre ?? s.servicio?.nombre ?? (typeof s.servicio === 'string' ? s.servicio : '—'),
-    area: area ? `${area} m²` : '—',
+    tipoProyecto: TIPOS_PROYECTO[s.tipo_proyecto] ?? s.tipo_proyecto ?? '—',
+    descripcion: s.descripcion ?? '—',
+    ubicacion: s.ubicacion ?? '—',
+    servicio: s.servicios ?? s.servicio_nombre ?? s.servicio?.nombre ?? (typeof s.servicio === 'string' ? s.servicio : '—'),
+    area: area !== null && area !== undefined ? `${moneda.format(Number(area))} m²` : '—',
     presupuesto: presupuesto(s),
+    plazoInicio: PLAZOS_INICIO[s.plazo_inicio] ?? s.plazo_inicio ?? '—',
     estado: estadoDe(s.estado),
     fecha: fmtFecha(creada),
     creada: Date.parse(creada) || null,
@@ -76,9 +94,11 @@ function mapCotizacion(c) {
     id: c.id,
     estado: String(c.estado ?? '').toLowerCase(),
     version: Number(c.version ?? 1),
-    valor: Number(c.valor_total ?? c.valor ?? c.total ?? 0),
+    titulo: c.titulo ?? 'Propuesta comercial',
+    valor: Number(c.valor),
+    moneda: c.moneda ?? 'COP',
     vigencia: c.vigencia_dias ?? null,
-    descripcion: c.descripcion ?? c.alcance ?? c.observaciones ?? '',
+    descripcion: c.mensaje ?? '',
   };
 }
 

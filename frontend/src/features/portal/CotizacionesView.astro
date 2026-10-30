@@ -151,12 +151,12 @@ import { RUTAS } from '../../lib/routes.js';
           <span class="c-quote__ico">${ico('file')}</span>
           <div>
             <small class="c-accent c-caps">${titulo}</small>
-            <strong>Propuesta comercial${cot.version > 1 ? ` · versión ${cot.version}` : ''}</strong>
+            <strong>${esc(cot.titulo)}${cot.version > 1 ? ` · versión ${cot.version}` : ''}</strong>
           </div>
         </div>
         <div class="c-quote__val">
           <div><small>Valor de la propuesta</small>${cot.vigencia ? `<small>Vigencia de ${esc(cot.vigencia)} días</small>` : ''}</div>
-          <strong>$${moneda.format(cot.valor)}</strong>
+          <strong>${new Intl.NumberFormat('es-CO', { style: 'currency', currency: cot.moneda }).format(cot.valor)}</strong>
         </div>
         ${cot.descripcion ? `<p class="c-quote__desc">${esc(cot.descripcion)}</p>` : ''}
         ${
@@ -212,10 +212,13 @@ import { RUTAS } from '../../lib/routes.js';
       <h3 class="c-sect"><span>01</span> Información del proyecto</h3>
       <dl class="c-info">
         <div><dt>Servicio</dt><dd>${esc(s.servicio)}</dd></div>
+        <div><dt>Tipo de proyecto</dt><dd>${esc(s.tipoProyecto)}</dd></div>
         <div><dt>Área aproximada</dt><dd>${esc(s.area)}</dd></div>
         <div><dt>Ubicación</dt><dd>${esc(s.ubicacion)}</dd></div>
         <div><dt>Presupuesto estimado</dt><dd>${esc(s.presupuesto)}</dd></div>
+        <div><dt>Plazo de inicio</dt><dd>${esc(s.plazoInicio)}</dd></div>
       </dl>
+      <p class="c-project-description">${esc(s.descripcion)}</p>
 
       ${htmlBloque(s, cot, estadoCot)}`;
   }
@@ -373,6 +376,7 @@ import { RUTAS } from '../../lib/routes.js';
   .cot .c-info { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; margin: 0 0 28px; }
   .cot .c-info dt { font-size: 10px; color: var(--p-muted); margin-bottom: 4px; }
   .cot .c-info dd { margin: 0; font-size: 12px; font-weight: 600; }
+  .cot .c-project-description { margin: -8px 0 28px; font-size: 12px; line-height: 1.7; white-space: pre-line; }
 
   .cot .c-banner { display: flex; gap: 14px; padding: 20px; background: #fdf8e8; border: 1px solid #efe2b8; color: #8a6a1f; }
   .cot .c-banner div { display: flex; flex-direction: column; gap: 4px; }
