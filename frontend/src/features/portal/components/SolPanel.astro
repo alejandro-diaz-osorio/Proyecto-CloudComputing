@@ -4,27 +4,15 @@
 import { Bot } from '@lucide/astro';
 ---
 
-<aside class="sol" aria-label="Asistente de proyecto (próximamente)" data-sol>
-  <header class="sol__head">
-    <span class="sol__ico"><Bot size={22} strokeWidth={1.5} /></span>
+<aside class="sticky top-[90px] overflow-hidden border border-[#e7e1d4] bg-[#fffdf9] max-xl:hidden" aria-label="Asistente de proyecto (próximamente)" data-sol>
+  <header class="flex items-center gap-3.5 bg-[#1d2433] p-[18px_20px] text-white">
+    <span class="grid size-11 shrink-0 place-items-center rounded-md bg-[#2a3347] text-[#f4a99f]"><Bot size={22} strokeWidth={1.5} /></span>
     <div>
-      <strong>Sol, asistente de proyecto <em>IA</em></strong>
-      <small>Próximamente</small>
+      <strong class="text-sm font-semibold">Sol, asistente de proyecto <em class="ml-1 rounded bg-[#e9e4f6] px-1.5 py-0.5 text-[9px] font-bold not-italic text-[#5b4a9a]">IA</em></strong>
+      <small class="text-[11px] text-[#a9b1c4]">Próximamente</small>
     </div>
   </header>
-  <div class="sol__body">
+  <div class="min-h-[360px]">
     <slot />
   </div>
 </aside>
-
-<style>
-  .sol { background: var(--p-card); border: 1px solid var(--p-line); overflow: hidden; position: sticky; top: 90px; }
-  .sol__head { display: flex; align-items: center; gap: 14px; padding: 18px 20px; background: #1d2433; color: #fff; }
-  .sol__ico { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 6px; background: #2a3347; color: #f4a99f; flex: none; }
-  .sol__head div { display: flex; flex-direction: column; gap: 4px; }
-  .sol__head strong { font-size: 14px; font-weight: 600; }
-  .sol__head em { font-style: normal; font-size: 9px; font-weight: 700; padding: 2px 5px; margin-left: 4px; border-radius: 3px; background: #e9e4f6; color: #5b4a9a; vertical-align: 1px; }
-  .sol__head small { font-size: 11px; color: #a9b1c4; }
-  .sol__body { min-height: 360px; }
-  @media (max-width: 1099px) { .sol { display: none; } }
-</style>

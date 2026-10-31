@@ -30,12 +30,12 @@ const inicio = rol === 'admin' ? RUTAS.portalAdmin : RUTAS.portal;
     <link rel="icon" href="/favicon.ico" />
     <title>{title}</title>
   </head>
-  <body>
-    <div class="portal-shell" data-nav-open="false">
+  <body class="m-0 bg-[#f6f3ec] text-[#1d2433]">
+    <div class="portal-shell group invisible" data-nav-open="false">
       <PortalHeader inicio={inicio} />
       <PortalSidebar pathname={Astro.url.pathname} items={items} titulo={tituloMenu} />
-      <div class="portal-backdrop" data-nav-close></div>
-      <main class="portal-main">
+      <div class="portal-backdrop fixed inset-[70px_0_0] z-[15] hidden bg-[rgb(20_24_34_/_0.35)] group-data-[nav-open=true]:block lg:hidden" data-nav-close></div>
+      <main class="ml-0 min-h-screen pt-[70px] lg:ml-[216px]">
         <slot />
       </main>
     </div>
@@ -76,36 +76,3 @@ const inicio = rol === 'admin' ? RUTAS.portalAdmin : RUTAS.portal;
 
   protegerPagina(rol, pintarUsuario);
 </script>
-
-<style is:global>
-  :root {
-    --p-bg: #f6f3ec;
-    --p-card: #fffdf9;
-    --p-line: #e7e1d4;
-    --p-ink: #1d2433;
-    --p-muted: #8a8678;
-    --p-accent: #c0301f;
-  }
-
-  /* Oculta el portal hasta confirmar sesión y rol (evita el parpadeo antes de redirigir) */
-  html[data-auth-pending] .portal-shell { visibility: hidden; }
-
-  body { margin: 0; background: var(--p-bg); color: var(--p-ink); }
-
-  .portal-main {
-    margin-left: 216px;
-    padding: 70px 0 0;
-    min-height: 100vh;
-  }
-  .portal-main > * { padding: 36px 48px 56px; }
-
-  .portal-backdrop { display: none; }
-
-  @media (max-width: 1023px) {
-    .portal-main { margin-left: 0; }
-    .portal-main > * { padding: 28px 20px 48px; }
-    .portal-shell[data-nav-open='true'] .portal-backdrop {
-      display: block; position: fixed; inset: 70px 0 0 0; z-index: 15; background: rgb(20 24 34 / .35);
-    }
-  }
-</style>

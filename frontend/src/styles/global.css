@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+:root {
+	--p-bg: #f6f3ec;
+	--p-card: #fffdf9;
+	--p-line: #e7e1d4;
+	--p-ink: #1d2433;
+	--p-muted: #8a8678;
+	--p-accent: #c0301f;
+}
+
 html {
 	 scroll-behavior: smooth;
 }
