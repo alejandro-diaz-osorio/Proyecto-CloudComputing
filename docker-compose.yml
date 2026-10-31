@@ -26,7 +26,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
       # Orígenes que el navegador puede usar para llamar a la API (separados por coma).
       # Si cambias FRONTEND_PORT o publicas con un dominio, defínelo en el .env.
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:8080}
     volumes:
       - uploads:/app/uploads
     depends_on:
