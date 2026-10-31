@@ -1,5 +1,5 @@
 ---
-import { Plus, FileText, Clock, Mail, MapPin, ArrowRight, Check, SlidersHorizontal } from '@lucide/astro';
+import { Plus, FileText, Clock, Mail, MapPin, ArrowRight, Check, SlidersHorizontal, Download } from '@lucide/astro';
 import { RUTAS } from '../../lib/routes.js';
 ---
 
@@ -60,6 +60,7 @@ import { RUTAS } from '../../lib/routes.js';
   <template id="ico-check"><Check size={14} strokeWidth={2.4} /></template>
   <template id="ico-reloj"><Clock size={22} strokeWidth={1.6} /></template>
   <template id="ico-file"><FileText size={18} strokeWidth={1.6} /></template>
+  <template id="ico-download"><Download size={16} strokeWidth={1.8} /></template>
 </section>
 
 <script>
@@ -69,6 +70,7 @@ import { RUTAS } from '../../lib/routes.js';
     listarMisSolicitudes,
     cotizacionVigente,
     confirmarCotizacion,
+    descargarArchivo,
     PASOS,
     ESTADOS,
     moneda,
@@ -159,6 +161,18 @@ import { RUTAS } from '../../lib/routes.js';
           <strong>${new Intl.NumberFormat('es-CO', { style: 'currency', currency: cot.moneda }).format(cot.valor)}</strong>
         </div>
         ${cot.descripcion ? `<p class="c-quote__desc">${esc(cot.descripcion)}</p>` : ''}
+        ${
+          cot.archivoId
+            ? `<div class="c-quote__file">
+                 <span>${ico('file')}</span>
+                 <span class="c-quote__file-name">${esc(cot.archivoNombre || 'Propuesta en PDF')}</span>
+                 <button type="button" class="c-btn c-btn--ghost" data-descargar="${esc(cot.archivoId)}" data-nombre="${esc(cot.archivoNombre || 'propuesta.pdf')}">
+                   <span class="c-download-label">${ico('download')} Descargar PDF</span>
+                 </button>
+               </div>
+               <p class="c-msg c-msg--error" id="cot-download-error" role="alert" hidden></p>`
+            : ''
+        }
         ${
           s.estado === 'respondida'
             ? `<div class="c-quote__actions">
@@ -275,6 +289,27 @@ import { RUTAS } from '../../lib/routes.js';
   });
 
   detalleEl.addEventListener('click', async (e) => {
+    const descargar = e.target.closest('[data-descargar]');
+    if (descargar && !descargar.disabled) {
+      const error = $('cot-download-error');
+      descargar.disabled = true;
+      if (error) error.hidden = true;
+      try {
+        await descargarArchivo({
+          id: descargar.dataset.descargar,
+          nombre: descargar.dataset.nombre,
+        });
+      } catch (err) {
+        if (error) {
+          error.hidden = false;
+          error.textContent = err?.message || 'No pudimos descargar el PDF. Intenta de nuevo.';
+        }
+      } finally {
+        descargar.disabled = false;
+      }
+      return;
+    }
+
     const btn = e.target.closest('[data-confirmar]');
     if (!btn || btn.disabled) return;
     if (!window.confirm('¿Confirmar esta cotización? Esta acción no se puede deshacer.')) return;
@@ -392,6 +427,10 @@ import { RUTAS } from '../../lib/routes.js';
   .cot .c-quote__val div { display: flex; flex-direction: column; gap: 4px; }
   .cot .c-quote__val strong { font-size: 24px; font-weight: 800; }
   .cot .c-quote__desc { font-size: 10px; color: var(--p-muted); margin: 14px 0; }
+  .cot .c-quote__file { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #ecd2cc; }
+  .cot .c-quote__file > span:first-child { display: grid; place-items: center; flex: none; color: var(--p-accent); }
+  .cot .c-quote__file-name { flex: 1; min-width: 0; font-size: 12px; overflow-wrap: anywhere; }
+  .cot .c-download-label { display: inline-flex; align-items: center; gap: 7px; }
   .cot .c-quote__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
   @media (max-width: 1023px) { .cot .c-cols { grid-template-columns: 1fr; } }

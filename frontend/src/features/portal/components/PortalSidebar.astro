@@ -1,6 +1,7 @@
 ---
 import { FileText, User, CircleHelp, LogOut } from '@lucide/astro';
 import { NAV_PORTAL } from '../nav.js';
+import { RUTAS } from '../../../lib/routes.js';
 
 interface Props {
   pathname: string;
@@ -43,7 +44,7 @@ const ICONOS = { file: FileText, user: User };
       <CircleHelp size={20} strokeWidth={1.6} />
       <div>
         <strong>¿Necesitas ayuda?</strong>
-        <a href="/nosotros">Contáctanos</a>
+        <a href={RUTAS.cotizar}>Contáctanos</a>
       </div>
     </div>
     <button type="button" class="side__logout" id="portal-salir">

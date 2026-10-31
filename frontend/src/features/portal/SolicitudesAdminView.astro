@@ -1,5 +1,5 @@
 ---
-import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText } from '@lucide/astro';
+import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText, Send, Lock, Download } from '@lucide/astro';
 ---
 
 <section class="adm">
@@ -48,6 +48,9 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   <template id="ico-mail"><Mail size={12} strokeWidth={1.8} /></template>
   <template id="ico-clip"><Paperclip size={18} strokeWidth={1.6} /></template>
   <template id="ico-file"><FileText size={18} strokeWidth={1.6} /></template>
+  <template id="ico-down"><Download size={18} strokeWidth={1.6} /></template>
+  <template id="ico-send"><Send size={16} strokeWidth={1.8} /></template>
+  <template id="ico-lock"><Lock size={16} strokeWidth={1.6} /></template>
   <template id="ico-x"><X size={18} strokeWidth={1.6} /></template>
   <template id="ico-prev"><ChevronLeft size={16} strokeWidth={1.8} /></template>
   <template id="ico-next"><ChevronRight size={16} strokeWidth={1.8} /></template>
@@ -55,7 +58,17 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
 
 <script>
   import { initSession, getSesion, suscribirSesion } from '../auth/session.js';
-  import { listarSolicitudesAdmin, detalleSolicitudAdmin, ESTADOS } from './api.js';
+  import {
+    listarSolicitudesAdmin,
+    detalleSolicitudAdmin,
+    tomarSolicitud,
+    subirPropuestaPdf,
+    descargarArchivo,
+    crearCotizacion,
+    actualizarCotizacion,
+    enviarCotizacion,
+    ESTADOS,
+  } from './api.js';
 
   initSession(); // idempotente: este script corre antes que el del layout
 
@@ -87,6 +100,11 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
 
   const CATEGORIAS = { referencia: 'Referencia', plano: 'Plano' };
   const ESTADOS_COT = { borrador: 'Borrador', vigente: 'Vigente', reemplazada: 'Reemplazada', confirmada: 'Confirmada' };
+
+  const fmtMoneda = (n, moneda = 'COP') =>
+    new Intl.NumberFormat('es-CO', { style: 'currency', currency: moneda, maximumFractionDigits: 0 }).format(n);
+  // Cotizaciones creadas en un intento de envío que falló a medias: se reutilizan al reintentar.
+  const intentos = new Map(); // solicitudId -> { id: cotizacionId, archivoId }
 
   const nombreDe = (s) => s.cliente ?? `Cliente #${s.clienteId ?? '—'}`;
   const inicialesDe = (s) => {
@@ -180,43 +198,137 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
     };
   }
 
+  // Fila de archivo con descarga (la ruta exige sesión, por eso es un botón y no un enlace).
+  function htmlArchivo(a, detalle, extra = '') {
+    return `
+      <button type="button" class="a-file ${extra}" data-descargar="${esc(a.id)}" aria-label="Descargar ${esc(a.nombre)}">
+        <span class="a-file__ico">${ico('clip')}</span>
+        <span class="a-stack"><strong>${esc(a.nombre)}</strong><small>${esc(detalle.filter(Boolean).join(' · '))}</small></span>
+        <span class="a-file__dl">${ico('down')}</span>
+      </button>`;
+  }
+
   function htmlArchivos(d, estado) {
     if (estado === 'cargando') return `<p class="a-note">Cargando archivos…</p>`;
     if (estado === 'error') return `<p class="a-note a-note--error">No pudimos cargar los archivos.</p>`;
     // Los archivos de categoría "cotizacion" son de la administración, no del cliente.
     const archivos = (d?.archivos ?? []).filter((a) => a.categoria !== 'cotizacion');
     if (!archivos.length) return `<p class="a-note">El cliente no adjuntó archivos.</p>`;
-    return archivos
-      .map(
-        (a) => `
-        <div class="a-file">
-          <span class="a-file__ico">${ico('clip')}</span>
-          <span class="a-stack"><strong>${esc(a.nombre)}</strong><small>${esc([CATEGORIAS[a.categoria] ?? a.categoria, a.tamano].filter(Boolean).join(' · '))}</small></span>
-        </div>`,
-      )
-      .join('');
+    return archivos.map((a) => htmlArchivo(a, [CATEGORIAS[a.categoria] ?? a.categoria, a.tamano])).join('');
   }
 
-  function htmlCotizacion(d, estado) {
-    if (estado === 'cargando') return `<p class="a-note">Cargando cotización…</p>`;
-    if (estado === 'error') return `<p class="a-note a-note--error">No pudimos cargar la cotización.</p>`;
-    const c = d?.cotizacion;
-    if (!c) return `<p class="a-note">Aún no hay una cotización para esta solicitud.</p>`;
-    const valor = Number.isFinite(c.valor)
-      ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: c.moneda, maximumFractionDigits: 0 }).format(c.valor)
-      : '—';
+  function htmlQuote(c, d) {
+    const valor = Number.isFinite(c.valor) ? fmtMoneda(c.valor, c.moneda) : '—';
+    const pdf = c.archivoId ? (d?.archivos ?? []).find((a) => String(a.id) === String(c.archivoId)) : null;
+    const meta = [c.enviada && ['Enviada el', c.enviada], c.vence && ['Válida hasta', c.vence]].filter(Boolean);
     return `
       <div class="a-quote">
         <div class="a-quote__head">
           <span class="a-quote__ico">${ico('file')}</span>
           <span class="a-stack">
             <strong>${esc(c.titulo)}${c.version > 1 ? ` · versión ${esc(c.version)}` : ''}</strong>
-            <small>${esc(ESTADOS_COT[c.estado] ?? c.estado)}${c.vigencia ? ` · vigencia de ${esc(c.vigencia)} días` : ''}</small>
+            <small>${esc([
+              ESTADOS_COT[c.estado] ?? c.estado,
+              c.vigencia ? `Vigencia de ${c.vigencia} días` : '',
+              c.ivaIncluido === true ? 'IVA incluido' : c.ivaIncluido === false ? 'Más IVA' : '',
+            ].filter(Boolean).join(' · '))}</small>
           </span>
         </div>
         <div class="a-quote__val"><small>Valor de la propuesta</small><strong>${esc(valor)}</strong></div>
+        ${meta.length ? `<dl class="a-info a-quote__meta">${meta.map(([k, t]) => `<div><dt>${k}</dt><dd>${esc(t)}</dd></div>`).join('')}</dl>` : ''}
         ${c.descripcion ? `<p class="a-quote__desc">${esc(c.descripcion)}</p>` : ''}
-      </div>`;
+      </div>
+      ${pdf ? htmlArchivo(pdf, ['Propuesta en PDF', pdf.tamano], 'a-file--quote') : ''}`;
+  }
+
+  // Formulario "Preparar cotización": solo con la solicitud En evaluación y sin cotización enviada.
+  function htmlPreparar(v, d) {
+    const c = d?.borrador ?? null;
+    const valor = c && Number.isFinite(c.valor) ? c.valor : '';
+    const pdfPrevio = c?.archivoId ? (d.archivos ?? []).find((a) => String(a.id) === String(c.archivoId)) : null;
+    const iva = c?.ivaIncluido === false ? '0' : '1';
+    return `
+      <form class="a-prep" id="adm-form" novalidate data-solicitud="${esc(v.id)}" data-cotizacion="${esc(c?.id ?? '')}" data-archivo="${esc(c?.archivoId ?? '')}">
+        <h3 class="a-prep__title"><span>02</span> Preparar cotización</h3>
+        ${c ? `<p class="a-note">Hay un borrador guardado: puedes completarlo y enviarlo.</p>` : ''}
+
+        <div class="a-field">
+          <label for="cot-titulo">Título de la propuesta</label>
+          <input class="a-input" id="cot-titulo" name="titulo" maxlength="120" required value="${esc(c?.titulo ?? 'Propuesta comercial')}" />
+        </div>
+
+        <div class="a-field">
+          <label for="cot-valor">Valor de la propuesta</label>
+          <div class="a-money">
+            <b>$</b>
+            <input id="cot-valor" name="valor" type="number" min="1" step="any" inputmode="decimal" required placeholder="24500000" value="${esc(valor)}" />
+            <em>COP</em>
+          </div>
+        </div>
+
+        <div class="a-two">
+          <div class="a-field">
+            <label for="cot-iva">IVA</label>
+            <select class="a-input" id="cot-iva" name="iva">
+              <option value="1" ${iva === '1' ? 'selected' : ''}>Incluido</option>
+              <option value="0" ${iva === '0' ? 'selected' : ''}>No incluido</option>
+            </select>
+          </div>
+          <div class="a-field">
+            <label for="cot-vig">Vigencia (días)</label>
+            <input class="a-input" id="cot-vig" name="vigencia" type="number" min="1" max="365" step="1" required value="${esc(c?.vigencia ?? 30)}" />
+          </div>
+        </div>
+
+        <div class="a-field">
+          <label for="cot-msg">Mensaje para el cliente</label>
+          <textarea class="a-input" id="cot-msg" name="mensaje" rows="5" maxlength="2000"
+            placeholder="Hemos revisado la información de tu proyecto. Adjuntamos nuestra propuesta con el alcance y las etapas sugeridas.">${esc(c?.descripcion ?? '')}</textarea>
+        </div>
+
+        <label class="a-drop">
+          <input type="file" name="pdf" accept="application/pdf,.pdf" />
+          ${ico('clip')}
+          <span id="cot-pdf-txt">${pdfPrevio ? `${esc(pdfPrevio.nombre)} (adjunto)` : 'Adjuntar propuesta en PDF'}</span>
+        </label>
+
+        <p class="a-note a-note--error" id="adm-form-error" role="alert" hidden></p>
+        <button type="submit" class="a-btn a-btn--primary a-btn--block" id="cot-enviar">${ico('send')}<span>Enviar cotización</span></button>
+      </form>`;
+  }
+
+  // Zona inferior del detalle según el estado de la solicitud.
+  function seccionCotizacion(v, d, estado) {
+    const envuelve = (html) => `<div class="a-body a-body--cot">${html}</div>`;
+    if (estado === 'cargando') return envuelve(`<h3 class="a-sect">Cotización</h3><p class="a-note">Cargando cotización…</p>`);
+    if (estado === 'error') return envuelve(`<h3 class="a-sect">Cotización</h3><p class="a-note a-note--error">No pudimos cargar la cotización.</p>`);
+
+    const c = d?.cotizacion ?? null;
+
+    if (v.estado === 'enviada') {
+      return envuelve(`
+        <h3 class="a-prep__title a-prep__title--off"><span>02</span> Preparar cotización</h3>
+        <div class="a-lock">${ico('lock')}<span>Toma la solicitud para habilitar este apartado y preparar la cotización.</span></div>`);
+    }
+    if (v.estado === 'evaluacion' && !c) return envuelve(htmlPreparar(v, d));
+
+    return envuelve(`
+      <h3 class="a-sect">${c ? 'Cotización enviada' : 'Cotización'}</h3>
+      ${c ? htmlQuote(c, d) : `<p class="a-note">Aún no hay una cotización para esta solicitud.</p>`}`);
+  }
+
+  // Acciones de gestión según el estado de la solicitud.
+  function accionesHtml(v) {
+    if (v.estado !== 'enviada') return '';
+    return `
+      <div class="a-action">
+        <span class="a-stack">
+          <strong>Solicitud nueva</strong>
+          <small>Al tomarla pasa a “En evaluación” y quedas como responsable. El cliente verá el cambio.</small>
+        </span>
+        <button type="button" class="a-btn a-btn--primary" data-tomar="${esc(v.id)}">Tomar solicitud</button>
+      </div>
+      <p class="a-note a-note--error a-note--pad" id="adm-error" role="alert" hidden></p>`;
   }
 
   function pintarDetalle(s, d = null, estado = 'ok') {
@@ -244,6 +356,8 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
         ${pill(v, 'a-pill--big')}
       </div>
 
+      ${accionesHtml(v)}
+
       <div class="a-body">
         <h3 class="a-sect">Proyecto</h3>
         <p class="a-title">${esc(v.titulo)}</p>
@@ -260,10 +374,9 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
 
         <h3 class="a-sect">Archivos del cliente</h3>
         ${htmlArchivos(d, estado)}
+      </div>
 
-        <h3 class="a-sect">Cotización</h3>
-        ${htmlCotizacion(d, estado)}
-      </div>`;
+      ${seccionCotizacion(v, d, estado)}`;
   }
 
   async function seleccionar(id) {
@@ -333,11 +446,167 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
     }
   });
 
-  detalleEl.addEventListener('click', (e) => {
-    if (!e.target.closest('[data-cerrar]')) return;
-    activa = null;
-    pintarLista();
-    pintarDetalle(null);
+  async function refrescar(id) {
+    cache.clear();
+    todas = await listarSolicitudesAdmin();
+    pintarBadge();
+    await seleccionar(id);
+  }
+
+  detalleEl.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-cerrar]')) {
+      activa = null;
+      pintarLista();
+      pintarDetalle(null);
+      return;
+    }
+
+    const dl = e.target.closest('[data-descargar]');
+    if (dl) {
+      if (dl.disabled) return;
+      const archivo = cache.get(activa?.id)?.archivos?.find((a) => String(a.id) === dl.dataset.descargar);
+      if (!archivo) return;
+      const nota = dl.querySelector('small');
+      const original = nota.textContent;
+      dl.disabled = true;
+      nota.textContent = 'Descargando…';
+      try {
+        await descargarArchivo(archivo);
+        nota.textContent = original;
+      } catch (err) {
+        nota.textContent = err?.message || 'No pudimos descargar el archivo.';
+        nota.classList.add('a-err');
+        setTimeout(() => { nota.textContent = original; nota.classList.remove('a-err'); }, 5000);
+      }
+      dl.disabled = false;
+      return;
+    }
+
+    const btn = e.target.closest('[data-tomar]');
+    if (!btn || btn.disabled) return;
+    if (!window.confirm('¿Tomar esta solicitud? Pasará a “En evaluación” y quedarás como responsable.')) return;
+
+    const id = btn.dataset.tomar;
+    const caja = $('adm-error');
+    btn.disabled = true;
+    if (caja) caja.hidden = true;
+
+    try {
+      await tomarSolicitud(id);
+    } catch (err) {
+      btn.disabled = false;
+      if (caja) {
+        caja.hidden = false;
+        caja.textContent = err?.message || 'No se pudo tomar la solicitud. Intenta de nuevo.';
+      }
+      return;
+    }
+
+    try {
+      await refrescar(id);
+    } catch {
+      mensaje('La solicitud se tomó, pero no pudimos actualizar la lista. Recarga la página.');
+    }
+  });
+
+  detalleEl.addEventListener('change', (e) => {
+    if (e.target.name !== 'pdf') return;
+    const txt = $('cot-pdf-txt');
+    if (txt) txt.textContent = e.target.files[0]?.name ?? 'Adjuntar propuesta en PDF';
+  });
+
+  const idDe = (r) => {
+    const id = r?.id ?? r?.archivo?.id ?? r?.cotizacion?.id;
+    if (id === undefined || id === null) throw new Error('El servidor no devolvió el identificador esperado.');
+    return id;
+  };
+
+  // Enviar cotización: (1) sube el PDF, (2) crea o completa la cotización, (3) la envía.
+  // Al enviarla el backend pasa la solicitud de "En evaluación" a "Respondida".
+  detalleEl.addEventListener('submit', async (e) => {
+    const form = e.target.closest('#adm-form');
+    if (!form) return;
+    e.preventDefault();
+
+    const caja = $('adm-form-error');
+    const btn = $('cot-enviar');
+    const etiqueta = btn.querySelector('span');
+    const textoBtn = etiqueta.textContent;
+    const el = form.elements;
+
+    const fallo = (texto, campo) => {
+      caja.hidden = false;
+      caja.textContent = texto;
+      el[campo]?.focus();
+    };
+    caja.hidden = true;
+
+    const titulo = el.titulo.value.trim();
+    const valor = Number(el.valor.value);
+    const vigencia = Number(el.vigencia.value);
+    const pdf = el.pdf.files[0] ?? null;
+
+    if (!titulo) return fallo('Escribe un título para la propuesta.', 'titulo');
+    if (!(valor > 0)) return fallo('Ingresa un valor mayor que cero.', 'valor');
+    if (valor > 999999999999) return fallo('El valor es demasiado alto.', 'valor');
+    if (!Number.isInteger(vigencia) || vigencia < 1 || vigencia > 365) {
+      return fallo('La vigencia debe ser un número entero de días entre 1 y 365.', 'vigencia');
+    }
+    if (pdf && pdf.type !== 'application/pdf' && !/\.pdf$/i.test(pdf.name)) {
+      return fallo('La propuesta adjunta debe ser un archivo PDF.', 'pdf');
+    }
+
+    const solicitudId = form.dataset.solicitud;
+    const s = todas.find((x) => String(x.id) === String(solicitudId));
+    if (!window.confirm(`¿Enviar la cotización por ${fmtMoneda(valor)} a ${s ? nombreDe(s) : 'el cliente'}? La solicitud pasará a “Respondida”.`)) return;
+
+    const bloquear = (si) => form.querySelectorAll('input, select, textarea, button').forEach((c) => { c.disabled = si; });
+    bloquear(true);
+
+    const sid = String(solicitudId);
+    const previo = intentos.get(sid) ?? { id: form.dataset.cotizacion || null, archivoId: form.dataset.archivo || null };
+    let cotizacionId = previo.id;
+    let archivoId = previo.archivoId;
+    try {
+      if (pdf) {
+        etiqueta.textContent = 'Subiendo PDF…';
+        archivoId = idDe(await subirPropuestaPdf(solicitudId, pdf));
+      }
+
+      // El backend reescribe todos los campos al editar: archivo_id debe viajar siempre.
+      const datos = {
+        titulo,
+        valor,
+        moneda: 'COP',
+        iva_incluido: el.iva.value === '1',
+        vigencia_dias: vigencia,
+        mensaje: el.mensaje.value.trim() || null,
+        archivo_id: archivoId ? Number(archivoId) : null,
+      };
+
+      etiqueta.textContent = 'Guardando…';
+      if (cotizacionId) {
+        await actualizarCotizacion(cotizacionId, datos);
+      } else {
+        cotizacionId = idDe(await crearCotizacion(solicitudId, datos));
+      }
+      intentos.set(sid, { id: cotizacionId, archivoId }); // por si falla el envío y se reintenta
+
+      etiqueta.textContent = 'Enviando…';
+      await enviarCotizacion(cotizacionId);
+    } catch (err) {
+      bloquear(false);
+      etiqueta.textContent = textoBtn;
+      fallo(err?.message || 'No pudimos enviar la cotización. Intenta de nuevo.');
+      return;
+    }
+
+    intentos.delete(String(solicitudId));
+    try {
+      await refrescar(solicitudId);
+    } catch {
+      mensaje('La cotización se envió, pero no pudimos actualizar la lista. Recarga la página.');
+    }
   });
 
   // ── Sesión: pedir datos solo cuando hay usuario autenticado ────────────
@@ -420,7 +689,14 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   .adm .a-client { display: flex; align-items: center; gap: 12px; padding: 18px 20px; background: #f3efe6; border-bottom: 1px solid var(--p-line); }
   .adm .a-mail { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--p-muted); text-decoration: none; overflow-wrap: anywhere; }
   .adm .a-mail:hover { color: var(--p-accent); }
+  .adm .a-action { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 16px 20px; background: #fdf8e8; border-bottom: 1px solid #efe2b8; }
+  .adm .a-action small { color: #8a6a1f; }
+  .adm .a-note--pad { margin: 0; padding: 10px 20px; border-bottom: 1px solid var(--p-line); }
+  .adm .a-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 3px; border: 1px solid transparent; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .adm .a-btn--primary { background: var(--p-accent); color: #fff; box-shadow: 0 6px 14px rgb(192 48 31 / .25); }
+  .adm .a-btn:disabled { opacity: .55; cursor: not-allowed; }
   .adm .a-body { padding: 20px; }
+  .adm .a-body--cot { border-top: 1px solid var(--p-line); }
   .adm .a-sect { margin: 0 0 14px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--p-accent); }
   .adm .a-sect:not(:first-child) { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--p-line); }
   .adm .a-title { margin: 0 0 16px; font-size: 16px; font-weight: 600; line-height: 1.3; }
@@ -429,8 +705,13 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   .adm .a-info dd { margin: 0; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
   .adm .a-desc { margin: 0; font-size: 12px; line-height: 1.7; white-space: pre-line; }
 
-  .adm .a-file { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 8px; background: #fff; border: 1px solid var(--p-line); }
-  .adm .a-file__ico { color: var(--p-muted); display: grid; }
+  .adm .a-file { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; margin-bottom: 8px; text-align: left; background: #fff; border: 1px solid var(--p-line); cursor: pointer; }
+  .adm .a-file:hover:not(:disabled) { background: #f8f5ee; }
+  .adm .a-file:disabled { cursor: progress; opacity: .7; }
+  .adm .a-file .a-stack { flex: 1; }
+  .adm .a-file__ico, .adm .a-file__dl { color: var(--p-muted); display: grid; flex: none; }
+  .adm .a-file:hover .a-file__dl { color: var(--p-accent); }
+  .adm .a-err { color: var(--p-accent); }
 
   .adm .a-quote { padding: 16px; background: #fbf1ee; border: 1px solid #ecd2cc; }
   .adm .a-quote__head { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #ecd2cc; }
@@ -439,7 +720,30 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   .adm .a-quote__val strong { font-size: 22px; font-weight: 800; }
   .adm .a-quote__desc { margin: 12px 0 0; font-size: 11px; line-height: 1.6; color: var(--p-muted); white-space: pre-line; }
 
-  .adm :is(.a-row, .a-tab, .a-pg, .a-iconbtn):focus-visible { outline: 2px solid var(--p-accent); outline-offset: -2px; }
+  /* Preparar cotización */
+  .adm .a-prep__title { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 13px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
+  .adm .a-prep__title span { font-size: 10px; color: var(--p-accent); }
+  .adm .a-prep__title--off { color: var(--p-muted); }
+  .adm .a-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; min-width: 0; }
+  .adm .a-field label { font-size: 10px; font-weight: 600; color: var(--p-muted); }
+  .adm .a-input { width: 100%; padding: 11px 12px; background: #fff; border: 1px solid var(--p-line); border-radius: 4px; font: inherit; font-size: 12px; color: var(--p-ink); }
+  .adm textarea.a-input { resize: vertical; line-height: 1.6; }
+  .adm .a-input:focus, .adm .a-money:focus-within { outline: 0; border-color: var(--p-accent); }
+  .adm .a-money { display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #fff; border: 1px solid var(--p-line); border-radius: 4px; }
+  .adm .a-money b { color: var(--p-accent); font-size: 12px; }
+  .adm .a-money em { font-style: normal; font-size: 10px; color: var(--p-muted); }
+  .adm .a-money input { flex: 1; min-width: 0; padding: 12px 0; border: 0; outline: 0; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--p-ink); }
+  .adm .a-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .adm .a-drop { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; padding: 14px; border: 1px dashed #cfc8b8; border-radius: 3px; font-size: 11px; font-weight: 600; color: var(--p-muted); cursor: pointer; text-align: center; overflow-wrap: anywhere; }
+  .adm .a-drop:hover { background: #f8f5ee; }
+  .adm .a-drop:focus-within { outline: 2px solid var(--p-accent); outline-offset: 2px; }
+  .adm .a-drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+  .adm .a-btn--block { width: 100%; justify-content: center; padding: 16px; font-size: 13px; }
+  .adm .a-lock { display: flex; align-items: center; gap: 10px; padding: 14px; background: #f8f5ee; border: 1px dashed #cfc8b8; font-size: 12px; color: var(--p-muted); line-height: 1.5; }
+  .adm .a-quote__meta { margin: 14px 0 0; padding-top: 14px; border-top: 1px solid #ecd2cc; }
+  .adm .a-file--quote { margin: 10px 0 0; }
+
+  .adm :is(.a-row, .a-tab, .a-pg, .a-iconbtn, .a-btn, .a-file):focus-visible { outline: 2px solid var(--p-accent); outline-offset: -2px; }
 
   @media (max-width: 1279px) {
     .adm .a-cols { grid-template-columns: 1fr; }
@@ -455,7 +759,7 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
     .adm .a-date { grid-area: date; }
     .adm .a-toolbar { padding: 14px; }
     .adm .a-search { width: 100%; }
-    .adm .a-info { grid-template-columns: 1fr; }
+    .adm .a-info, .adm .a-two { grid-template-columns: 1fr; }
     .adm .a-client { flex-wrap: wrap; }
     .adm .a-pill--big { margin-left: 0; }
   }

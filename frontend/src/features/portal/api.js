@@ -1,12 +1,15 @@
 import { http } from '../../lib/http.js';
 
-// ⚠ ÚNICO punto que depende de lib/http.js. Si tu cliente HTTP tiene otra firma, se ajusta aquí.
+// ── Cliente HTTP ──────────────────────────────────────────────────────────────
+
 const get = (ruta) => http.get(ruta);
 const post = (ruta, cuerpo = {}) => http.post(ruta, cuerpo);
 const patch = (ruta, cuerpo = {}) => http.patch(ruta, cuerpo);
 const del = (ruta) => http.delete(ruta);
 
 export const moneda = new Intl.NumberFormat('es-CO');
+
+// ── Estados ──────────────────────────────────────────────────────────────────
 
 export const PASOS = [
   { id: 'enviada', label: 'Enviada' },
@@ -22,14 +25,14 @@ export const ESTADOS = {
   confirmada: { label: 'Confirmada', tono: 'ok' },
 };
 
-// ── Mapeo de respuestas del backend ─────────────────────────────────────────
+// ── Mapeo de respuestas del backend ──────────────────────────────────────────
 
 const lista = (r) =>
   Array.isArray(r)
     ? r
     : r?.data ?? r?.solicitudes ?? r?.cotizaciones ?? [];
 
-// ── Estados ──────────────────────────────────────────────────────────────────
+// ── Alias de estados ─────────────────────────────────────────────────────────
 
 const ALIAS_ESTADO = {
   borrador: 'borrador',
@@ -49,7 +52,7 @@ const estadoDe = (v) =>
       .replace(/[\s-]+/g, '_')
   ] ?? 'enviada';
 
-// ── Formato de fecha ─────────────────────────────────────────────────────────
+// ── Formato de fechas ────────────────────────────────────────────────────────
 
 const fmtFecha = (v) => {
   const d = new Date(v);
@@ -65,12 +68,24 @@ const fmtFecha = (v) => {
         .replace(/\./g, '');
 };
 
+// Fechas sin alterar el día por zona horaria.
+
+const fmtFechaDia = (v) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(v ?? ''));
+
+  if (!m) return '';
+
+  return new Intl.DateTimeFormat('es-CO', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+    .format(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])))
+    .replace(/\./g, '');
+};
+
 // ── Servicios ────────────────────────────────────────────────────────────────
 
-// El servicio puede llegar como:
-// "Diseño arquitectónico"
-// o como:
-// [{ id, nombre }]
 function serviciosTexto(v) {
   if (Array.isArray(v)) {
     return (
@@ -86,7 +101,6 @@ function serviciosTexto(v) {
 
 // ── Datos del cliente ────────────────────────────────────────────────────────
 
-// ⚠ Depende de que el backend una la solicitud con `usuarios`.
 function datosCliente(s) {
   const c =
     s.cliente && typeof s.cliente === 'object'
@@ -287,9 +301,30 @@ function mapCotizacion(c) {
       c.vigencia_dias ??
       null,
 
+    ivaIncluido:
+      c.iva_incluido == null
+        ? null
+        : Boolean(c.iva_incluido),
+
     descripcion:
       c.mensaje ??
       '',
+
+    archivoId:
+      c.archivo_id ??
+      null,
+
+    archivoNombre:
+      c.archivo_nombre ??
+      null,
+
+    enviada:
+      c.enviada_en
+        ? fmtFecha(c.enviada_en)
+        : '',
+
+    vence:
+      fmtFechaDia(c.vence_en),
   };
 }
 
@@ -313,14 +348,12 @@ function mapArchivo(a) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// ENDPOINTS
+// SOLICITUDES DEL CLIENTE
 // ═════════════════════════════════════════════════════════════════════════════
 
-// ── Solicitudes del cliente ──────────────────────────────────────────────────
-
 /**
- * Solicitudes del cliente (sin borradores),
- * de la más reciente a la más antigua.
+ * Lista las solicitudes del cliente.
+ * Excluye borradores.
  */
 export async function listarMisSolicitudes() {
   const filas = lista(
@@ -332,11 +365,12 @@ export async function listarMisSolicitudes() {
     .sort((a, b) => b.orden - a.orden);
 }
 
-// ── Cotizaciones ─────────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// COTIZACIONES DEL CLIENTE
+// ═════════════════════════════════════════════════════════════════════════════
 
 /**
- * Última versión de cotización enviada/confirmada
- * de una solicitud (o null).
+ * Obtiene la última cotización enviada o confirmada.
  */
 export async function cotizacionVigente(solicitudId) {
   const filas = lista(
@@ -361,19 +395,11 @@ export const confirmarCotizacion = (cotizacionId) =>
   post(`/cotizaciones/${cotizacionId}/confirmar`);
 
 // ═════════════════════════════════════════════════════════════════════════════
-// NUEVA SOLICITUD — "CUÉNTANOS SOBRE TU PROYECTO"
+// NUEVA SOLICITUD
 // ═════════════════════════════════════════════════════════════════════════════
 
 // ── Servicios disponibles ────────────────────────────────────────────────────
 
-/**
- * Catálogo público de servicios activos.
- *
- * Devuelve:
- * [
- *   { id, nombre }
- * ]
- */
 export const listarServicios = async () =>
   lista(
     await get('/public/servicios')
@@ -381,46 +407,21 @@ export const listarServicios = async () =>
 
 // ── Crear borrador ───────────────────────────────────────────────────────────
 
-/**
- * Crea una nueva solicitud en estado borrador.
- *
- * Devuelve:
- * { mensaje, id, codigo }
- */
 export const crearBorrador = (datos) =>
   post('/solicitudes', datos);
 
 // ── Actualizar borrador ──────────────────────────────────────────────────────
 
-/**
- * Actualiza una solicitud que todavía está en borrador.
- *
- * El backend exige el cuerpo completo.
- */
 export const actualizarBorrador = (id, datos) =>
   patch(`/solicitudes/${id}`, datos);
 
 // ── Enviar solicitud ─────────────────────────────────────────────────────────
 
-/**
- * Cambia una solicitud de:
- *
- * borrador → enviada
- *
- * Devuelve:
- * { mensaje, codigo }
- */
 export const enviarSolicitud = (id) =>
   post(`/solicitudes/${id}/enviar`);
 
-// ── Subir archivo ────────────────────────────────────────────────────────────
+// ── Subir archivo de solicitud ───────────────────────────────────────────────
 
-/**
- * Adjunta un PDF a una solicitud.
- *
- * Campo multipart:
- * "archivo"
- */
 export function subirArchivo(solicitudId, file) {
   const datos = new FormData();
 
@@ -438,12 +439,11 @@ export const eliminarArchivo = (archivoId) =>
   del(`/archivos/${archivoId}`);
 
 // ═════════════════════════════════════════════════════════════════════════════
-// ADMINISTRACIÓN
+// ADMINISTRACIÓN DE SOLICITUDES
 // ═════════════════════════════════════════════════════════════════════════════
 
 /**
- * Todas las solicitudes enviadas (sin borradores),
- * de la más reciente a la más antigua.
+ * Lista todas las solicitudes enviadas.
  */
 export async function listarSolicitudesAdmin() {
   const filas = lista(
@@ -456,12 +456,8 @@ export async function listarSolicitudesAdmin() {
 }
 
 /**
- * Detalle de una solicitud:
- *
- * - Datos de la solicitud
- * - Cliente
- * - Archivos
- * - Última cotización
+ * Detalle de una solicitud: sus datos, sus archivos, la última cotización ya
+ * enviada (`cotizacion`, o null) y el borrador en preparación (`borrador`, o null).
  */
 export async function detalleSolicitudAdmin(id) {
   const r = await get(`/solicitudes/${id}`);
@@ -484,6 +480,80 @@ export async function detalleSolicitudAdmin(id) {
         .map(mapArchivo),
 
     cotizacion:
-      cotizaciones[0] ?? null,
+      cotizaciones.find((c) => c.estado !== 'borrador') ?? null,
+
+    borrador:
+      cotizaciones.find((c) => c.estado === 'borrador') ?? null,
   };
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// GESTIÓN DE SOLICITUDES Y COTIZACIONES — ADMINISTRACIÓN
+// ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * La administradora toma una solicitud.
+ * enviada → en_evaluacion
+ */
+export const tomarSolicitud = (id) =>
+  post(`/solicitudes/${id}/tomar`);
+
+/**
+ * Sube el PDF de la propuesta comercial (campo multipart "archivo").
+ * Los campos de texto van antes del archivo.
+ */
+export function subirPropuestaPdf(solicitudId, archivo) {
+  const datos = new FormData();
+
+  datos.append('categoria', 'cotizacion');
+  datos.append('archivo', archivo);
+
+  return http.post(
+    `/archivos/solicitud/${solicitudId}`,
+    datos
+  );
+}
+
+/**
+ * Crea una nueva versión de cotización en borrador → { id, version }.
+ * POST /cotizaciones/solicitud/:solicitudId
+ */
+export const crearCotizacion = (solicitudId, datos) =>
+  post(`/cotizaciones/solicitud/${solicitudId}`, datos);
+
+/**
+ * Edita un borrador. El backend reescribe todos los campos,
+ * por eso `archivo_id` debe enviarse siempre.
+ */
+export const actualizarCotizacion = (id, datos) =>
+  patch(`/cotizaciones/${id}`, datos);
+
+/**
+ * Envía la cotización al cliente:
+ * borrador → vigente, calcula vence_en y la solicitud pasa a "respondida".
+ */
+export const enviarCotizacion = (id) =>
+  post(`/cotizaciones/${id}/enviar`);
+
+/**
+ * Descarga un archivo con la sesión activa
+ * (GET /archivos/:id/descargar exige Bearer, no sirve un enlace simple).
+ * @param {{ id: number|string, nombre: string }} archivo
+ */
+export async function descargarArchivo(archivo) {
+  const blob = await http.get(`/archivos/${archivo.id}/descargar`, {
+    blob: true,
+    headers: { Accept: '*/*' },
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+
+  a.href = url;
+  a.download = archivo.nombre || 'archivo';
+  document.body.append(a);
+  a.click();
+  a.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }

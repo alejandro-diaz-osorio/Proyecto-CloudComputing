@@ -36,6 +36,7 @@ function mensajePorEstado(status) {
   if (status === 403) return 'No tienes permiso para realizar esta acción.';
   if (status === 404) return 'No encontramos lo que buscabas.';
   if (status === 409) return 'Ya existe un registro con esos datos.';
+  if (status === 413) return 'El archivo es demasiado grande. Prueba con uno más liviano.';
   if (status === 429) return 'Demasiados intentos. Intenta de nuevo en unos minutos.';
   if (status >= 500) return 'Tuvimos un problema en el servidor. Inténtalo más tarde.';
   return 'Ocurrió un error inesperado.';
@@ -43,8 +44,8 @@ function mensajePorEstado(status) {
 
 async function enviar(ruta, { method = 'GET', body, headers, signal }, token) {
   const h = { Accept: 'application/json', ...headers };
+  // FormData (subida de archivos): el navegador pone el Content-Type con su boundary.
   const esForm = typeof FormData !== 'undefined' && body instanceof FormData;
-  // Con FormData NO se fija Content-Type: el navegador lo pone con el boundary del multipart
   if (body !== undefined && !esForm) h['Content-Type'] = 'application/json';
   if (token) h.Authorization = `Bearer ${token}`;
   try {
@@ -80,8 +81,9 @@ async function leer(res) {
 
 /**
  * @param {string} ruta  relativa a /api, p. ej. '/solicitudes'
- * @param {{method?:string, body?:any, headers?:object, signal?:AbortSignal, auth?:boolean}} opts
+ * @param {{method?:string, body?:any, headers?:object, signal?:AbortSignal, auth?:boolean, blob?:boolean}} opts
  *        auth:false → ruta pública (login, registro, refresh): sin Bearer y sin reintento.
+ *        blob:true  → respuesta binaria (descarga de archivos); los errores siguen saliendo como ApiError.
  */
 export async function request(ruta, opts = {}) {
   const { auth = true } = opts;
@@ -93,6 +95,7 @@ export async function request(ruta, opts = {}) {
     if (nuevoToken) res = await enviar(ruta, opts, nuevoToken);
     else manejadores.onExpire();
   }
+  if (opts.blob && res.ok) return res.blob(); // descargas: devuelve el archivo tal cual
   return leer(res);
 }
 

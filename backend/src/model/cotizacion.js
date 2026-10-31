@@ -1,4 +1,4 @@
-const { query } = require('./conexion');
+const { query, transaction } = require('./conexion');
 const { ErrorDeNegocio } = require('../utils/manejarError');
 const Solicitud = require('./solicitud');
 
