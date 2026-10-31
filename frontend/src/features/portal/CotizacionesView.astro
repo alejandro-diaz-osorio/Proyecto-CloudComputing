@@ -10,7 +10,7 @@ import { RUTAS } from '../../lib/routes.js';
       <h1>Mis cotizaciones</h1>
       <p class="c-sub">Consulta el avance y las respuestas de tus proyectos.</p>
     </div>
-    <a class="c-btn c-btn--primary" href={RUTAS.cotizar}>
+    <a class="c-btn c-btn--primary" href={RUTAS.portalNuevaSolicitud}>
       <Plus size={16} strokeWidth={2} /> Nueva solicitud
     </a>
   </div>
@@ -113,7 +113,7 @@ import { RUTAS } from '../../lib/routes.js';
   // ── Lista ──────────────────────────────────────────────────────────────
   function pintarLista() {
     if (!solicitudes.length) {
-      listaEl.innerHTML = `<p class="c-vacio">Aún no tienes solicitudes. <a href="${RUTAS.cotizar}">Crea la primera</a>.</p>`;
+      listaEl.innerHTML = `<p class="c-vacio">Aún no tienes solicitudes. <a href="${RUTAS.portalNuevaSolicitud}">Crea la primera</a>.</p>`;
       return;
     }
     listaEl.innerHTML = solicitudes

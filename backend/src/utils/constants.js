@@ -10,10 +10,10 @@ const TRANSICIONES = {
   confirmada:    [],
 };
 
-// ⚠ PENDIENTE: copiar los valores exactos de los ENUM de la base de datos.
-const TIPOS_PROYECTO = [];
-const PLAZOS_INICIO = [];
-const CATEGORIAS_ARCHIVO = [];
+// Valores exactos de los ENUM de la base de datos (solucia.sql)
+const TIPOS_PROYECTO = ['vivienda', 'comercial', 'otro'];                                          // solicitudes.tipo_proyecto
+const PLAZOS_INICIO = ['proximo_mes', 'proximos_3_meses', 'proximos_6_meses', 'mas_adelante', 'sin_definir']; // solicitudes.plazo_inicio
+const CATEGORIAS_ARCHIVO = ['referencia', 'plano', 'cotizacion'];                                  // archivos.categoria
 
 module.exports = {
   ESTADOS_SOLICITUD,

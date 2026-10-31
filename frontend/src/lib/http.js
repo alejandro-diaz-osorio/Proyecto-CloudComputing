@@ -43,13 +43,15 @@ function mensajePorEstado(status) {
 
 async function enviar(ruta, { method = 'GET', body, headers, signal }, token) {
   const h = { Accept: 'application/json', ...headers };
-  if (body !== undefined) h['Content-Type'] = 'application/json';
+  const esForm = typeof FormData !== 'undefined' && body instanceof FormData;
+  // Con FormData NO se fija Content-Type: el navegador lo pone con el boundary del multipart
+  if (body !== undefined && !esForm) h['Content-Type'] = 'application/json';
   if (token) h.Authorization = `Bearer ${token}`;
   try {
     return await fetch(`${API_BASE}${ruta}`, {
       method,
       headers: h,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body === undefined ? undefined : esForm ? body : JSON.stringify(body),
       credentials: 'same-origin',
       signal,
     });

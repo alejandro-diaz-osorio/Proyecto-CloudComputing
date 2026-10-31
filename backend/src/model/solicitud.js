@@ -1,9 +1,10 @@
-const { query } = require('./conexion');
+const { query, transaction } = require('./conexion');
 const { TRANSICIONES } = require('../utils/constants');
 const { ErrorDeNegocio } = require('../utils/errors');
 const Usuario = require('./usuario');
 const HistorialEstado = require('./historialEstado');
 const Notificacion = require('./notificacion');
+
 
 // Base de las listas: solicitud + nombre del cliente + arquitecta + servicios en texto
 const SELECT_LISTA = `

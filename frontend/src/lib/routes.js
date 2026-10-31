@@ -12,6 +12,7 @@ export const RUTAS = {
   // Portal del cliente (rol 'cliente')
   portal: '/portal/cotizaciones/',          // destino por defecto tras el login de un cliente
   portalCotizaciones: '/portal/cotizaciones/',
+  portalNuevaSolicitud: '/portal/cotizaciones/nueva/',
   portalPerfil: '/portal/perfil/',
 
   // Portal de administración (rol 'admin')

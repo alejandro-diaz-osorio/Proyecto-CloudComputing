@@ -21,4 +21,4 @@ const manejarError = (res, err, mensajeDefecto) => {
   return res.status(500).json({ mensaje: mensajeDefecto });
 };
 
-module.exports = { traducirError, manejarError };
+module.exports = { traducirError, manejarError, ErrorDeNegocio };

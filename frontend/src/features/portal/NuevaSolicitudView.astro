@@ -1,0 +1,694 @@
+---
+import { ArrowLeft, ArrowRight, Building2, Check, House, Lightbulb, MapPin, Paperclip, ShieldCheck, Store } from '@lucide/astro';
+import SolPanel from './components/SolPanel.astro';
+import { RUTAS } from '../../lib/routes.js';
+import { TIPOS, PRESUPUESTOS, PLAZOS, LIMITES } from './solicitud.js';
+
+const ICONOS = { vivienda: House, comercial: Store, otro: Building2 };
+const PASOS = ['Tu idea', 'Datos del proyecto', 'Revisar solicitud', 'Evaluación humana'];
+---
+
+<section class="nueva" id="nueva">
+  <div class="n-nav">
+    <a class="n-back" href={RUTAS.portalCotizaciones}><ArrowLeft size={14} strokeWidth={1.8} /> Mis cotizaciones</a>
+    <span class="n-saved" id="n-guardado" hidden><Check size={14} strokeWidth={2.2} /> Borrador guardado</span>
+  </div>
+
+  <div class="n-top">
+    <div>
+      <p class="n-eyebrow">Nueva solicitud</p>
+      <h1>Cuéntanos sobre tu proyecto</h1>
+      <p class="n-sub">No necesitas conocer términos técnicos. Describe tu idea con tus propias palabras.</p>
+    </div>
+    <div class="n-human">
+      <ShieldCheck size={20} strokeWidth={1.6} />
+      <div><b>Revisión humana garantizada</b><small>Un arquitecto validará tu solicitud antes de cotizar</small></div>
+    </div>
+  </div>
+
+  <ol class="n-tabs" id="n-tabs" aria-label="Progreso de la solicitud">
+    {PASOS.map((p, i) => (
+      <li class="n-tab" data-tab={i + 1} data-estado={i === 0 ? 'current' : 'todo'}>
+        <span class="n-tab__dot">{String(i + 1).padStart(2, '0')}</span>
+        <b>{p}</b>
+      </li>
+    ))}
+  </ol>
+
+  <div class="n-cols" id="n-cols">
+    <div class="n-card">
+      <p class="n-alert" id="n-alerta" role="alert" hidden></p>
+
+      <form id="n-form" novalidate>
+        <!-- ── Paso 1 ─────────────────────────────────────────── -->
+        <div class="n-panel" data-panel="1">
+          <header class="n-head">
+            <p class="n-step">Paso 1 de 4</p>
+            <h2>Empecemos por tu idea</h2>
+            <p class="n-lead">Entre más contexto compartas, mejor podremos entender lo que necesitas.</p>
+          </header>
+
+          <fieldset class="n-field">
+            <legend class="n-label">¿Qué tipo de proyecto tienes en mente?</legend>
+            <div class="n-tipos">
+              {TIPOS.map((t, i) => {
+                const Ico = ICONOS[t.id];
+                return (
+                  <label class="n-tipo">
+                    <input type="radio" name="tipo" value={t.id} checked={i === 0} />
+                    <span class="n-tipo__ico"><Ico size={22} strokeWidth={1.5} /></span>
+                    <span class="n-tipo__txt"><b>{t.label}</b><small>{t.hint}</small></span>
+                    <i class="n-radio" aria-hidden="true"></i>
+                  </label>
+                );
+              })}
+            </div>
+            <p class="n-err" data-err="tipo" hidden></p>
+          </fieldset>
+
+          <div class="n-field">
+            <div class="n-labelrow">
+              <label class="n-label" for="n-desc">Describe lo que imaginas para tu proyecto</label>
+              <small>No te preocupes por usar palabras técnicas</small>
+            </div>
+            <textarea id="n-desc" class="n-input n-textarea" rows="6" maxlength={LIMITES.descripcionMax}
+              placeholder="Ej.: Quiero construir una casa campestre para mi familia, con espacios abiertos, mucha luz y conectada al jardín…"></textarea>
+            <div class="n-counter"><small id="n-cuenta">0 caracteres</small></div>
+            <p class="n-err" data-err="descripcion" hidden></p>
+          </div>
+
+          <div class="n-hint">
+            <Lightbulb size={16} strokeWidth={1.6} />
+            <b>Te puede ayudar mencionar:</b>
+            <span>Quiénes usarán el espacio</span>
+            <span>Qué ambientes necesitas</span>
+            <span>Qué sensación buscas</span>
+            <span>Referencias que te gustan</span>
+          </div>
+
+          <div class="n-field">
+            <label class="n-drop" id="n-drop">
+              <span class="n-drop__ico"><Paperclip size={20} strokeWidth={1.6} /></span>
+              <span class="n-drop__txt"><b>Agrega planos o referencias</b><small>PDF · Máximo 10 MB por archivo</small></span>
+              <span class="n-drop__btn">Seleccionar archivos</span>
+              <input type="file" id="n-archivos" accept=".pdf,application/pdf" multiple hidden />
+            </label>
+            <ul class="n-files" id="n-lista-archivos"></ul>
+            <p class="n-err" data-err="archivos" hidden></p>
+          </div>
+
+          <footer class="n-actions">
+            <button type="button" class="n-btn n-btn--ghost" data-accion="salir">Guardar y salir</button>
+            <button type="button" class="n-btn n-btn--primary" data-accion="ir2">Continuar con los datos <ArrowRight size={16} strokeWidth={2} /></button>
+          </footer>
+        </div>
+
+        <!-- ── Paso 2 ─────────────────────────────────────────── -->
+        <div class="n-panel" data-panel="2" hidden>
+          <header class="n-head">
+            <p class="n-step">Paso 2 de 4</p>
+            <h2>Completa los datos principales</h2>
+            <p class="n-lead">Puedes dejar en blanco cualquier dato que todavía no conozcas.</p>
+          </header>
+
+          <div class="n-grid">
+            <div class="n-field">
+              <label class="n-label" for="n-ubic">Ubicación del proyecto</label>
+              <div class="n-icon-input">
+                <MapPin size={16} strokeWidth={1.6} />
+                <input id="n-ubic" class="n-input" type="text" maxlength={LIMITES.ubicacionMax} placeholder="Ej.: El Retiro, Antioquia" autocomplete="off" />
+              </div>
+              <p class="n-err" data-err="ubicacion" hidden></p>
+            </div>
+
+            <div class="n-field">
+              <label class="n-label" for="n-area">Área aproximada</label>
+              <div class="n-suffix-input">
+                <input id="n-area" class="n-input" type="text" inputmode="decimal" placeholder="Ej.: 120" autocomplete="off" />
+                <span>m²</span>
+              </div>
+              <small class="n-help">Puede ser un estimado</small>
+              <p class="n-err" data-err="area" hidden></p>
+            </div>
+
+            <div class="n-field">
+              <label class="n-label" for="n-pres">Presupuesto disponible</label>
+              <select id="n-pres" class="n-input n-select">
+                {PRESUPUESTOS.map((r) => <option value={r.id}>{r.label}</option>)}
+              </select>
+            </div>
+
+            <div class="n-field">
+              <label class="n-label" for="n-plazo">¿Cuándo te gustaría comenzar?</label>
+              <select id="n-plazo" class="n-input n-select">
+                {PLAZOS.map((p) => <option value={p.id}>{p.label}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <fieldset class="n-field">
+            <legend class="n-label">¿Qué servicios necesitas?</legend>
+            <div class="n-chips" id="n-servicios"><small class="n-help">Cargando servicios…</small></div>
+            <small class="n-help">Elige al menos uno; puedes marcar varios.</small>
+            <p class="n-err" data-err="servicios" hidden></p>
+          </fieldset>
+
+          <footer class="n-actions">
+            <button type="button" class="n-btn n-btn--ghost" data-accion="ir1">Anterior</button>
+            <button type="button" class="n-btn n-btn--primary" data-accion="ir3">Revisar solicitud <ArrowRight size={16} strokeWidth={2} /></button>
+          </footer>
+        </div>
+
+        <!-- ── Paso 3 ─────────────────────────────────────────── -->
+        <div class="n-panel" data-panel="3" hidden>
+          <header class="n-head">
+            <p class="n-step">Paso 3 de 4</p>
+            <h2>Revisa tu solicitud</h2>
+            <p class="n-lead">Verifica que todo esté bien antes de enviarla.</p>
+          </header>
+
+          <div class="n-note">
+            <ShieldCheck size={20} strokeWidth={1.6} />
+            <div><b>Un arquitecto de Solucia evaluará tu solicitud</b><small>Revisa la información y envíala cuando estés listo.</small></div>
+          </div>
+
+          <section class="n-sum">
+            <header><h3><span>01</span> Idea del proyecto</h3><button type="button" data-ir="1">Editar</button></header>
+            <p id="r-idea" class="n-sum__idea"></p>
+          </section>
+
+          <section class="n-sum">
+            <header><h3><span>02</span> Datos principales</h3><button type="button" data-ir="2">Editar</button></header>
+            <dl class="n-sum__grid">
+              <div><dt>Tipo</dt><dd id="r-tipo"></dd></div>
+              <div><dt>Ubicación</dt><dd id="r-ubic"></dd></div>
+              <div><dt>Área estimada</dt><dd id="r-area"></dd></div>
+              <div><dt>Presupuesto</dt><dd id="r-pres"></dd></div>
+              <div><dt>Inicio</dt><dd id="r-plazo"></dd></div>
+              <div><dt>Servicios</dt><dd id="r-serv"></dd></div>
+              <div class="n-sum__wide"><dt>Archivos adjuntos</dt><dd id="r-arch"></dd></div>
+            </dl>
+          </section>
+
+          <label class="n-confirm">
+            <input type="checkbox" id="n-confirma" />
+            <span>Confirmo que revisé la información y autorizo enviarla al equipo de Solucia para una evaluación humana.</span>
+          </label>
+
+          <footer class="n-actions">
+            <button type="button" class="n-btn n-btn--ghost" data-accion="ir2-atras">Anterior</button>
+            <button type="button" class="n-btn n-btn--primary" id="n-enviar" data-accion="enviar" disabled>Enviar a evaluación humana <ArrowRight size={16} strokeWidth={2} /></button>
+          </footer>
+        </div>
+      </form>
+
+      <!-- ── Paso 4 ───────────────────────────────────────────── -->
+      <div class="n-panel n-done" data-panel="4" hidden>
+        <span class="n-done__ico"><Check size={30} strokeWidth={2} /></span>
+        <p class="n-step">Solicitud recibida</p>
+        <h2>Tu proyecto ya está en manos del equipo</h2>
+        <p class="n-lead">Creamos la solicitud <b id="n-codigo">—</b>. La evaluación y la cotización serán realizadas por un arquitecto de Solucia.</p>
+        <span class="n-pill"><i></i>Enviada</span>
+        <ol class="n-timeline">
+          <li class="n-timeline__ok"><span><Check size={14} strokeWidth={2.4} /></span><div><b>Solicitud enviada</b><small>Completado ahora</small></div></li>
+          <li><span>2</span><div><b>Evaluación humana</b><small>Tiempo estimado: 2 a 3 días hábiles</small></div></li>
+          <li><span>3</span><div><b>Respuesta y cotización</b><small>Recibirás una notificación</small></div></li>
+        </ol>
+        <a class="n-btn n-btn--primary" href={RUTAS.portalCotizaciones}>Ver mis solicitudes <ArrowRight size={16} strokeWidth={2} /></a>
+      </div>
+    </div>
+
+    <!-- Espacio de "Sol": todavía sin implementar -->
+    <SolPanel />
+  </div>
+
+  <template id="ico-check"><Check size={14} strokeWidth={2.4} /></template>
+</section>
+
+<script>
+  import { initSession, getSesion, suscribirSesion } from '../auth/session.js';
+  import { RUTAS } from '../../lib/routes.js';
+  import { crearBorrador, actualizarBorrador, enviarSolicitud, listarServicios, subirArchivo, eliminarArchivo } from './api.js';
+  import {
+    LIMITES, validarIdea, validarDatos, validarArchivo, construirPayload,
+    rangoPorId, etiquetaTipo, etiquetaPlazo, parseArea, tamanoLegible,
+  } from './solicitud.js';
+
+  initSession(); // idempotente: este script corre antes que el del layout
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) =>
+    String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const msgDe = (err, defecto) => err?.mensaje || err?.message || defecto;
+
+  const form = $('n-form');
+  const cols = $('n-cols');
+  const alertaEl = $('n-alerta');
+
+  const estado = {
+    paso: 1,
+    id: null,          // id del borrador (se crea al pasar del paso 1)
+    codigo: null,
+    catalogo: [],      // servicios activos [{id, nombre}]
+    archivos: [],      // { uid, file, estado: pendiente|subiendo|ok|error, id, msg }
+    ocupado: false,
+    enviada: false,
+  };
+  let uid = 0;
+
+  // ── Lectura del formulario ────────────────────────────────────────────
+  function leer() {
+    return {
+      tipo: form.querySelector('input[name="tipo"]:checked')?.value ?? '',
+      descripcion: $('n-desc').value,
+      ubicacion: $('n-ubic').value,
+      area: $('n-area').value,
+      presupuesto: $('n-pres').value,
+      plazo: $('n-plazo').value,
+      servicios: [...document.querySelectorAll('#n-servicios input:checked')].map((i) => Number(i.value)),
+    };
+  }
+
+  // ── Mensajes ──────────────────────────────────────────────────────────
+  function alerta(texto) {
+    alertaEl.hidden = !texto;
+    alertaEl.textContent = texto ?? '';
+    if (texto) alertaEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function mostrarErrores(errores) {
+    document.querySelectorAll('[data-err]').forEach((p) => {
+      const m = errores[p.dataset.err];
+      p.hidden = !m;
+      p.textContent = m ?? '';
+    });
+    const primero = Object.keys(errores)[0];
+    if (primero) document.querySelector(`[data-err="${primero}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return Object.keys(errores).length === 0;
+  }
+
+  function marcarGuardado() {
+    $('n-guardado').hidden = false;
+  }
+
+  // Ejecuta una acción asíncrona bloqueando el botón (evita doble envío) y mostrando el error si falla.
+  async function correr(boton, textoOcupado, fn) {
+    if (estado.ocupado) return;
+    estado.ocupado = true;
+    alerta(null);
+    const original = boton?.innerHTML;
+    if (boton) { boton.disabled = true; boton.textContent = textoOcupado; }
+    try {
+      await fn();
+    } catch (err) {
+      alerta(msgDe(err, 'No pudimos completar la acción. Inténtalo de nuevo.'));
+    } finally {
+      estado.ocupado = false;
+      if (boton && !estado.enviada) {
+        boton.innerHTML = original;
+        boton.disabled = boton.id === 'n-enviar' ? !$('n-confirma').checked : false;
+      }
+    }
+  }
+
+  // ── Navegación entre pasos ────────────────────────────────────────────
+  function irAPaso(n) {
+    estado.paso = n;
+    document.querySelectorAll('[data-panel]').forEach((p) => (p.hidden = Number(p.dataset.panel) !== n));
+    document.querySelectorAll('.n-tab').forEach((t) => {
+      const i = Number(t.dataset.tab);
+      const st = n === 4 || i < n ? 'done' : i === n ? 'current' : 'todo';
+      t.dataset.estado = st;
+      t.querySelector('.n-tab__dot').innerHTML = st === 'done' ? ($('ico-check')?.innerHTML ?? '✓') : String(i).padStart(2, '0');
+    });
+    cols.classList.toggle('n-cols--solo', n === 4);
+    alerta(null);
+    $('nueva').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Persistencia (borrador) ───────────────────────────────────────────
+  async function guardar() {
+    const payload = construirPayload(leer());
+    if (estado.id) {
+      await actualizarBorrador(estado.id, payload);
+    } else {
+      const r = await crearBorrador(payload);
+      estado.id = r.id;
+      estado.codigo = r.codigo ?? null;
+    }
+    marcarGuardado();
+  }
+
+  // ── Archivos ──────────────────────────────────────────────────────────
+  function pintarArchivos() {
+    const etiqueta = { pendiente: 'En espera', subiendo: 'Subiendo…', ok: 'Adjuntado', error: 'No se pudo subir' };
+    $('n-lista-archivos').innerHTML = estado.archivos
+      .map((a) => `
+        <li class="n-file n-file--${a.estado}">
+          <span class="n-file__name">${esc(a.file.name)}</span>
+          <small>${tamanoLegible(a.file.size)} · ${esc(a.estado === 'error' && a.msg ? a.msg : etiqueta[a.estado])}</small>
+          <button type="button" data-quitar="${a.uid}" aria-label="Quitar ${esc(a.file.name)}" ${a.estado === 'subiendo' ? 'disabled' : ''}>Quitar</button>
+        </li>`)
+      .join('');
+  }
+
+  async function subirPendientes() {
+    for (const a of estado.archivos.filter((x) => x.estado === 'pendiente')) {
+      a.estado = 'subiendo';
+      pintarArchivos();
+      try {
+        const r = await subirArchivo(estado.id, a.file);
+        a.id = r?.id ?? null;
+        a.estado = 'ok';
+      } catch (err) {
+        a.estado = 'error';
+        a.msg = msgDe(err, 'Error al subir');
+      }
+      pintarArchivos();
+    }
+  }
+
+  function agregarArchivos(lista) {
+    const errores = [];
+    for (const file of [...lista]) {
+      const problema = validarArchivo(file);
+      if (problema) { errores.push(problema); continue; }
+      if (estado.archivos.some((a) => a.file.name === file.name && a.file.size === file.size)) continue;
+      if (estado.archivos.length >= LIMITES.archivosMax) { errores.push(`Solo puedes adjuntar hasta ${LIMITES.archivosMax} archivos.`); break; }
+      estado.archivos.push({ uid: ++uid, file, estado: 'pendiente', id: null, msg: '' });
+    }
+    mostrarErrores({ ...(errores.length ? { archivos: errores.join(' ') } : {}) });
+    pintarArchivos();
+    if (estado.id) subirPendientes(); // si el borrador ya existe, se suben de una vez
+  }
+
+  async function quitarArchivo(id) {
+    const a = estado.archivos.find((x) => x.uid === Number(id));
+    if (!a) return;
+    if (a.estado === 'ok' && a.id) {
+      try { await eliminarArchivo(a.id); }
+      catch (err) { alerta(msgDe(err, 'No pudimos quitar el archivo.')); return; }
+    }
+    estado.archivos = estado.archivos.filter((x) => x.uid !== a.uid);
+    pintarArchivos();
+  }
+
+  // ── Servicios (catálogo público) ──────────────────────────────────────
+  async function cargarServicios() {
+    const caja = $('n-servicios');
+    try {
+      estado.catalogo = await listarServicios();
+      caja.innerHTML = estado.catalogo.length
+        ? estado.catalogo
+            .map((s) => `<label class="n-chip"><input type="checkbox" value="${esc(s.id)}" /><span>${esc(s.nombre)}</span></label>`)
+            .join('')
+        : '<small class="n-help">No hay servicios disponibles por ahora.</small>';
+    } catch (err) {
+      caja.innerHTML = `<small class="n-help n-help--error">${esc(msgDe(err, 'No pudimos cargar los servicios. Recarga la página.'))}</small>`;
+    }
+  }
+
+  // ── Resumen (paso 3) ──────────────────────────────────────────────────
+  function pintarResumen() {
+    const d = leer();
+    const area = parseArea(d.area);
+    const nombres = d.servicios.map((id) => estado.catalogo.find((s) => Number(s.id) === id)?.nombre).filter(Boolean);
+    const adjuntos = estado.archivos.filter((a) => a.estado === 'ok').map((a) => a.file.name);
+    $('r-idea').textContent = d.descripcion.trim();
+    $('r-tipo').textContent = etiquetaTipo(d.tipo);
+    $('r-ubic').textContent = d.ubicacion.trim() || '—';
+    $('r-area').textContent = area ? `${new Intl.NumberFormat('es-CO').format(area)} m²` : '—';
+    $('r-pres').textContent = rangoPorId(d.presupuesto).label;
+    $('r-plazo').textContent = etiquetaPlazo(d.plazo);
+    $('r-serv').textContent = nombres.join(', ') || '—';
+    $('r-arch').textContent = adjuntos.join(', ') || 'Ninguno';
+    $('n-confirma').checked = false;
+    $('n-enviar').disabled = true;
+  }
+
+  // ── Acciones ──────────────────────────────────────────────────────────
+  function irPaso2(boton) {
+    if (!mostrarErrores(validarIdea(leer()))) return;
+    return correr(boton, 'Guardando…', async () => {
+      await guardar();
+      await subirPendientes();
+      irAPaso(2);
+    });
+  }
+
+  function irPaso3(boton) {
+    if (!mostrarErrores(validarDatos(leer()))) return;
+    return correr(boton, 'Guardando…', async () => {
+      await guardar();
+      pintarResumen();
+      irAPaso(3);
+    });
+  }
+
+  function guardarYSalir(boton) {
+    const d = leer();
+    const errores = { ...validarIdea(d), ...validarDatos(d, { exigirServicios: false }) };
+    if (!mostrarErrores(errores)) return;
+    return correr(boton, 'Guardando…', async () => {
+      await guardar();
+      await subirPendientes();
+      window.location.assign(RUTAS.portalCotizaciones);
+    });
+  }
+
+  function enviar(boton) {
+    if (!$('n-confirma').checked) return;
+    if (estado.archivos.some((a) => a.estado === 'subiendo' || a.estado === 'pendiente')) {
+      alerta('Espera a que terminen de subirse los archivos.');
+      return;
+    }
+    return correr(boton, 'Enviando…', async () => {
+      await guardar(); // deja el borrador al día antes de enviarlo
+      const r = await enviarSolicitud(estado.id);
+      estado.enviada = true;
+      $('n-codigo').textContent = r?.codigo ?? estado.codigo ?? `#${estado.id}`;
+      irAPaso(4);
+    });
+  }
+
+  const ACCIONES = {
+    ir1: () => irAPaso(1),
+    'ir2-atras': () => irAPaso(2),
+    ir2: irPaso2,
+    ir3: irPaso3,
+    salir: guardarYSalir,
+    enviar,
+  };
+
+  // ── Eventos ───────────────────────────────────────────────────────────
+  form.addEventListener('submit', (e) => e.preventDefault()); // Enter no envía nada
+
+  // Al corregir un campo, su mensaje de error desaparece
+  const CAMPO_ERR = { 'n-desc': 'descripcion', 'n-ubic': 'ubicacion', 'n-area': 'area', tipo: 'tipo' };
+  const limpiarError = (e) => {
+    const nombre = e.target.closest('#n-servicios') ? 'servicios' : CAMPO_ERR[e.target.id] ?? CAMPO_ERR[e.target.name];
+    const p = nombre && document.querySelector(`[data-err="${nombre}"]`);
+    if (p) { p.hidden = true; p.textContent = ''; }
+  };
+  form.addEventListener('input', limpiarError);
+  form.addEventListener('change', limpiarError);
+
+  form.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-accion]');
+    if (btn) return ACCIONES[btn.dataset.accion]?.(btn);
+    const ir = e.target.closest('[data-ir]');
+    if (ir) return irAPaso(Number(ir.dataset.ir));
+    const quitar = e.target.closest('[data-quitar]');
+    if (quitar) quitarArchivo(quitar.dataset.quitar);
+  });
+
+  $('n-tabs').addEventListener('click', (e) => {
+    const t = e.target.closest('.n-tab');
+    if (t && estado.paso < 4 && Number(t.dataset.tab) < estado.paso) irAPaso(Number(t.dataset.tab));
+  });
+
+  $('n-desc').addEventListener('input', (e) => {
+    const n = e.target.value.length;
+    $('n-cuenta').textContent = `${new Intl.NumberFormat('es-CO').format(n)} caracteres`;
+  });
+
+  $('n-confirma').addEventListener('change', (e) => {
+    $('n-enviar').disabled = !e.target.checked || estado.ocupado;
+  });
+
+  $('n-archivos').addEventListener('change', (e) => {
+    agregarArchivos(e.target.files);
+    e.target.value = ''; // permite volver a elegir el mismo archivo
+  });
+
+  const drop = $('n-drop');
+  ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('is-over'); }));
+  ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('is-over'); }));
+  drop.addEventListener('drop', (e) => agregarArchivos(e.dataTransfer?.files ?? []));
+
+  // ── Sesión: pedir datos solo cuando hay usuario autenticado ───────────
+  let iniciado = false;
+  function alCambiarSesion(sesion) {
+    if (sesion.status !== 'authenticated' || iniciado) return;
+    iniciado = true;
+    cargarServicios();
+  }
+  alCambiarSesion(getSesion());
+  suscribirSesion(alCambiarSesion);
+</script>
+
+<style is:global>
+  .nueva h1 { font-size: clamp(1.9rem, 3vw, 2.6rem); font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.1; }
+  .nueva h2 { font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; margin: 6px 0 8px; }
+  .nueva small { font-size: 11px; color: var(--p-muted); }
+  .nueva [hidden] { display: none !important; }
+
+  /* Cabecera */
+  .nueva .n-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
+  .nueva .n-back { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--p-ink); text-decoration: none; }
+  .nueva .n-back:hover { color: var(--p-accent); }
+  .nueva .n-saved { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #2f6b4a; }
+  .nueva .n-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 26px; }
+  .nueva .n-eyebrow { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--p-accent); margin-bottom: 6px; }
+  .nueva .n-sub { margin-top: 8px; font-size: 13px; color: var(--p-muted); }
+  .nueva .n-human { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: #e8f1ec; border: 1px solid #cfe2d7; color: #2f6b4a; }
+  .nueva .n-human div { display: flex; flex-direction: column; gap: 2px; }
+  .nueva .n-human b { font-size: 12px; font-weight: 600; }
+  .nueva .n-human small { color: #5f8a73; font-size: 10px; }
+
+  /* Pestañas de pasos */
+  .nueva .n-tabs { list-style: none; margin: 0 0 18px; padding: 0 !important; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--p-card); border: 1px solid var(--p-line); }
+  .nueva .n-tab { display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 2px solid transparent; border-right: 1px solid var(--p-line); font-size: 11px; color: var(--p-muted); }
+  .nueva .n-tab:last-child { border-right: 0; }
+  .nueva .n-tab b { font-weight: 600; }
+  .nueva .n-tab__dot { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%; font-size: 10px; font-weight: 700; border: 1px solid var(--p-line); background: #fff; color: var(--p-muted); }
+  .nueva .n-tab[data-estado='current'] { border-bottom-color: var(--p-accent); color: var(--p-ink); }
+  .nueva .n-tab[data-estado='current'] .n-tab__dot { background: var(--p-accent); border-color: var(--p-accent); color: #fff; box-shadow: 0 0 0 4px #f9e3df; }
+  .nueva .n-tab[data-estado='done'] { color: #2f6b4a; }
+  .nueva .n-tab[data-estado='done'] .n-tab__dot { background: #e8f1ec; border-color: #7fae93; color: #2f6b4a; }
+  .nueva .n-tab[data-estado='done']:not(:last-child) { cursor: pointer; }
+
+  /* Columnas: formulario + espacio de Sol */
+  .nueva .n-cols { display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 18px; align-items: start; }
+  .nueva .n-cols--solo { grid-template-columns: minmax(0, 760px); justify-content: center; }
+  .nueva .n-cols--solo .sol { display: none; }
+  @media (max-width: 1099px) { .nueva .n-cols { grid-template-columns: minmax(0, 1fr); } }
+
+  .nueva .n-card { background: var(--p-card); border: 1px solid var(--p-line); padding: 28px 28px 24px; }
+  .nueva .n-head { padding-bottom: 20px; margin-bottom: 22px; border-bottom: 1px solid var(--p-line); }
+  .nueva .n-step { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--p-accent); }
+  .nueva .n-lead { font-size: 12px; color: var(--p-muted); line-height: 1.6; }
+
+  /* Campos */
+  .nueva .n-field { border: 0; margin: 0 0 22px; padding: 0; min-width: 0; }
+  .nueva .n-label { font-size: 12px; font-weight: 600; display: block; margin-bottom: 10px; padding: 0; }
+  .nueva .n-labelrow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .nueva .n-input { width: 100%; box-sizing: border-box; padding: 13px 14px; background: #fff; border: 1px solid var(--p-line); border-radius: 3px; font: inherit; font-size: 13px; color: var(--p-ink); }
+  .nueva .n-input:focus { outline: 2px solid #f0b9b1; outline-offset: 0; border-color: var(--p-accent); }
+  .nueva .n-textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
+  .nueva .n-counter { padding: 8px 12px; background: #f8f5ee; border: 1px solid var(--p-line); border-top: 0; }
+  .nueva .n-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+  .nueva .n-icon-input { position: relative; }
+  .nueva .n-icon-input > svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--p-muted); pointer-events: none; }
+  .nueva .n-icon-input .n-input { padding-left: 40px; }
+  .nueva .n-suffix-input { position: relative; }
+  .nueva .n-suffix-input span { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--p-muted); }
+  .nueva .n-select { appearance: auto; }
+  .nueva .n-help { display: block; margin-top: 6px; font-size: 10px; color: var(--p-muted); }
+  .nueva .n-help--error { color: var(--p-accent); }
+  .nueva .n-err { margin-top: 8px; font-size: 11px; color: var(--p-accent); font-weight: 500; }
+  .nueva .n-alert { margin: 0 0 18px; padding: 12px 14px; font-size: 12px; color: #8f2518; background: #fbe9e6; border: 1px solid #efc3bc; }
+
+  /* Tipo de proyecto */
+  .nueva .n-tipos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .nueva .n-tipo { position: relative; display: flex; align-items: center; gap: 12px; padding: 16px; background: #fff; border: 1px solid var(--p-line); border-radius: 3px; cursor: pointer; }
+  .nueva .n-tipo input { position: absolute; opacity: 0; pointer-events: none; }
+  .nueva .n-tipo__ico { color: var(--p-muted); display: grid; }
+  .nueva .n-tipo__txt { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .nueva .n-tipo__txt b { font-size: 12px; font-weight: 600; }
+  .nueva .n-radio { width: 16px; height: 16px; border: 1.5px solid #c9c3b4; border-radius: 50%; flex: none; }
+  .nueva .n-tipo:hover { border-color: #d9a69f; }
+  .nueva .n-tipo:has(input:checked) { border: 2px solid var(--p-accent); background: #fdf1ee; padding: 15px; }
+  .nueva .n-tipo:has(input:checked) .n-tipo__ico { color: var(--p-accent); }
+  .nueva .n-tipo:has(input:checked) .n-radio { border-color: var(--p-accent); background: radial-gradient(var(--p-accent) 42%, transparent 46%); }
+  .nueva .n-tipo:has(input:focus-visible) { outline: 2px solid #f0b9b1; outline-offset: 2px; }
+
+  /* Ayuda y archivos */
+  .nueva .n-hint { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 14px; margin-bottom: 22px; background: #fdf8e8; border: 1px solid #efe2b8; color: #8a6a1f; font-size: 11px; }
+  .nueva .n-hint b { font-weight: 600; }
+  .nueva .n-hint span { padding: 3px 10px; border: 1px solid #e6d9a8; border-radius: 999px; background: #fffdf4; font-size: 10px; }
+  .nueva .n-drop { display: flex; align-items: center; gap: 14px; padding: 16px; background: #fff; border: 1.5px dashed #d8d1c0; border-radius: 3px; cursor: pointer; }
+  .nueva .n-drop.is-over, .nueva .n-drop:hover { border-color: var(--p-accent); background: #fdf1ee; }
+  .nueva .n-drop__ico { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 4px; background: #f3efe6; color: var(--p-muted); flex: none; }
+  .nueva .n-drop__txt { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .nueva .n-drop__txt b { font-size: 12px; font-weight: 600; }
+  .nueva .n-drop__btn { font-size: 11px; font-weight: 600; color: var(--p-accent); white-space: nowrap; }
+  .nueva .n-files { list-style: none; margin: 10px 0 0; padding: 0 !important; display: grid; gap: 8px; }
+  .nueva .n-file { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 10px 14px; background: #fff; border: 1px solid var(--p-line); font-size: 12px; }
+  .nueva .n-file__name { font-weight: 600; word-break: break-all; }
+  .nueva .n-file small { grid-column: 1; }
+  .nueva .n-file button { grid-column: 2; grid-row: 1 / span 2; align-self: center; background: none; border: 0; font: inherit; font-size: 11px; color: var(--p-accent); cursor: pointer; }
+  .nueva .n-file button:disabled { opacity: .4; cursor: default; }
+  .nueva .n-file--error { border-color: #efc3bc; background: #fdf5f3; }
+  .nueva .n-file--ok small { color: #2f6b4a; }
+
+  /* Servicios */
+  .nueva .n-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .nueva .n-chip { position: relative; }
+  .nueva .n-chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .nueva .n-chip span { display: inline-block; padding: 9px 16px; background: #fff; border: 1px solid var(--p-line); border-radius: 999px; font-size: 12px; cursor: pointer; }
+  .nueva .n-chip span:hover { border-color: #d9a69f; }
+  .nueva .n-chip input:checked + span { background: #fdf1ee; border-color: var(--p-accent); color: var(--p-accent); font-weight: 600; }
+  .nueva .n-chip input:focus-visible + span { outline: 2px solid #f0b9b1; outline-offset: 2px; }
+
+  /* Revisión */
+  .nueva .n-note { display: flex; gap: 12px; align-items: center; padding: 16px 18px; margin-bottom: 18px; background: #e8f1ec; border: 1px solid #cfe2d7; color: #2f6b4a; }
+  .nueva .n-note div { display: flex; flex-direction: column; gap: 3px; }
+  .nueva .n-note b { font-size: 12px; font-weight: 600; }
+  .nueva .n-note small { color: #5f8a73; }
+  .nueva .n-sum { margin-bottom: 14px; padding: 18px; background: #fbf9f4; border: 1px solid var(--p-line); }
+  .nueva .n-sum header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .nueva .n-sum h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; margin: 0; }
+  .nueva .n-sum h3 span { color: var(--p-accent); margin-right: 8px; font-size: 10px; }
+  .nueva .n-sum header button { background: none; border: 0; font: inherit; font-size: 11px; font-weight: 600; color: var(--p-accent); cursor: pointer; }
+  .nueva .n-sum__idea { font-size: 12px; line-height: 1.7; white-space: pre-line; margin: 0; }
+  .nueva .n-sum__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; margin: 0; }
+  .nueva .n-sum__grid dt { font-size: 10px; color: var(--p-muted); margin-bottom: 4px; }
+  .nueva .n-sum__grid dd { margin: 0; font-size: 12px; font-weight: 600; word-break: break-word; }
+  .nueva .n-sum__wide { grid-column: 1 / -1; }
+  .nueva .n-confirm { display: flex; gap: 10px; align-items: flex-start; margin: 18px 0 22px; font-size: 11px; line-height: 1.5; cursor: pointer; }
+  .nueva .n-confirm input { margin-top: 2px; accent-color: var(--p-accent); width: 16px; height: 16px; }
+
+  /* Botones */
+  .nueva .n-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; padding-top: 22px; border-top: 1px solid var(--p-line); }
+  .nueva .n-btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 3px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; border: 1px solid transparent; }
+  .nueva .n-btn--primary { background: var(--p-accent); color: #fff; box-shadow: 0 6px 14px rgb(192 48 31 / .25); }
+  .nueva .n-btn--primary:hover:not(:disabled) { background: #a82818; }
+  .nueva .n-btn--ghost { background: var(--p-card); color: var(--p-ink); border-color: var(--p-line); font-weight: 600; }
+  .nueva .n-btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+
+  /* Paso 4 */
+  .nueva .n-done { text-align: center; display: flex; flex-direction: column; align-items: center; padding: 20px 0 8px; }
+  .nueva .n-done__ico { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: #e8f1ec; color: #2f6b4a; margin-bottom: 18px; box-shadow: 0 0 0 10px #f1f7f3; }
+  .nueva .n-done h2 { font-size: 26px; max-width: 460px; margin: 10px 0; }
+  .nueva .n-done .n-lead { max-width: 460px; }
+  .nueva .n-pill { display: inline-flex; align-items: center; gap: 6px; margin: 16px 0 22px; padding: 4px 12px; border-radius: 999px; background: #e4ecf5; color: #3f6aa0; font-size: 10px; font-weight: 600; }
+  .nueva .n-pill i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .nueva .n-timeline { list-style: none; margin: 0 0 24px; padding: 18px 0 !important; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); text-align: left; border-top: 1px solid var(--p-line); border-bottom: 1px solid var(--p-line); }
+  .nueva .n-timeline li { display: flex; gap: 10px; align-items: center; padding: 0 14px; border-right: 1px solid var(--p-line); }
+  .nueva .n-timeline li:last-child { border-right: 0; }
+  .nueva .n-timeline li > span { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%; font-size: 10px; font-weight: 700; border: 1px solid var(--p-line); color: var(--p-muted); background: #fff; }
+  .nueva .n-timeline .n-timeline__ok > span { background: #3f7a5a; border-color: #3f7a5a; color: #fff; }
+  .nueva .n-timeline div { display: flex; flex-direction: column; gap: 3px; font-size: 11px; }
+  .nueva .n-timeline b { font-weight: 600; }
+
+  @media (max-width: 767px) {
+    .nueva .n-tabs { grid-template-columns: 1fr 1fr; }
+    .nueva .n-tab { padding: 12px 14px; }
+    .nueva .n-card { padding: 20px 16px; }
+    .nueva .n-tipos, .nueva .n-grid, .nueva .n-sum__grid, .nueva .n-timeline { grid-template-columns: 1fr; }
+    .nueva .n-timeline li { border-right: 0; padding: 8px 0; }
+    .nueva .n-actions { flex-direction: column-reverse; align-items: stretch; }
+    .nueva .n-btn { justify-content: center; }
+  }
+</style>
