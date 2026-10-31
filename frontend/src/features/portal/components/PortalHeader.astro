@@ -3,52 +3,26 @@ import { Menu, Bell, ChevronDown } from '@lucide/astro';
 import { RUTAS } from '../../../lib/routes.js';
 ---
 
-<header class="phead">
-  <button type="button" class="phead__menu" data-nav-toggle aria-label="Abrir menú">
+<header class="fixed inset-x-0 top-0 z-[30] flex h-[70px] items-center gap-4 border-b border-[#e7e1d4] bg-[#fffdf9] px-5">
+  <button type="button" class="hidden border-0 bg-transparent text-[#1d2433] lg:hidden" data-nav-toggle aria-label="Abrir menú">
     <Menu size={22} strokeWidth={1.8} />
   </button>
 
-  <a href={RUTAS.portal} class="phead__logo">
-    <img src="/logo.png" alt="SOLUCIA · Diseño y construcción" />
+  <a href={RUTAS.portal}>
+    <img class="block h-[52px] w-auto max-sm:h-[42px]" src="/logo.png" alt="SOLUCIA · Diseño y construcción" />
   </a>
 
-  <div class="phead__actions">
-    <button type="button" class="phead__bell" aria-label="Notificaciones">
+  <div class="ml-auto flex items-center gap-5">
+    <button type="button" class="border-0 bg-transparent text-[#1d2433]" aria-label="Notificaciones">
       <Bell size={20} strokeWidth={1.6} />
     </button>
-    <div class="phead__user">
-      <span class="phead__avatar" data-user-initials>··</span>
-      <span class="phead__who">
-        <strong data-user-short>&nbsp;</strong>
-        <small data-user-role>&nbsp;</small>
+    <div class="flex items-center gap-2.5 text-[#8a8678]">
+      <span class="grid size-9 place-items-center rounded-full bg-[#ece8df] text-xs font-bold text-[#1d2433]" data-user-initials>··</span>
+      <span class="flex flex-col leading-tight max-sm:hidden">
+        <strong class="text-[13px] font-semibold text-[#1d2433]" data-user-short>&nbsp;</strong>
+        <small class="text-[11px] text-[#8a8678]" data-user-role>&nbsp;</small>
       </span>
       <ChevronDown size={16} strokeWidth={1.8} />
     </div>
   </div>
 </header>
-
-<style>
-  .phead {
-    position: fixed; inset: 0 0 auto 0; height: 70px; z-index: 30;
-    display: flex; align-items: center; gap: 1rem; padding: 0 1.25rem;
-    background: #fffdf9; border-bottom: 1px solid var(--p-line);
-  }
-  .phead__menu { display: none; background: none; border: 0; color: var(--p-ink); cursor: pointer; }
-  .phead__logo img { height: 52px; width: auto; display: block; }
-  .phead__actions { margin-left: auto; display: flex; align-items: center; gap: 1.25rem; }
-  .phead__bell { background: none; border: 0; color: var(--p-ink); cursor: pointer; }
-  .phead__user { display: flex; align-items: center; gap: .6rem; color: var(--p-muted); }
-  .phead__avatar {
-    display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
-    background: #ece8df; color: var(--p-ink); font-size: 12px; font-weight: 700;
-  }
-  .phead__who { display: flex; flex-direction: column; line-height: 1.2; }
-  .phead__who strong { font-size: 13px; color: var(--p-ink); font-weight: 600; }
-  .phead__who small { font-size: 11px; color: var(--p-muted); }
-
-  @media (max-width: 1023px) { .phead__menu { display: block; } }
-  @media (max-width: 767px) {
-    .phead__who { display: none; }
-    .phead__logo img { height: 42px; }
-  }
-</style>

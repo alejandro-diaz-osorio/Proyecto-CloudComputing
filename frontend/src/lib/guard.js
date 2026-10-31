@@ -49,6 +49,7 @@ export function protegerPagina(rol, alAutorizar) {
     if (!autorizado) {
       autorizado = true;
       document.documentElement.removeAttribute('data-auth-pending');
+      document.querySelector('.portal-shell')?.classList.remove('invisible');
       alAutorizar?.(sesion.user);
     }
   };

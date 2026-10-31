@@ -3,15 +3,15 @@ import PortalLayout from '../../layouts/PortalLayout.astro';
 ---
 
 <PortalLayout title="Mi perfil · SOLUCIA" rol="cliente">
-  <section class="perfil">
-    <p class="perfil__eyebrow">Área de cliente</p>
-    <h1>Mi perfil</h1>
+  <section class="p-5 lg:p-[36px_48px_56px]">
+    <p class="mb-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-[#c0301f]">Área de cliente</p>
+    <h1 class="mb-7 text-[clamp(1.9rem,3vw,2.6rem)] font-extrabold uppercase leading-tight tracking-tight">Mi perfil</h1>
 
-    <dl class="perfil__card">
-      <div><dt>Nombre</dt><dd data-perfil="nombre">—</dd></div>
-      <div><dt>Correo electrónico</dt><dd data-perfil="email">—</dd></div>
-      <div><dt>Teléfono</dt><dd data-perfil="telefono">—</dd></div>
-      <div><dt>Tipo de cuenta</dt><dd>Cliente</dd></div>
+    <dl class="grid max-w-[720px] grid-cols-1 gap-6 border border-[#e7e1d4] bg-[#fffdf9] p-7 sm:grid-cols-2">
+      <div><dt class="mb-1 text-[11px] text-[#8a8678]">Nombre</dt><dd class="m-0 break-words text-sm font-semibold" data-perfil="nombre">—</dd></div>
+      <div><dt class="mb-1 text-[11px] text-[#8a8678]">Correo electrónico</dt><dd class="m-0 break-words text-sm font-semibold" data-perfil="email">—</dd></div>
+      <div><dt class="mb-1 text-[11px] text-[#8a8678]">Teléfono</dt><dd class="m-0 break-words text-sm font-semibold" data-perfil="telefono">—</dd></div>
+      <div><dt class="mb-1 text-[11px] text-[#8a8678]">Tipo de cuenta</dt><dd class="m-0 break-words text-sm font-semibold">Cliente</dd></div>
     </dl>
   </section>
 </PortalLayout>
@@ -34,12 +34,3 @@ import PortalLayout from '../../layouts/PortalLayout.astro';
   pintar(getSesion());
   suscribirSesion(pintar);
 </script>
-
-<style is:global>
-  .perfil h1 { font-size: clamp(1.9rem, 3vw, 2.6rem); font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.1; margin: 0 0 28px; }
-  .perfil__eyebrow { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--p-accent); margin: 0 0 6px; }
-  .perfil__card { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 720px; margin: 0; padding: 28px; background: var(--p-card); border: 1px solid var(--p-line); }
-  .perfil__card dt { font-size: 11px; color: var(--p-muted); margin-bottom: 4px; }
-  .perfil__card dd { margin: 0; font-size: 14px; font-weight: 600; word-break: break-word; }
-  @media (max-width: 767px) { .perfil__card { grid-template-columns: 1fr; } }
-</style>
