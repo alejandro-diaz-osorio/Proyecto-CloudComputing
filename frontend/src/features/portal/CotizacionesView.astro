@@ -11,7 +11,7 @@ import { RUTAS } from '../../lib/routes.js';
       <p class="c-sub">Consulta el avance y las respuestas de tus proyectos.</p>
     </div>
     <a class="c-btn c-btn--primary" href={RUTAS.portalNuevaSolicitud}>
-      <Plus size={16} strokeWidth={2} /> Nueva solicitud
+      <Plus size={16} stroke-width={2} /> Nueva solicitud
     </a>
   </div>
 
@@ -20,17 +20,17 @@ import { RUTAS } from '../../lib/routes.js';
   <div id="cot-cuerpo" hidden>
     <div class="c-stats">
       <div class="c-stat">
-        <span class="c-stat__ico c-stat__ico--blue"><FileText size={20} strokeWidth={1.6} /></span>
+        <span class="c-stat__ico c-stat__ico--blue"><FileText size={20} stroke-width={1.6} /></span>
         <div><b>Total solicitudes</b><small id="st-desde">&nbsp;</small></div>
         <strong id="st-total">0</strong>
       </div>
       <div class="c-stat">
-        <span class="c-stat__ico c-stat__ico--warn"><Clock size={20} strokeWidth={1.6} /></span>
+        <span class="c-stat__ico c-stat__ico--warn"><Clock size={20} stroke-width={1.6} /></span>
         <div><b>En proceso</b><small>Respuesta estimada: 2 días</small></div>
         <strong id="st-proceso">0</strong>
       </div>
       <div class="c-stat">
-        <span class="c-stat__ico c-stat__ico--accent"><Mail size={20} strokeWidth={1.6} /></span>
+        <span class="c-stat__ico c-stat__ico--accent"><Mail size={20} stroke-width={1.6} /></span>
         <div><b>Por confirmar</b><small>Requiere tu atención</small></div>
         <strong id="st-confirmar">0</strong>
       </div>
@@ -44,7 +44,7 @@ import { RUTAS } from '../../lib/routes.js';
             <small id="st-count">0 proyectos</small>
           </div>
           <button type="button" class="c-iconbtn" aria-label="Filtrar" disabled>
-            <SlidersHorizontal size={18} strokeWidth={1.6} />
+            <SlidersHorizontal size={18} stroke-width={1.6} />
           </button>
         </header>
         <div id="cot-lista"></div>
@@ -55,12 +55,12 @@ import { RUTAS } from '../../lib/routes.js';
   </div>
 
   <!-- Íconos Lucide para el HTML que se pinta desde JS -->
-  <template id="ico-pin"><MapPin size={12} strokeWidth={1.8} /></template>
-  <template id="ico-flecha"><ArrowRight size={16} strokeWidth={1.6} /></template>
-  <template id="ico-check"><Check size={14} strokeWidth={2.4} /></template>
-  <template id="ico-reloj"><Clock size={22} strokeWidth={1.6} /></template>
-  <template id="ico-file"><FileText size={18} strokeWidth={1.6} /></template>
-  <template id="ico-download"><Download size={16} strokeWidth={1.8} /></template>
+  <template id="ico-pin"><MapPin size={12} stroke-width={1.8} /></template>
+  <template id="ico-flecha"><ArrowRight size={16} stroke-width={1.6} /></template>
+  <template id="ico-check"><Check size={14} stroke-width={2.4} /></template>
+  <template id="ico-reloj"><Clock size={22} stroke-width={1.6} /></template>
+  <template id="ico-file"><FileText size={18} stroke-width={1.6} /></template>
+  <template id="ico-download"><Download size={16} stroke-width={1.8} /></template>
 </section>
 
 <script>

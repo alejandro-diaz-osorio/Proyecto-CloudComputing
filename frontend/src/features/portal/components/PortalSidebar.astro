@@ -32,7 +32,7 @@ const ICONOS = { file: FileText, user: User };
           class:list={['relative flex items-center gap-3 rounded px-3 py-3 text-[13px] text-[#1d2433] no-underline hover:bg-[#f3efe6] before:absolute before:bottom-0 before:left-[-12px] before:top-0 before:w-[3px] before:bg-[#c0301f] before:content-[\'\']', { 'bg-[#f9e3df] text-[#c0301f]': activo(item.href) }]}
           aria-current={activo(item.href) ? 'page' : undefined}
         >
-          <Icono size={18} strokeWidth={1.6} />
+          <Icono size={18} stroke-width={1.6} />
           {item.label}
         </a>
       );
@@ -41,16 +41,16 @@ const ICONOS = { file: FileText, user: User };
 
   <div class="mt-auto flex flex-col gap-3.5">
     <div class="flex items-center gap-2.5 rounded-md border border-[#e7e1d4] p-3 text-[11px] text-[#8a8678]">
-      <CircleHelp size={20} strokeWidth={1.6} />
+      <CircleHelp size={20} stroke-width={1.6} />
       <div>
         <strong>¿Necesitas ayuda?</strong>
         <a href={RUTAS.cotizar}>Contáctanos</a>
         <strong class="block font-semibold text-[#1d2433]">¿Necesitas ayuda?</strong>
-        <a class="text-[#c0301f] no-underline" href="/nosotros">Contáctanos</a>
+        <a class="text-[#c0301f] no-underline" href={RUTAS.nosotros}>Contáctanos</a>
       </div>
     </div>
     <button type="button" class="flex items-center gap-2.5 border-0 bg-transparent px-3 py-2 text-xs text-[#8a8678] hover:text-[#1d2433]" id="portal-salir">
-      <LogOut size={18} strokeWidth={1.6} />
+      <LogOut size={18} stroke-width={1.6} />
       Cerrar sesión
     </button>
   </div>

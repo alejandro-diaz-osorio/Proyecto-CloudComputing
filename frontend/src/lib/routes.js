@@ -5,6 +5,7 @@ export const RUTAS = {
   login: '/login/',
   registro: '/registro/',
   cotizar: '/cotizar',
+  nosotros: '/nosotros',
   recuperar: '/recuperar',     // pendiente: requiere endpoint de recuperación en el backend
   terminos: '/terminos',       // pendiente: página estática
   privacidad: '/privacidad',   // pendiente: página estática
