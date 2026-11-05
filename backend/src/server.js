@@ -66,6 +66,7 @@ api.use('/cotizaciones',   require('./routes/cotizaciones'));
 api.use('/archivos',       require('./routes/archivos'));
 api.use('/mensajes',       require('./routes/mensajes'));
 api.use('/notificaciones', require('./routes/notificaciones'));
+api.use('/sol',            require('./routes/sol'));          // asistente Sol (IA)
 
 app.use('/api', api);
 

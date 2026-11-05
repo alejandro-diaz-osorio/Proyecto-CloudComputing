@@ -1,18 +1,213 @@
 ---
-// Espacio reservado para "Sol, asistente de proyecto". La IA aún no se implementa:
-// solo deja el lugar (encabezado y un <slot/> vacío) para conectarla después sin tocar el layout.
-import { Bot } from '@lucide/astro';
+// Sol, asistente de proyecto. Lee el formulario de NuevaSolicitudView directamente del DOM
+// (sin tocar su script) y consulta POST /api/sol/analizar. Sol orienta; no cotiza ni aprueba.
+import { Bot, Send, Sparkles } from '@lucide/astro';
 ---
 
-<aside class="sticky top-[90px] overflow-hidden border border-[#e7e1d4] bg-[#fffdf9] max-xl:hidden" aria-label="Asistente de proyecto (próximamente)" data-sol>
+<aside class="sol xl:sticky xl:top-[90px] overflow-hidden border border-[#e7e1d4] bg-[#fffdf9]" aria-label="Sol, asistente de proyecto" data-sol>
   <header class="flex items-center gap-3.5 bg-[#1d2433] p-[18px_20px] text-white">
     <span class="grid size-11 shrink-0 place-items-center rounded-md bg-[#2a3347] text-[#f4a99f]"><Bot size={22} stroke-width={1.5} /></span>
     <div>
       <strong class="text-sm font-semibold">Sol, asistente de proyecto <em class="ml-1 rounded bg-[#e9e4f6] px-1.5 py-0.5 text-[9px] font-bold not-italic text-[#5b4a9a]">IA</em></strong>
-      <small class="text-[11px] text-[#a9b1c4]">Próximamente</small>
+      <small class="block text-[11px] text-[#a9b1c4]">Te ayudo a preparar tu solicitud</small>
     </div>
   </header>
-  <div class="min-h-[360px]">
-    <slot />
+
+  <div class="sol-body">
+    <div id="sol-log" class="sol-log" aria-live="polite">
+      <div class="sol-msg sol-msg--sol">
+        Hola, soy Sol. Cuando hayas descrito tu idea, puedo revisar qué información y documentos
+        te faltan para que el arquitecto evalúe mejor tu solicitud.
+      </div>
+    </div>
+
+    <div id="sol-info" class="sol-lista" hidden></div>
+    <div id="sol-docs" class="sol-lista" hidden></div>
+
+    <button type="button" id="sol-usar" class="sol-usar" hidden>
+      <Sparkles size={14} stroke-width={1.8} /> Usar la descripción que sugiere Sol
+    </button>
+
+    <button type="button" id="sol-analizar" class="sol-analizar">
+      <Sparkles size={15} stroke-width={1.8} /> Revisar mi solicitud con Sol
+    </button>
+
+    <form id="sol-form" class="sol-entrada">
+      <textarea
+        id="sol-texto"
+        rows="2"
+        maxlength="1000"
+        name="mensaje"
+        placeholder="Pregúntale algo a Sol o responde sus dudas…"
+        aria-label="Mensaje para Sol"
+      ></textarea>
+      <button type="submit" id="sol-enviar" aria-label="Enviar mensaje a Sol"><Send size={16} stroke-width={1.8} /></button>
+    </form>
+
+    <p class="sol-nota">
+      Puedes conversar con Sol desde aquí, incluso antes de completar la descripción. Sol orienta, pero no da precios ni aprueba cotizaciones; un arquitecto de Solucia revisa tu solicitud.
+    </p>
   </div>
 </aside>
+
+<script>
+  import { analizarConSol } from "../solApi.js"
+  import { parseArea } from "../solicitud.js"
+
+  const $ = (id) => document.getElementById(id)
+  const log = $("sol-log")
+  const btnAnalizar = $("sol-analizar")
+  const btnEnviar = $("sol-enviar")
+  const txt = $("sol-texto")
+  const form = $("sol-form")
+  const btnUsar = $("sol-usar")
+
+  const historial = []
+  let sugerida = ""
+  let ocupado = false
+
+  // Lee el formulario de la solicitud (ids de NuevaSolicitudView.astro)
+  function leerSolicitud() {
+    return {
+      tipo_proyecto:
+        document.querySelector('input[name="tipo"]:checked')?.value ?? "",
+      descripcion: $("n-desc")?.value ?? "",
+      ubicacion: $("n-ubic")?.value ?? "",
+      area_m2: parseArea($("n-area")?.value ?? "") || null,
+      servicios: [...document.querySelectorAll("#n-servicios input:checked")]
+        .map((i) => i.nextElementSibling?.textContent?.trim())
+        .filter(Boolean),
+      archivos: [
+        ...document.querySelectorAll(".n-file:not(.n-file--error) .n-file__name"),
+      ].map((n) => n.textContent.trim()),
+    }
+  }
+
+  function burbuja(rol, texto) {
+    const d = document.createElement("div")
+    d.className = `sol-msg sol-msg--${rol}`
+    d.textContent = texto // textContent: nunca innerHTML con texto del modelo
+    log.append(d)
+    log.scrollTop = log.scrollHeight
+    return d
+  }
+
+  function pintarLista(el, titulo, items) {
+    el.replaceChildren()
+    el.hidden = !items?.length
+    if (!items?.length) return
+    const h = document.createElement("h4")
+    h.textContent = titulo
+    const ul = document.createElement("ul")
+    for (const t of items) {
+      const li = document.createElement("li")
+      li.textContent = t
+      ul.append(li)
+    }
+    el.append(h, ul)
+  }
+
+  function bloquear(v) {
+    ocupado = v
+    btnAnalizar.disabled = v
+    btnEnviar.disabled = v
+    txt.disabled = v
+  }
+
+  async function consultar(mensaje) {
+    if (ocupado) return
+    const solicitud = leerSolicitud()
+    const hayConversacion = historial.some(
+      (m) => m.rol === "cliente" && m.texto.trim(),
+    )
+    if (!solicitud.descripcion.trim() && !mensaje && !hayConversacion) {
+      burbuja("sol", "Puedo conversar contigo por aquí. Para revisar tu solicitud, cuéntame qué proyecto tienes en mente, en el chat o en la descripción.")
+      return
+    }
+    if (mensaje) {
+      burbuja("yo", mensaje)
+      historial.push({ rol: "cliente", texto: mensaje })
+    }
+    bloquear(true)
+    const espera = burbuja("sol", "Sol está revisando tu solicitud…")
+    espera.classList.add("sol-msg--espera")
+    try {
+      const r = await analizarConSol({
+        ...solicitud,
+        mensaje,
+        historial: (mensaje ? historial.slice(0, -1) : historial).slice(-8),
+      })
+      espera.remove()
+      burbuja("sol", r.respuesta)
+      historial.push({ rol: "sol", texto: r.respuesta })
+      pintarLista($("sol-info"), "Información que ayudaría", r.preguntas_pendientes)
+      pintarLista($("sol-docs"), "Documentos que puedes adjuntar", r.documentos_pendientes)
+      sugerida = r.descripcion_mejorada ?? ""
+      btnUsar.hidden = !sugerida
+    } catch (err) {
+      espera.remove()
+      burbuja("sol", err?.mensaje || err?.message || "No pude responder ahora. Inténtalo de nuevo.")
+    } finally {
+      bloquear(false)
+    }
+  }
+
+  btnAnalizar.addEventListener("click", () => consultar(""))
+
+  function enviarMensaje() {
+    const m = txt.value.trim()
+    if (ocupado || !m) return
+    txt.value = ""
+    consultar(m)
+  }
+  form.addEventListener("submit", (e) => {
+    e.preventDefault()
+    enviarMensaje()
+  })
+  txt.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      enviarMensaje()
+    }
+  })
+
+  btnUsar.addEventListener("click", () => {
+    const d = $("n-desc")
+    if (!d || !sugerida) return
+    if (d.value.trim() && !confirm("¿Reemplazar tu descripción por la que sugiere Sol? Podrás editarla después.")) return
+    d.value = d.maxLength > 0 ? sugerida.slice(0, d.maxLength) : sugerida
+    d.dispatchEvent(new Event("input", { bubbles: true }))
+  })
+</script>
+
+<style is:global>
+  .sol .sol-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .sol .sol-log { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+  .sol .sol-msg { padding: 10px 12px; font-size: 12px; line-height: 1.55; border-radius: 4px; max-width: 92%; white-space: pre-line; }
+  .sol .sol-msg--sol { background: #f3efe6; color: #1d2433; align-self: flex-start; }
+  .sol .sol-msg--yo { background: #1d2433; color: #fff; align-self: flex-end; }
+  .sol .sol-msg--espera { opacity: 0.6; font-style: italic; }
+  .sol .sol-lista { padding: 12px 14px; background: #fdf8e8; border: 1px solid #efe2b8; }
+  .sol .sol-lista h4 { margin: 0 0 6px; font-size: 11px; font-weight: 700; color: #8a6a1f; text-transform: uppercase; letter-spacing: 0.06em; }
+  .sol .sol-lista ul { margin: 0; padding-left: 16px !important; display: grid; gap: 4px; }
+  .sol .sol-lista li { font-size: 12px; color: #1d2433; line-height: 1.5; }
+  .sol .sol-analizar, .sol .sol-usar {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 14px; font: inherit; font-size: 12px; font-weight: 700; border-radius: 3px; cursor: pointer;
+  }
+  .sol .sol-analizar { background: var(--p-accent); color: #fff; border: 1px solid transparent; }
+  .sol .sol-analizar:disabled, .sol #sol-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
+  .sol .sol-usar { background: #fff; color: var(--p-accent); border: 1px solid var(--p-accent); }
+  .sol .sol-usar[hidden], .sol .sol-lista[hidden] { display: none; }
+  .sol .sol-entrada { display: flex; gap: 8px; align-items: flex-end; }
+  .sol .sol-entrada textarea {
+    flex: 1; resize: none; padding: 10px 12px; font: inherit; font-size: 12px;
+    border: 1px solid #e7e1d4; border-radius: 3px; background: #fff; color: #1d2433;
+  }
+  .sol .sol-entrada textarea:focus { outline: 2px solid #f0b9b1; border-color: var(--p-accent); }
+  .sol #sol-enviar {
+    display: grid; place-items: center; width: 40px; height: 40px; flex: none;
+    background: #1d2433; color: #fff; border: 0; border-radius: 3px; cursor: pointer;
+  }
+  .sol .sol-nota { margin: 0; font-size: 10px; color: var(--p-muted); line-height: 1.5; }
+</style>
