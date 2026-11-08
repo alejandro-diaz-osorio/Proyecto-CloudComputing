@@ -10,10 +10,11 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-from .grafo import modo_actual, sol_graph  # noqa: E402  (después de cargar .env)
+from .grafo import VERSION, modo_actual, sol_graph  # noqa: E402  (después de cargar .env)
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("sol")
+log.info("Sol grafo versión %s (modo %s)", VERSION, modo_actual())
 
 app = FastAPI(title="Sol - agentes", docs_url=None, redoc_url=None, openapi_url=None)
 
@@ -33,51 +34,45 @@ class Mensaje(BaseModel):
 
 class Entrada(BaseModel):
     tipo_proyecto: str = Field(default="", max_length=40)
-    descripcion: str = Field(default="", max_length=4000)
-    ubicacion: str = Field(default="", max_length=200)
-    area_m2: float | None = Field(default=None, ge=0, le=10_000_000)
-    servicios: list[str] = Field(default_factory=list, max_length=20)
-    archivos: list[str] = Field(default_factory=list, max_length=20)
+    descripcion: str = Field(default="", max_length=4000)  # campo "Describe lo que imaginas..."
     mensaje: str = Field(default="", max_length=1000)
-    historial: list[Mensaje] = Field(default_factory=list, max_length=12)
+    historial: list[Mensaje] = Field(default_factory=list, max_length=30)
+    ficha: dict[str, str] = Field(default_factory=dict, max_length=30)  # ficha del turno anterior
 
 
 class Salida(BaseModel):
     respuesta: str
-    preguntas_pendientes: list[str]
-    documentos_pendientes: list[str]
-    descripcion_mejorada: str
+    borrador: str  # vacío si Sol todavía no propone un borrador
+    ficha: dict[str, str]  # ficha actualizada: el cliente la guarda y la reenvía en el siguiente turno
     modo: str
+    version: str = ""  # versión del grafo que respondió (para comprobar el despliegue)
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "modo": modo_actual()}
+    return {"status": "ok", "modo": modo_actual(), "version": VERSION}
 
 
 @app.post("/sol/analizar", response_model=Salida, dependencies=[Depends(verificar_token)])
 async def analizar(datos: Entrada):
+    if not datos.mensaje.strip() and not datos.descripcion.strip():
+        raise HTTPException(status_code=422, detail="Escribe un mensaje o describe tu proyecto.")
     estado = {
         "tipo_proyecto": datos.tipo_proyecto,
         "descripcion": datos.descripcion,
-        "ubicacion": datos.ubicacion,
-        "area_m2": datos.area_m2,
-        "servicios": [s[:100] for s in datos.servicios],
-        "archivos": [a[:200] for a in datos.archivos],
         "mensaje_usuario": datos.mensaje,
         "historial": [m.model_dump() for m in datos.historial],
+        "ficha_previa": datos.ficha,
     }
     try:
         r = await sol_graph.ainvoke(estado)
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
     except Exception:
         log.exception("Error en el grafo de Sol")
         raise HTTPException(status_code=500, detail="Error interno")
     return Salida(
         respuesta=r["respuesta"],
-        preguntas_pendientes=r["preguntas_pendientes"],
-        documentos_pendientes=r["documentos_pendientes"],
-        descripcion_mejorada=r["descripcion_mejorada"],
+        borrador=r["borrador"],
+        ficha=r["ficha"],
         modo=r["modo"],
+        version=r.get("version", ""),
     )

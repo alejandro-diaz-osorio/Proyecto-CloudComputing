@@ -1,36 +1,46 @@
 const solService = require('../services/solService');
 
+const TIPOS = new Set(['vivienda', 'comercial', 'otro']);
 const texto = (v, max) => String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
-const listaTextos = (v, max, maxItem) =>
-  (Array.isArray(v) ? v : []).slice(0, max).map((x) => texto(x, maxItem)).filter(Boolean);
+
+// Ficha de requerimientos que Sol va completando: { clave: valor } con claves y valores cortos
+const limpiarFicha = (f) => {
+  const out = {};
+  if (!f || typeof f !== 'object' || Array.isArray(f)) return out;
+  for (const [k, v] of Object.entries(f).slice(0, 30)) {
+    if (/^[a-z_]{1,40}$/.test(k) && typeof v === 'string') out[k] = texto(v, 300);
+  }
+  return out;
+};
 
 // POST /api/sol/analizar
+// Conversación de Sol para ayudar a redactar el campo "Describe lo que imaginas para tu proyecto".
 const analizar = async (req, res, next) => {
   const b = req.body ?? {};
+  const mensaje = texto(b.mensaje, 1000);
   const descripcion = texto(b.descripcion, 4000);
+  if (!mensaje && !descripcion) {
+    return res.status(400).json({ mensaje: 'Escríbele a Sol o cuéntale tu idea para empezar.' });
+  }
 
-  const area = Number(b.area_m2);
   const payload = {
-    tipo_proyecto: texto(b.tipo_proyecto, 40),
+    tipo_proyecto: TIPOS.has(b.tipo_proyecto) ? b.tipo_proyecto : '',
     descripcion,
-    ubicacion: texto(b.ubicacion, 200),
-    area_m2: Number.isFinite(area) && area > 0 ? area : null,
-    servicios: listaTextos(b.servicios, 20, 100),
-    archivos: listaTextos(b.archivos, 20, 200),
-    mensaje: texto(b.mensaje, 1000),
+    mensaje,
     historial: (Array.isArray(b.historial) ? b.historial : [])
-      .slice(-8)
+      .slice(-30)
       .filter((m) => m && (m.rol === 'cliente' || m.rol === 'sol'))
-      .map((m) => ({ rol: m.rol, texto: texto(m.texto, 1000) })),
+      .map((m) => ({ rol: m.rol, texto: texto(m.texto, 1000) }))
+      .filter((m) => m.texto),
+    ficha: limpiarFicha(b.ficha),
   };
 
   try {
     const d = await solService.analizar(payload);
     return res.json({
       respuesta: d.respuesta,
-      preguntas_pendientes: d.preguntas_pendientes,
-      documentos_pendientes: d.documentos_pendientes,
-      descripcion_mejorada: d.descripcion_mejorada,
+      borrador: d.borrador || '',
+      ficha: limpiarFicha(d.ficha),
     });
   } catch (err) {
     if (err instanceof solService.SolError) {

@@ -1,36 +1,42 @@
 ---
-// Sol, asistente de proyecto. Lee el formulario de NuevaSolicitudView directamente del DOM
-// (sin tocar su script) y consulta POST /api/sol/analizar. Sol orienta; no cotiza ni aprueba.
-import { Bot, Send, Sparkles } from '@lucide/astro';
+// Sol, asistente de proyecto. Permanece OCULTO hasta que el cliente pulsa el botón
+// "Revisar mi solicitud con Sol" (#n-sol-abrir), que NuevaSolicitudView.astro muestra debajo de
+// "Describe lo que imaginas para tu proyecto" y que solo se activa cuando hay texto en ese campo.
+// El chat de Sol tampoco funciona mientras esa descripción esté vacía.
+// Sol no pide los demás datos del formulario ni da precios ni plazos.
+import { Bot, Send, X } from '@lucide/astro';
 ---
 
-<aside class="sol xl:sticky xl:top-[90px] overflow-hidden border border-[#e7e1d4] bg-[#fffdf9]" aria-label="Sol, asistente de proyecto" data-sol>
+<aside id="sol-panel" class="sol xl:sticky xl:top-[90px] overflow-hidden border border-[#e7e1d4] bg-[#fffdf9]" aria-label="Sol, asistente de proyecto" data-sol hidden>
   <header class="flex items-center gap-3.5 bg-[#1d2433] p-[18px_20px] text-white">
     <span class="grid size-11 shrink-0 place-items-center rounded-md bg-[#2a3347] text-[#f4a99f]"><Bot size={22} stroke-width={1.5} /></span>
     <div>
       <strong class="text-sm font-semibold">Sol, asistente de proyecto <em class="ml-1 rounded bg-[#e9e4f6] px-1.5 py-0.5 text-[9px] font-bold not-italic text-[#5b4a9a]">IA</em></strong>
-      <small class="block text-[11px] text-[#a9b1c4]">Te ayudo a preparar tu solicitud</small>
+      <small class="block text-[11px] text-[#a9b1c4]">Te ayudo a contar cómo imaginas tu proyecto</small>
     </div>
+    <button type="button" id="sol-cerrar" class="sol-cerrar" aria-label="Cerrar a Sol"><X size={18} stroke-width={1.8} /></button>
   </header>
 
   <div class="sol-body">
     <div id="sol-log" class="sol-log" aria-live="polite">
       <div class="sol-msg sol-msg--sol">
-        Hola, soy Sol. Cuando hayas descrito tu idea, puedo revisar qué información y documentos
-        te faltan para que el arquitecto evalúe mejor tu solicitud.
+        Hola, soy Sol. Voy a leer lo que escribiste y te ayudo a completar tu idea.
       </div>
     </div>
 
-    <div id="sol-info" class="sol-lista" hidden></div>
-    <div id="sol-docs" class="sol-lista" hidden></div>
+    <div id="sol-borrador" class="sol-borrador" hidden>
+      <h4>Borrador para tu descripción</h4>
+      <p id="sol-borrador-texto"></p>
+      <div class="sol-borrador__acciones">
+        <button type="button" id="sol-usar" class="sol-usar">Usar este borrador</button>
+        <button type="button" id="sol-ajustar" class="sol-ajustar">Quiero cambiar algo</button>
+      </div>
+    </div>
 
-    <button type="button" id="sol-usar" class="sol-usar" hidden>
-      <Sparkles size={14} stroke-width={1.8} /> Usar la descripción que sugiere Sol
-    </button>
-
-    <button type="button" id="sol-analizar" class="sol-analizar">
-      <Sparkles size={15} stroke-width={1.8} /> Revisar mi solicitud con Sol
-    </button>
+    <div id="sol-atajos" class="sol-atajos" hidden>
+      <button type="button" id="sol-pedir-borrador" class="sol-chip">Quiero el borrador ya</button>
+      <button type="button" id="sol-nose" class="sol-chip">No sé</button>
+    </div>
 
     <form id="sol-form" class="sol-entrada">
       <textarea
@@ -38,52 +44,94 @@ import { Bot, Send, Sparkles } from '@lucide/astro';
         rows="2"
         maxlength="1000"
         name="mensaje"
-        placeholder="Pregúntale algo a Sol o responde sus dudas…"
+        placeholder="Escríbele a Sol…"
         aria-label="Mensaje para Sol"
+        disabled
       ></textarea>
-      <button type="submit" id="sol-enviar" aria-label="Enviar mensaje a Sol"><Send size={16} stroke-width={1.8} /></button>
+      <button type="submit" id="sol-enviar" aria-label="Enviar mensaje a Sol" disabled><Send size={16} stroke-width={1.8} /></button>
     </form>
 
     <p class="sol-nota">
-      Puedes conversar con Sol desde aquí, incluso antes de completar la descripción. Sol orienta, pero no da precios ni aprueba cotizaciones; un arquitecto de Solucia revisa tu solicitud.
+      Sol te ayuda a expresar tu idea; no da precios, plazos ni aprueba cotizaciones.
+      Un arquitecto de Solucia revisa tu solicitud.
     </p>
   </div>
 </aside>
 
 <script>
   import { analizarConSol } from "../solApi.js"
-  import { parseArea } from "../solicitud.js"
 
-  const $ = (id) => document.getElementById(id)
-  const log = $("sol-log")
-  const btnAnalizar = $("sol-analizar")
-  const btnEnviar = $("sol-enviar")
-  const txt = $("sol-texto")
-  const form = $("sol-form")
-  const btnUsar = $("sol-usar")
+  type Rol = "cliente" | "sol"
+  type Msg = { rol: Rol; texto: string }
+  type RespuestaSol = { respuesta: string; borrador?: string | null; ficha?: Record<string, string> }
 
-  const historial = []
-  let sugerida = ""
+  const $ = <T extends HTMLElement = HTMLElement>(id: string): T | null =>
+    document.getElementById(id) as T | null
+
+  const panel = document.querySelector<HTMLElement>("[data-sol]")!
+  const btnAbrir = $<HTMLButtonElement>("n-sol-abrir") // vive en NuevaSolicitudView, bajo la descripción
+  const hint = $("n-sol-hint")
+  const btnCerrar = $<HTMLButtonElement>("sol-cerrar")!
+  const log = $("sol-log")!
+  const cajaBorrador = $("sol-borrador")!
+  const textoBorrador = $("sol-borrador-texto")!
+  const btnUsar = $<HTMLButtonElement>("sol-usar")!
+  const btnAjustar = $<HTMLButtonElement>("sol-ajustar")!
+  const btnEnviar = $<HTMLButtonElement>("sol-enviar")!
+  const txt = $<HTMLTextAreaElement>("sol-texto")!
+  const form = $<HTMLFormElement>("sol-form")!
+  const atajos = $("sol-atajos")!
+  const btnBorradorYa = $<HTMLButtonElement>("sol-pedir-borrador")!
+  const btnNoSe = $<HTMLButtonElement>("sol-nose")!
+
+  const historial: Msg[] = []
+  let ficha: Record<string, string> = {} // lo que Sol ya sabe del proyecto; se reenvía en cada turno
+  let borradorActual = ""
+  let ultimaRevisada = "" // descripción que Sol ya leyó, para no repetir la revisión sin cambios
   let ocupado = false
 
-  // Lee el formulario de la solicitud (ids de NuevaSolicitudView.astro)
-  function leerSolicitud() {
-    return {
-      tipo_proyecto:
-        document.querySelector('input[name="tipo"]:checked')?.value ?? "",
-      descripcion: $("n-desc")?.value ?? "",
-      ubicacion: $("n-ubic")?.value ?? "",
-      area_m2: parseArea($("n-area")?.value ?? "") || null,
-      servicios: [...document.querySelectorAll("#n-servicios input:checked")]
-        .map((i) => i.nextElementSibling?.textContent?.trim())
-        .filter(Boolean),
-      archivos: [
-        ...document.querySelectorAll(".n-file:not(.n-file--error) .n-file__name"),
-      ].map((n) => n.textContent.trim()),
-    }
+  const descripcion = (): string => $<HTMLTextAreaElement>("n-desc")?.value ?? ""
+  const hayTexto = (): boolean => descripcion().trim().length > 0
+
+  // ── Habilitar según lo que escribe el cliente en la descripción ───────
+  function sincronizar(): void {
+    const ok = hayTexto()
+    if (btnAbrir) btnAbrir.disabled = !ok
+    if (hint) hint.hidden = ok
+    // El chat de Sol no funciona mientras la descripción esté vacía
+    txt.disabled = ocupado || !ok
+    btnEnviar.disabled = ocupado || !ok
+    btnBorradorYa.disabled = ocupado || !ok
+    btnNoSe.disabled = ocupado || !ok
+    txt.placeholder = ok ? "Escríbele a Sol…" : "Primero escribe tu idea en la descripción…"
   }
 
-  function burbuja(rol, texto) {
+  document.addEventListener("input", (e) => {
+    if ((e.target as HTMLElement | null)?.id === "n-desc") sincronizar()
+  })
+  sincronizar() // por si el navegador restauró texto en el campo
+
+  // ── Abrir / cerrar el panel ───────────────────────────────────────────
+  function abrir(): void {
+    if (!hayTexto()) return
+    panel.hidden = false
+    btnAbrir?.setAttribute("aria-expanded", "true")
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" })
+    // Al abrirlo (o pulsar de nuevo tras cambiar el texto), Sol revisa lo que hay escrito
+    if (descripcion().trim() !== ultimaRevisada) void consultar("")
+  }
+
+  function cerrar(): void {
+    panel.hidden = true
+    btnAbrir?.setAttribute("aria-expanded", "false")
+    btnAbrir?.focus()
+  }
+
+  btnAbrir?.addEventListener("click", abrir)
+  btnCerrar.addEventListener("click", cerrar)
+
+  // ── Chat ──────────────────────────────────────────────────────────────
+  function burbuja(rol: "sol" | "yo", texto: string): HTMLDivElement {
     const d = document.createElement("div")
     d.className = `sol-msg sol-msg--${rol}`
     d.textContent = texto // textContent: nunca innerHTML con texto del modelo
@@ -92,122 +140,150 @@ import { Bot, Send, Sparkles } from '@lucide/astro';
     return d
   }
 
-  function pintarLista(el, titulo, items) {
-    el.replaceChildren()
-    el.hidden = !items?.length
-    if (!items?.length) return
-    const h = document.createElement("h4")
-    h.textContent = titulo
-    const ul = document.createElement("ul")
-    for (const t of items) {
-      const li = document.createElement("li")
-      li.textContent = t
-      ul.append(li)
-    }
-    el.append(h, ul)
+  function mostrarBorrador(texto: string): void {
+    borradorActual = texto
+    cajaBorrador.hidden = !texto
+    textoBorrador.textContent = texto
   }
 
-  function bloquear(v) {
+  function bloquear(v: boolean): void {
     ocupado = v
-    btnAnalizar.disabled = v
-    btnEnviar.disabled = v
-    txt.disabled = v
+    sincronizar()
+    // Devuelve el foco al chat solo si el cliente no está escribiendo en otro campo
+    if (!v && !txt.disabled && (document.activeElement === document.body || panel.contains(document.activeElement)))
+      txt.focus()
   }
 
-  async function consultar(mensaje) {
-    if (ocupado) return
-    const solicitud = leerSolicitud()
-    const hayConversacion = historial.some(
-      (m) => m.rol === "cliente" && m.texto.trim(),
-    )
-    if (!solicitud.descripcion.trim() && !mensaje && !hayConversacion) {
-      burbuja("sol", "Puedo conversar contigo por aquí. Para revisar tu solicitud, cuéntame qué proyecto tienes en mente, en el chat o en la descripción.")
-      return
-    }
-    if (mensaje) {
-      burbuja("yo", mensaje)
-      historial.push({ rol: "cliente", texto: mensaje })
-    }
+  // mensaje vacío = revisión inicial: Sol comenta lo que ya está en la descripción
+  async function consultar(mensaje: string): Promise<void> {
+    if (ocupado || !hayTexto()) return
+    if (mensaje) burbuja("yo", mensaje)
     bloquear(true)
-    const espera = burbuja("sol", "Sol está revisando tu solicitud…")
+    const enviada = descripcion().trim()
+    const espera = burbuja("sol", mensaje ? "Sol está escribiendo…" : "Sol está leyendo tu idea…")
     espera.classList.add("sol-msg--espera")
     try {
-      const r = await analizarConSol({
-        ...solicitud,
+      const r = (await analizarConSol({
+        tipo_proyecto:
+          document.querySelector<HTMLInputElement>('input[name="tipo"]:checked')?.value ?? "",
+        descripcion: descripcion(),
         mensaje,
-        historial: (mensaje ? historial.slice(0, -1) : historial).slice(-8),
-      })
+        historial: historial.slice(-30),
+        ficha,
+      })) as RespuestaSol
       espera.remove()
       burbuja("sol", r.respuesta)
+      atajos.hidden = false // desde la primera respuesta el cliente puede pedir el borrador o decir "no sé"
+      // Solo se guarda en el historial cuando la consulta tuvo éxito
+      if (mensaje) historial.push({ rol: "cliente", texto: mensaje })
       historial.push({ rol: "sol", texto: r.respuesta })
-      pintarLista($("sol-info"), "Información que ayudaría", r.preguntas_pendientes)
-      pintarLista($("sol-docs"), "Documentos que puedes adjuntar", r.documentos_pendientes)
-      sugerida = r.descripcion_mejorada ?? ""
-      btnUsar.hidden = !sugerida
+      ultimaRevisada = enviada
+      if (r.ficha) ficha = r.ficha
+      // El borrador se mantiene visible mientras Sol afina detalles; solo cambia cuando llega uno nuevo
+      const nuevo = (r.borrador ?? "").trim()
+      if (nuevo) mostrarBorrador(nuevo)
     } catch (err) {
       espera.remove()
-      burbuja("sol", err?.mensaje || err?.message || "No pude responder ahora. Inténtalo de nuevo.")
+      const e = err as { mensaje?: string; message?: string } | null
+      burbuja("sol", e?.mensaje || e?.message || "No pude responder ahora. Inténtalo de nuevo.")
     } finally {
       bloquear(false)
     }
   }
 
-  btnAnalizar.addEventListener("click", () => consultar(""))
-
-  function enviarMensaje() {
+  function enviarMensaje(): void {
     const m = txt.value.trim()
-    if (ocupado || !m) return
+    if (!m || txt.disabled) return
     txt.value = ""
-    consultar(m)
+    void consultar(m)
   }
+
   form.addEventListener("submit", (e) => {
     e.preventDefault()
     enviarMensaje()
   })
-  txt.addEventListener("keydown", (e) => {
+
+  txt.addEventListener("keydown", (e: KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       enviarMensaje()
     }
   })
 
+  // Atajos: "borrador" activa _PIDE_CIERRE y "No sé" activa _NO_SABE en el backend
+  btnBorradorYa.addEventListener("click", () => void consultar("Ya quiero el borrador"))
+  btnNoSe.addEventListener("click", () => void consultar("No sé"))
+
+  // El cliente confirma el borrador: solo entonces se escribe en el campo del formulario.
   btnUsar.addEventListener("click", () => {
-    const d = $("n-desc")
-    if (!d || !sugerida) return
-    if (d.value.trim() && !confirm("¿Reemplazar tu descripción por la que sugiere Sol? Podrás editarla después.")) return
-    d.value = d.maxLength > 0 ? sugerida.slice(0, d.maxLength) : sugerida
+    const d = $<HTMLTextAreaElement>("n-desc")
+    if (!d || !borradorActual) return
+    if (
+      d.value.trim() &&
+      d.value.trim() !== borradorActual &&
+      !confirm("¿Reemplazar tu descripción por este borrador? Podrás editarla después.")
+    )
+      return
+    d.value = d.maxLength > 0 ? borradorActual.slice(0, d.maxLength) : borradorActual
     d.dispatchEvent(new Event("input", { bubbles: true }))
+    ultimaRevisada = d.value.trim() // el borrador ya lo escribió Sol: no hace falta revisarlo otra vez
+    // Por si la vista quiere guardar que el cliente aceptó la versión de Sol (descripcion_ia / usar_version_ia)
+    document.dispatchEvent(new CustomEvent("sol:borrador-aceptado", { detail: { borrador: borradorActual } }))
+    const nota = "Listo, lo puse en tu descripción. Puedes editarlo cuando quieras o seguir conversando conmigo."
+    burbuja("sol", nota)
+    historial.push({ rol: "sol", texto: nota })
+    mostrarBorrador("")
+  })
+
+  btnAjustar.addEventListener("click", () => {
+    txt.placeholder = "Dime qué quieres cambiar o agregar…"
+    txt.focus()
   })
 </script>
 
 <style is:global>
+  /* Mientras Sol está oculto, el formulario ocupa todo el ancho */
+  .nueva .n-cols:not(.n-cols--solo):has(> .sol[hidden]) { grid-template-columns: minmax(0, 1fr); }
+  .sol:not([hidden]) { animation: sol-aparece 0.3s ease-out; }
+  @keyframes sol-aparece { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .sol .sol-cerrar { margin-left: auto; padding: 6px; background: transparent; border: 0; color: #a9b1c4; cursor: pointer; display: grid; place-items: center; }
+  .sol .sol-cerrar:hover { color: #fff; }
   .sol .sol-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 12px; }
-  .sol .sol-log { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
+  .sol .sol-log { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; }
   .sol .sol-msg { padding: 10px 12px; font-size: 12px; line-height: 1.55; border-radius: 4px; max-width: 92%; white-space: pre-line; }
   .sol .sol-msg--sol { background: #f3efe6; color: #1d2433; align-self: flex-start; }
   .sol .sol-msg--yo { background: #1d2433; color: #fff; align-self: flex-end; }
   .sol .sol-msg--espera { opacity: 0.6; font-style: italic; }
-  .sol .sol-lista { padding: 12px 14px; background: #fdf8e8; border: 1px solid #efe2b8; }
-  .sol .sol-lista h4 { margin: 0 0 6px; font-size: 11px; font-weight: 700; color: #8a6a1f; text-transform: uppercase; letter-spacing: 0.06em; }
-  .sol .sol-lista ul { margin: 0; padding-left: 16px !important; display: grid; gap: 4px; }
-  .sol .sol-lista li { font-size: 12px; color: #1d2433; line-height: 1.5; }
-  .sol .sol-analizar, .sol .sol-usar {
+  .sol .sol-borrador[hidden] { display: none; }
+  .sol .sol-borrador { padding: 12px 14px; background: #fdf8e8; border: 1px solid #efe2b8; }
+  .sol .sol-borrador h4 { margin: 0 0 6px; font-size: 11px; font-weight: 700; color: #8a6a1f; text-transform: uppercase; letter-spacing: 0.06em; }
+  .sol .sol-borrador p { margin: 0 0 10px; font-size: 12px; line-height: 1.6; color: #1d2433; white-space: pre-line; }
+  .sol .sol-borrador__acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sol .sol-usar, .sol .sol-ajustar {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 11px 14px; font: inherit; font-size: 12px; font-weight: 700; border-radius: 3px; cursor: pointer;
+    padding: 9px 14px; font: inherit; font-size: 12px; font-weight: 700; border-radius: 3px; cursor: pointer;
   }
-  .sol .sol-analizar { background: var(--p-accent); color: #fff; border: 1px solid transparent; }
-  .sol .sol-analizar:disabled, .sol #sol-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
-  .sol .sol-usar { background: #fff; color: var(--p-accent); border: 1px solid var(--p-accent); }
-  .sol .sol-usar[hidden], .sol .sol-lista[hidden] { display: none; }
+  .sol .sol-usar { background: var(--p-accent); color: #fff; border: 1px solid transparent; }
+  .sol .sol-ajustar { background: #fff; color: var(--p-accent); border: 1px solid var(--p-accent); }
+
+  .sol .sol-atajos { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sol .sol-atajos[hidden] { display: none; }
+  .sol .sol-chip { padding: 6px 10px; font: inherit; font-size: 11px; font-weight: 600; background: #fff; color: #1d2433; border: 1px solid #e7e1d4; border-radius: 999px; cursor: pointer; }
+  .sol .sol-chip:hover:not(:disabled) { border-color: var(--p-accent); color: var(--p-accent); }
+  .sol .sol-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+
   .sol .sol-entrada { display: flex; gap: 8px; align-items: flex-end; }
   .sol .sol-entrada textarea {
     flex: 1; resize: none; padding: 10px 12px; font: inherit; font-size: 12px;
     border: 1px solid #e7e1d4; border-radius: 3px; background: #fff; color: #1d2433;
   }
   .sol .sol-entrada textarea:focus { outline: 2px solid #f0b9b1; border-color: var(--p-accent); }
+  .sol .sol-entrada textarea:disabled { background: #f6f3ec; cursor: not-allowed; }
   .sol #sol-enviar {
     display: grid; place-items: center; width: 40px; height: 40px; flex: none;
     background: #1d2433; color: #fff; border: 0; border-radius: 3px; cursor: pointer;
   }
+  .sol #sol-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
   .sol .sol-nota { margin: 0; font-size: 10px; color: var(--p-muted); line-height: 1.5; }
 </style>

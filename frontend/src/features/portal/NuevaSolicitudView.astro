@@ -9,6 +9,7 @@ import {
   MapPin,
   Paperclip,
   ShieldCheck,
+  Sparkles,
   Store,
 } from "@lucide/astro"
 import SolPanel from "./components/SolPanel.astro"
@@ -190,6 +191,25 @@ const PASOS = [
               hidden
             >
             </p>
+            <div class="n-sol-row">
+              <button
+                type="button"
+                id="n-sol-abrir"
+                class="n-sol-btn"
+                aria-controls="sol-panel"
+                aria-expanded="false"
+                disabled
+                ><Sparkles
+                  size={15}
+                  stroke-width={1.8}
+                /> Revisar mi solicitud con Sol</button
+              >
+              <small
+                id="n-sol-hint"
+                class="n-sol-hint"
+                >Se activa cuando empiezas a escribir tu idea</small
+              >
+            </div>
           </div>
 
           <div class="n-hint">
@@ -548,7 +568,7 @@ const PASOS = [
       </div>
     </div>
 
-    <!-- Sol, asistente de proyecto (lee este formulario desde el DOM) -->
+    <!-- Sol: oculto hasta que el cliente pulsa "Revisar mi solicitud con Sol" (#n-sol-abrir) -->
     <SolPanel />
   </div>
 
@@ -1226,6 +1246,34 @@ const PASOS = [
     background: #f8f5ee;
     border: 1px solid var(--p-line);
     border-top: 0;
+  }
+  .nueva .n-sol-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 12px;
+  }
+  .nueva .n-sol-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #fff;
+    color: var(--p-accent);
+    border: 1px solid var(--p-accent);
+    border-radius: 3px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .nueva .n-sol-btn:hover:not(:disabled) {
+    background: #fdf1ee;
+  }
+  .nueva .n-sol-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   .nueva .n-grid {
     display: grid;
