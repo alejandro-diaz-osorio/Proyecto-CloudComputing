@@ -12,6 +12,8 @@ import { http, ApiError } from '../../lib/http.js';
 const RUTAS_API = {
   login: '/auth/login',
   registro: '/auth/register',
+  recuperar: '/auth/forgot-password',
+  restablecer: '/auth/reset-password',
 };
 
 function normalizar(data) {
@@ -49,5 +51,21 @@ export const authApi = {
     if (telefono) cuerpo.telefono = telefono;
     const data = await http.post(RUTAS_API.registro, cuerpo, { auth: false });
     return normalizar(data); // el backend ya devuelve token + usuario al registrar
+  },
+
+  async solicitarRecuperacion({ email }) {
+    return http.post(
+      RUTAS_API.recuperar,
+      { email: email.trim().toLowerCase() },
+      { auth: false },
+    );
+  },
+
+  async restablecerPassword({ token, password }) {
+    return http.post(
+      RUTAS_API.restablecer,
+      { token, password },
+      { auth: false },
+    );
   },
 };

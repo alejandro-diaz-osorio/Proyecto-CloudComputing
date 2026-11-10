@@ -4,4 +4,5 @@ import { RUTAS } from '../../lib/routes.js';
 // La forma de cada ítem es la misma que usa PortalSidebar: { label, href, icon }.
 export const NAV_ADMIN_SOLICITUDES = [
   { label: 'Solicitudes', href: RUTAS.portalAdmin, icon: 'file' },
+  { id: 'perfil', label: 'Mi perfil', href: RUTAS.portalAdminPerfil, icon: 'user' },
 ];

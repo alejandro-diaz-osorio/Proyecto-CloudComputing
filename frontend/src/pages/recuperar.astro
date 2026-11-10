@@ -1,0 +1,201 @@
+---
+import AuthHero from '../components/auth/AuthHero.astro';
+import AuthLayout from '../layouts/AuthLayout.astro';
+---
+
+<AuthLayout
+  title="Recuperar contraseña · SOLUCIA"
+  description="Solicita un enlace seguro para recuperar el acceso a tu cuenta de SOLUCIA."
+>
+  <AuthHero mode="login" />
+  <section class="auth-panel">
+    <div class="auth-panel__inner">
+      <nav class="auth-tabs" aria-label="Acceso">
+        <a href="/login/">Iniciar sesión</a>
+        <a href="/registro/">Crear cuenta</a>
+      </nav>
+
+      <header class="auth-heading">
+        <p class="auth-eyebrow">Recupera el acceso</p>
+        <h1 id="recuperar-titulo">¿Olvidaste tu contraseña?</h1>
+        <p class="auth-sub" id="recuperar-descripcion">
+          Escribe el correo de tu cuenta y te enviaremos un enlace para crear una contraseña nueva.
+        </p>
+      </header>
+
+      <div id="recuperar-aviso" class="auth-alert auth-alert--info" role="status" aria-live="polite" hidden></div>
+
+      <form id="solicitar-form" class="auth-form" novalidate>
+        <div class="auth-field">
+          <div class="auth-field__head">
+            <label for="recuperar-email">Correo electrónico</label>
+          </div>
+          <div class="auth-input">
+            <input
+              id="recuperar-email"
+              name="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              maxlength="190"
+              placeholder="nombre@correo.com"
+              required
+              aria-describedby="recuperar-error"
+            />
+          </div>
+          <p id="recuperar-error" class="auth-field__error" hidden></p>
+        </div>
+        <button type="submit" class="auth-submit" data-label="Enviar enlace">
+          <span class="auth-spinner" aria-hidden="true" hidden></span>
+          <span data-label-text>Enviar enlace de recuperación</span>
+        </button>
+      </form>
+
+      <form id="restablecer-form" class="auth-form" novalidate hidden>
+        <div class="auth-field">
+          <div class="auth-field__head">
+            <label for="nueva-password">Contraseña nueva</label>
+          </div>
+          <div class="auth-input">
+            <input
+              id="nueva-password"
+              name="password"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              required
+              aria-describedby="password-ayuda password-error"
+            />
+          </div>
+          <p id="password-ayuda" class="auth-rules">Mínimo 8 caracteres, una mayúscula y un número.</p>
+          <p id="password-error" class="auth-field__error" hidden></p>
+        </div>
+
+        <div class="auth-field">
+          <div class="auth-field__head">
+            <label for="confirmar-password">Confirma la contraseña</label>
+          </div>
+          <div class="auth-input">
+            <input
+              id="confirmar-password"
+              name="confirmar"
+              type="password"
+              autocomplete="new-password"
+              required
+              aria-describedby="confirmar-error"
+            />
+          </div>
+          <p id="confirmar-error" class="auth-field__error" hidden></p>
+        </div>
+
+        <button type="submit" class="auth-submit">
+          <span class="auth-spinner" aria-hidden="true" hidden></span>
+          <span data-label-text>Guardar contraseña nueva</span>
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        <a class="auth-link" href="/login/">Volver a iniciar sesión</a>
+      </p>
+    </div>
+  </section>
+</AuthLayout>
+
+<script>
+  import { authApi } from '../features/auth/api.js';
+
+  const solicitarForm = document.querySelector<HTMLFormElement>('#solicitar-form');
+  const restablecerForm = document.querySelector<HTMLFormElement>('#restablecer-form');
+  const aviso = document.querySelector<HTMLElement>('#recuperar-aviso');
+  const token = new URLSearchParams(window.location.search).get('token');
+
+  function mostrarAviso(mensaje: string, error = false) {
+    if (!aviso) return;
+    aviso.textContent = mensaje;
+    aviso.classList.toggle('auth-alert--error', error);
+    aviso.classList.toggle('auth-alert--info', !error);
+    aviso.hidden = !mensaje;
+  }
+
+  function estadoBoton(form: HTMLFormElement, enviando: boolean, texto: string) {
+    const boton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const etiqueta = boton?.querySelector<HTMLElement>('[data-label-text]');
+    const spinner = boton?.querySelector<HTMLElement>('.auth-spinner');
+    if (!boton || !etiqueta) return;
+    boton.disabled = enviando;
+    boton.setAttribute('aria-busy', String(enviando));
+    etiqueta.textContent = enviando ? 'Procesando…' : texto;
+    if (spinner) spinner.hidden = !enviando;
+  }
+
+  function mostrarError(id: string, mensaje: string) {
+    const elemento = document.querySelector<HTMLElement>(`#${id}`);
+    if (elemento) {
+      elemento.textContent = mensaje;
+      elemento.hidden = !mensaje;
+    }
+  }
+
+  if (token) {
+    if (solicitarForm) solicitarForm.hidden = true;
+    if (restablecerForm) restablecerForm.hidden = false;
+    const titulo = document.querySelector<HTMLElement>('#recuperar-titulo');
+    const descripcion = document.querySelector<HTMLElement>('#recuperar-descripcion');
+    if (titulo) titulo.textContent = 'Crea una contraseña nueva';
+    if (descripcion) descripcion.textContent = 'Elige una contraseña segura para volver a entrar a tu cuenta.';
+  }
+
+  solicitarForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    mostrarAviso('');
+    const email = new FormData(solicitarForm).get('email')?.toString().trim() ?? '';
+    const error = !email ? 'Ingresa tu correo electrónico.' : !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)
+      ? 'El correo no tiene un formato válido.'
+      : '';
+    mostrarError('recuperar-error', error);
+    if (error) return;
+
+    estadoBoton(solicitarForm, true, 'Enviar enlace de recuperación');
+    try {
+      const resultado = await authApi.solicitarRecuperacion({ email });
+      mostrarAviso(resultado.mensaje);
+    } catch (err) {
+      mostrarAviso(err instanceof Error ? err.message : 'No pudimos enviar la solicitud. Inténtalo de nuevo.', true);
+    } finally {
+      estadoBoton(solicitarForm, false, 'Enviar enlace de recuperación');
+    }
+  });
+
+  restablecerForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    mostrarAviso('');
+    const datos = new FormData(restablecerForm);
+    const password = datos.get('password')?.toString() ?? '';
+    const confirmar = datos.get('confirmar')?.toString() ?? '';
+    const errores = {
+      password: !password ? 'Crea una contraseña.' :
+        new TextEncoder().encode(password).length > 72 ? 'La contraseña no puede superar 72 bytes.' :
+          password.length < 8 || !/[A-ZÁÉÍÓÚÑ]/.test(password) || !/\d/.test(password)
+            ? 'Usa al menos 8 caracteres, una mayúscula y un número.' : '',
+      confirmar: !confirmar ? 'Confirma tu contraseña.' :
+        confirmar !== password ? 'Las contraseñas no coinciden.' : '',
+    };
+    mostrarError('password-error', errores.password);
+    mostrarError('confirmar-error', errores.confirmar);
+    if (errores.password || errores.confirmar) return;
+
+    estadoBoton(restablecerForm, true, 'Guardar contraseña nueva');
+    try {
+      const resultado = await authApi.restablecerPassword({ token: token ?? '', password });
+      restablecerForm.hidden = true;
+      mostrarAviso(resultado.mensaje);
+      window.history.replaceState({}, '', window.location.pathname);
+      const titulo = document.querySelector<HTMLElement>('#recuperar-titulo');
+      if (titulo) titulo.textContent = 'Contraseña actualizada';
+    } catch (err) {
+      mostrarAviso(err instanceof Error ? err.message : 'No pudimos cambiar la contraseña. Solicita un enlace nuevo.', true);
+    } finally {
+      estadoBoton(restablecerForm, false, 'Guardar contraseña nueva');
+    }
+  });
+</script>

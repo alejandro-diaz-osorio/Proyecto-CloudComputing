@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../model/usuario');
+const PasswordReset = require('../model/passwordReset');
+const { enviarRecuperacionPassword, verificarServicioCorreo } = require('../services/emailService');
 const { emailRegex, textoOpcional, validarPassword, telefonoRegex } = require('../utils/validar');
 const { manejarError } = require('../utils/manejarError');
 
@@ -86,4 +89,88 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const forgotPassword = async (req, res) => {
+  try {
+    const email = texto(req.body?.email).toLowerCase();
+    if (!email || email.length > 190 || !emailRegex.test(email)) {
+      return res.status(400).json({ mensaje: 'Ingresa un correo electrónico válido' });
+    }
+
+    const frontendUrl = new URL(process.env.FRONTEND_URL || 'http://localhost');
+    if (!['http:', 'https:'].includes(frontendUrl.protocol)) {
+      throw new Error('FRONTEND_URL debe usar HTTP o HTTPS');
+    }
+    frontendUrl.pathname = `${frontendUrl.pathname.replace(/\/+$/, '')}/recuperar/`;
+    frontendUrl.hash = '';
+
+    try {
+      await verificarServicioCorreo();
+    } catch (error) {
+      console.error('El correo para recuperar contraseñas no está disponible:', error.message);
+      return res.status(503).json({
+        mensaje: 'El servicio de correo para recuperar contraseñas no está disponible. Inténtalo más tarde o contacta al administrador.',
+      });
+    }
+
+    await PasswordReset.deleteExpired();
+    const usuario = await Usuario.findByEmail(email);
+    if (usuario?.activo) {
+      const token = crypto.randomBytes(32).toString('hex');
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+      await PasswordReset.deleteForUser(usuario.id);
+      await PasswordReset.create({
+        usuarioId: usuario.id,
+        tokenHash,
+      });
+
+      frontendUrl.search = `?token=${encodeURIComponent(token)}`;
+      try {
+        await enviarRecuperacionPassword({
+          email: usuario.email,
+          nombre: usuario.nombre,
+          enlace: frontendUrl.toString(),
+        });
+      } catch (error) {
+        await PasswordReset.deleteByTokenHash(tokenHash);
+        console.error('No se pudo enviar el correo de recuperación:', error);
+        return res.status(503).json({
+          mensaje: 'No pudimos enviar el correo de recuperación. Inténtalo más tarde.',
+        });
+      }
+    }
+
+    res.json({
+      mensaje: 'Si existe una cuenta con ese correo, recibirás instrucciones para recuperar tu contraseña.',
+    });
+  } catch (error) {
+    manejarError(res, error, 'No pudimos procesar la solicitud de recuperación');
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const token = texto(req.body?.token);
+    const password = String(req.body?.password ?? '');
+    if (!/^[a-f0-9]{64}$/.test(token)) {
+      return res.status(400).json({ mensaje: 'El enlace de recuperación no es válido o ya venció' });
+    }
+
+    const errorPassword = validarPassword(password);
+    if (errorPassword) return res.status(400).json({ mensaje: errorPassword });
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const actualizado = await PasswordReset.consumir({
+      tokenHash: crypto.createHash('sha256').update(token).digest('hex'),
+      passwordHash,
+    });
+    if (!actualizado) {
+      return res.status(400).json({ mensaje: 'El enlace de recuperación no es válido o ya venció' });
+    }
+
+    res.json({ mensaje: 'Tu contraseña se actualizó. Ya puedes iniciar sesión.' });
+  } catch (error) {
+    manejarError(res, error, 'No pudimos restablecer la contraseña');
+  }
+};
+
+module.exports = { register, login, forgotPassword, resetPassword };

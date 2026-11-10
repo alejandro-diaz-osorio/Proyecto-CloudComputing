@@ -37,12 +37,23 @@ El backend requiere las siguientes variables de entorno:
 | `DB_USER` | Usuario de la base de datos. |
 | `DB_PASSWORD` | Contraseña de la base de datos. |
 | `JWT_SECRET` | Secreto usado para firmar los tokens JWT. |
+| `FRONTEND_URL` | URL pública del frontend, usada para crear enlaces de recuperación. |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` | Servidor y conexión SMTP para enviar correos. |
+| `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | Credenciales SMTP y remitente del correo. |
 | `CORS_ORIGINS` | Orígenes permitidos, separados por comas. |
 | `UPLOADS_DIR` | Carpeta para archivos subidos. Por defecto, `/app/uploads`. |
 
 En producción, `JWT_SECRET` debe tener al menos 32 caracteres. Las
 credenciales deben configurarse mediante variables de entorno y no deben
 guardarse en el repositorio.
+
+La recuperación de contraseña requiere configurar las variables SMTP y
+`FRONTEND_URL`. Los enlaces vencen después de 30 minutos y solo pueden usarse
+una vez. Para bases de datos existentes, ejecuta una vez
+`database/migrations/20261109_renombrar_tokens_recuperacion.sql`; el script de
+inicialización de MySQL solo se ejecuta automáticamente al crear un volumen de
+datos nuevo. Sin SMTP configurado, la solicitud devuelve un error visible en
+lugar de confirmar falsamente que se envió un correo.
 
 ## Desarrollo local
 

@@ -6,9 +6,9 @@ export const RUTAS = {
   registro: '/registro/',
   cotizar: '/cotizar',
   nosotros: '/nosotros',
-  recuperar: '/recuperar',     // pendiente: requiere endpoint de recuperación en el backend
-  terminos: '/terminos',       // pendiente: página estática
-  privacidad: '/privacidad',   // pendiente: página estática
+  recuperar: '/recuperar/',
+  terminos: '/terminos/',
+  privacidad: '/privacidad/',
 
   // Portal del cliente (rol 'cliente')
   portal: '/portal/cotizaciones/',          // destino por defecto tras el login de un cliente
@@ -18,4 +18,5 @@ export const RUTAS = {
 
   // Portal de administración (rol 'admin')
   portalAdmin: '/portal/admin/',
+  portalAdminPerfil: '/portal/admin/perfil/',
 };

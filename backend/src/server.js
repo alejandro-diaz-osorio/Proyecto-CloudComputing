@@ -35,7 +35,7 @@ app.use(logger);
 // ── Router principal: todo cuelga de /api (nginx hace proxy /api → :3000) ──
 const api = express.Router();
 
-// Límite de intentos en login/registro (evita fuerza bruta)
+// Límite de intentos en autenticación (evita fuerza bruta y abuso de correos)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30,

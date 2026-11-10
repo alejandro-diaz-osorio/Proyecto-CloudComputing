@@ -16,7 +16,15 @@ const camposTexto = [
 <form id="register-form" class="auth-form" novalidate>
   <Alert id="register-alert" />
 
-  {camposTexto.map(({ label, ...campo }) => (
+  <div class="auth-form__row">
+    {camposTexto.slice(0, 2).map(({ label, ...campo }) => (
+      <Field id={campo.id} name={campo.name} label={label}>
+        <InputBox {...campo} />
+      </Field>
+    ))}
+  </div>
+
+  {camposTexto.slice(2).map(({ label, ...campo }) => (
     <Field id={campo.id} name={campo.name} label={label}>
       <InputBox {...campo} />
     </Field>

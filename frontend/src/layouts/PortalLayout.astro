@@ -34,8 +34,8 @@ const inicio = rol === 'admin' ? RUTAS.portalAdmin : RUTAS.portal;
     <div class="portal-shell group invisible" data-nav-open="false">
       <PortalHeader inicio={inicio} />
       <PortalSidebar pathname={Astro.url.pathname} items={items} titulo={tituloMenu} />
-      <div class="portal-backdrop fixed inset-[70px_0_0] z-[15] hidden bg-[rgb(20_24_34_/_0.35)] group-data-[nav-open=true]:block lg:hidden" data-nav-close></div>
-      <main class="ml-0 min-h-screen pt-[70px] lg:ml-[216px]">
+      <div class="portal-backdrop fixed inset-[70px_0_0] z-15 hidden bg-[rgb(20_24_34/0.35)] group-data-[nav-open=true]:block lg:hidden" data-nav-close></div>
+      <main class="ml-0 min-h-screen px-17.5 pt-21 lg:ml-54">
         <slot />
       </main>
     </div>

@@ -1,0 +1,5 @@
+RENAME TABLE password_reset_tokens TO tokens_recuperacion_contrasena;
+
+ALTER TABLE tokens_recuperacion_contrasena
+  RENAME INDEX uq_password_reset_token_hash TO uq_token_recuperacion_hash,
+  RENAME INDEX ix_password_reset_usuario TO ix_token_recuperacion_usuario;

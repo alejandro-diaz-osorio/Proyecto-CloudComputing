@@ -1,16 +1,25 @@
 ---
-import { RUTAS } from '../../../lib/routes.js';
-import Field from './Field.astro';
-import InputBox from './InputBox.astro';
-import PasswordField from './PasswordField.astro';
-import Alert from './Alert.astro';
-import Icon from './Icon.astro';
+import { RUTAS } from "../../../lib/routes.js"
+import Field from "./Field.astro"
+import InputBox from "./InputBox.astro"
+import PasswordField from "./PasswordField.astro"
+import Alert from "./Alert.astro"
+import Icon from "./Icon.astro"
 ---
+
 <!-- La redirección tras iniciar sesión la hace AuthPanel al detectar status === 'authenticated'. -->
-<form id="login-form" class="auth-form" novalidate>
+<form
+  id="login-form"
+  class="auth-form"
+  novalidate
+>
   <Alert id="login-alert" />
 
-  <Field id="login-email" name="email" label="Correo electrónico">
+  <Field
+    id="login-email"
+    name="email"
+    label="Correo electrónico"
+  >
     <InputBox
       id="login-email"
       name="email"
@@ -29,11 +38,19 @@ import Icon from './Icon.astro';
     placeholder="Ingresa tu contraseña"
     autocomplete="current-password"
   >
-    <a slot="aside" class="auth-link auth-link--small" href={RUTAS.recuperar}>¿Olvidaste tu contraseña?</a>
+    <a
+      slot="aside"
+      class="auth-link auth-link--small"
+      href={RUTAS.recuperar}
+      >¿Olvidaste tu contraseña?</a
+    >
   </PasswordField>
 
   <label class="auth-check">
-    <input type="checkbox" name="recordar" />
+    <input
+      type="checkbox"
+      name="recordar"
+    />
     <span>Recordarme en este dispositivo</span>
   </label>
 
@@ -43,79 +60,95 @@ import Icon from './Icon.astro';
     data-label-idle="Ingresar a mi cuenta"
     data-label-busy="Ingresando…"
   >
-    <span class="auth-spinner" aria-hidden="true" hidden></span>
+    <span
+      class="auth-spinner"
+      aria-hidden="true"
+      hidden
+    ></span>
     <span data-label>Ingresar a mi cuenta</span>
-    <Icon name="arrow-right" data-icon />
+    <Icon
+      name="arrow-right"
+      data-icon
+    />
   </button>
 </form>
 
 <script>
-  import { iniciarSesion } from '../session.js';
-  import { validarLogin, erroresDelServidor } from '../validation.js';
+  import { iniciarSesion } from "../session.js"
+  import { validarLogin, erroresDelServidor } from "../validation.js"
   import {
-    setFieldError, mostrarErrores, mostrarAlerta, setEnviando, enfocarPrimerError,
-  } from '../forms.js';
+    setFieldError,
+    mostrarErrores,
+    mostrarAlerta,
+    setEnviando,
+    enfocarPrimerError,
+  } from "../forms.js"
 
-  const CAMPOS = ['email', 'password'];
-  const form = document.querySelector<HTMLFormElement>('#login-form');
+  const CAMPOS = ["email", "password"]
+  const form = document.querySelector<HTMLFormElement>("#login-form")
 
   if (form) {
-    const alerta = form.querySelector<HTMLElement>('#login-alert');
-    const boton = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
-    let enviando = false;
+    const alerta = form.querySelector<HTMLElement>("#login-alert")
+    const boton = form.querySelector<HTMLButtonElement>(
+      'button[type="submit"]',
+    )!
+    let enviando = false
 
     const valores = () => ({
-      email: (form.elements.namedItem('email') as HTMLInputElement).value,
-      password: (form.elements.namedItem('password') as HTMLInputElement).value,
-      recordar: (form.elements.namedItem('recordar') as HTMLInputElement).checked,
-    });
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      password: (form.elements.namedItem("password") as HTMLInputElement).value,
+      recordar: (form.elements.namedItem("recordar") as HTMLInputElement)
+        .checked,
+    })
 
     // Al escribir se limpia el error de ese campo.
-    form.addEventListener('input', (e) => {
-      const { name } = e.target as HTMLInputElement;
-      if (CAMPOS.includes(name)) setFieldError(form, name, '');
-    });
+    form.addEventListener("input", (e) => {
+      const { name } = e.target as HTMLInputElement
+      if (CAMPOS.includes(name)) setFieldError(form, name, "")
+    })
 
     // Al salir de un campo se valida solo ese campo.
-    form.addEventListener('focusout', (e) => {
-      const { name } = e.target as HTMLInputElement;
-      if (CAMPOS.includes(name)) setFieldError(form, name, validarLogin(valores())[name]);
-    });
+    form.addEventListener("focusout", (e) => {
+      const { name } = e.target as HTMLInputElement
+      if (CAMPOS.includes(name))
+        setFieldError(form, name, validarLogin(valores())[name])
+    })
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (enviando) return;
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault()
+      if (enviando) return
 
-      const errs = validarLogin(valores());
-      mostrarErrores(form, CAMPOS, errs);
-      mostrarAlerta(alerta, '');
-      if (enfocarPrimerError(form, errs)) return;
+      const errs = validarLogin(valores())
+      mostrarErrores(form, CAMPOS, errs)
+      mostrarAlerta(alerta, "")
+      if (enfocarPrimerError(form, errs)) return
 
-      enviando = true;
-      setEnviando(boton, true);
+      enviando = true
+      setEnviando(boton, true)
       try {
-        await iniciarSesion(valores());
+        await iniciarSesion(valores())
         // Éxito: AuthPanel redirige al detectar la sesión; el botón queda en "Ingresando…".
       } catch (err: any) {
-        const delServidor = erroresDelServidor(err);
-        if (Object.keys(delServidor).length) mostrarErrores(form, CAMPOS, delServidor);
+        const delServidor = erroresDelServidor(err)
+        if (Object.keys(delServidor).length)
+          mostrarErrores(form, CAMPOS, delServidor)
         mostrarAlerta(
           alerta,
           err.status === 401 || err.status === 400
-            ? 'Correo o contraseña incorrectos.'
-            : err.mensaje || 'No pudimos iniciar sesión. Inténtalo de nuevo.',
-        );
-        enviando = false;
-        setEnviando(boton, false);
+            ? "Correo o contraseña incorrectos."
+            : err.mensaje || "No pudimos iniciar sesión. Inténtalo de nuevo.",
+        )
+        enviando = false
+        setEnviando(boton, false)
       }
-    });
+    })
 
     // Si el usuario vuelve con "atrás" (bfcache), el formulario no debe quedar bloqueado.
-    window.addEventListener('pageshow', (e) => {
+    window.addEventListener("pageshow", (e) => {
       if (e.persisted) {
-        enviando = false;
-        setEnviando(boton, false);
+        enviando = false
+        setEnviando(boton, false)
       }
-    });
+    })
   }
 </script>

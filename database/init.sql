@@ -31,6 +31,22 @@ CREATE TABLE usuarios (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
+-- 1b. TOKENS_RECUPERACION_CONTRASENA: enlaces temporales de un solo uso
+-- ---------------------------------------------------------------------
+CREATE TABLE tokens_recuperacion_contrasena (
+  id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  usuario_id  INT UNSIGNED NOT NULL,
+  token_hash  CHAR(64) NOT NULL,
+  expires_at  DATETIME NOT NULL,
+  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_token_recuperacion_hash (token_hash),
+  KEY ix_token_recuperacion_usuario (usuario_id),
+  CONSTRAINT fk_token_recuperacion_usuario FOREIGN KEY (usuario_id)
+    REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
 -- 2. SERVICIOS: catálogo editable (antes era una lista fija en el formulario)
 -- ---------------------------------------------------------------------
 CREATE TABLE servicios (

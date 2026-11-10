@@ -1,6 +1,7 @@
 ---
 // Layout propio de las pantallas de acceso: sin navbar/footer del sitio público.
 import '../styles/auth.css';
+import '../styles/global.css';
 
 interface Props {
   title?: string;
@@ -16,6 +17,7 @@ const { title = 'SOLUCIA · Portal de proyectos', description = 'Accede o crea t
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
