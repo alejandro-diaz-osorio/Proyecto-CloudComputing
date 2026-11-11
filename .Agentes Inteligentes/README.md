@@ -1,59 +1,30 @@
-# Sistema inteligente de asesoría y gestión de cotizaciones
+# Asistente Sol para estructurar descripciones de proyectos
 
 ## Descripción
 
-El sistema está diseñado para asistir a los clientes de SOLUCIA S.A.S. en la
-definición, mejora y seguimiento de sus solicitudes de cotización para
-proyectos de arquitectura, diseño y construcción.
+Sol ayuda al cliente a organizar el texto del campo «Describe lo que imaginas
+para tu proyecto» durante la creación de una solicitud. Cada turno devuelve
+una descripción editable; el cliente decide si la usa y puede seguir
+modificándola. Si falta contexto importante, Sol hace una sola pregunta
+concreta por turno (por ejemplo, qué espacios se van a remodelar y qué se
+quiere cambiar). No exige completar un cuestionario ni reemplaza la evaluación
+de un arquitecto.
 
-La solución utiliza un agente supervisor para coordinar el flujo de atención y
-un agente asesor para analizar los requisitos del proyecto, identificar la
-información faltante y proponer recomendaciones. También contempla el
-registro de las solicitudes y la consulta de su estado.
-
-El sistema orienta al cliente, pero las evaluaciones técnicas, comerciales y
-la aprobación final de las cotizaciones permanecen bajo responsabilidad del
-personal de SOLUCIA.
-
-## Objetivo general
-
-Diseñar un sistema inteligente de asesoría y gestión de cotizaciones para
-SOLUCIA S.A.S., basado en agentes de inteligencia artificial, que permita
-orientar a los clientes en la definición de sus proyectos.
-
-## Entregables
-
-1. Notebook inicial con el flujo entre el agente supervisor y el agente
-   asesor.
-2. Descripción de la arquitectura y del flujo de información.
-3. Implementación del agente supervisor.
-4. Implementación del agente asesor.
-5. Flujo de registro y consulta de solicitudes.
-6. Demostración conversacional del sistema.
-7. Casos de prueba y presentación de resultados.
-
-## Arquitectura propuesta
+## Arquitectura
 
 ```text
-Cliente
-   │
-   ▼
-Interfaz conversacional
-   │
-   ▼
-Agente supervisor
-   │
-   ├── Agente asesor
-   │      ├── Analiza requisitos
-   │      ├── Identifica información faltante
-   │      └── Genera recomendaciones
-   │
-   └── Gestión de solicitudes
-          ├── Registra la solicitud
-          └── Consulta el estado y el historial
+Formulario de solicitud → Backend → Servicio Sol (FastAPI/LangGraph)
+                                     ├── Gemini si hay GOOGLE_API_KEY
+                                     └── Estructuración por reglas si no hay IA
 ```
 
-## Notebook inicial
+El servicio no necesita una base vectorial para estructurar el texto que el
+cliente acaba de escribir. La ficha y el historial de chat se envían desde la
+interfaz en cada petición; la solicitud se guarda por separado en la base de
+datos de la aplicación.
 
-El notebook [`agente.ipynb`](./agente.ipynb) contiene la demostración inicial
-del funcionamiento del sistema multiagente.
+Si más adelante se desea consultar ejemplos de proyectos o documentación
+interna, se puede añadir una base vectorial independiente (por ejemplo,
+Qdrant) para recuperar solo esos documentos como contexto. No se deben
+indexar datos privados de clientes sin definir antes su autorización,
+retención y controles de acceso.

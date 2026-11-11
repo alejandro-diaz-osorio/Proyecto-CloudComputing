@@ -1,4 +1,5 @@
 """Servicio FastAPI de Sol. Solo debe ser alcanzable desde el backend Express (red interna)."""
+
 import hmac
 import logging
 import os
@@ -10,7 +11,12 @@ from pydantic import BaseModel, Field
 
 load_dotenv()
 
-from .grafo import VERSION, modo_actual, sol_graph  # noqa: E402  (después de cargar .env)
+from .grafo import (
+    VERSION,
+    SolicitudState,
+    modo_actual,
+    sol_graph,
+)  # noqa: E402  (después de cargar .env)
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("sol")
@@ -34,16 +40,22 @@ class Mensaje(BaseModel):
 
 class Entrada(BaseModel):
     tipo_proyecto: str = Field(default="", max_length=40)
-    descripcion: str = Field(default="", max_length=4000)  # campo "Describe lo que imaginas..."
+    descripcion: str = Field(
+        default="", max_length=4000
+    )  # campo "Describe lo que imaginas..."
     mensaje: str = Field(default="", max_length=1000)
     historial: list[Mensaje] = Field(default_factory=list, max_length=30)
-    ficha: dict[str, str] = Field(default_factory=dict, max_length=30)  # ficha del turno anterior
+    ficha: dict[str, str] = Field(
+        default_factory=dict, max_length=30
+    )  # ficha del turno anterior
 
 
 class Salida(BaseModel):
     respuesta: str
     borrador: str  # vacío si Sol todavía no propone un borrador
-    ficha: dict[str, str]  # ficha actualizada: el cliente la guarda y la reenvía en el siguiente turno
+    ficha: dict[
+        str, str
+    ]  # ficha actualizada: el cliente la guarda y la reenvía en el siguiente turno
     modo: str
     version: str = ""  # versión del grafo que respondió (para comprobar el despliegue)
 
@@ -53,11 +65,15 @@ def health():
     return {"status": "ok", "modo": modo_actual(), "version": VERSION}
 
 
-@app.post("/sol/analizar", response_model=Salida, dependencies=[Depends(verificar_token)])
+@app.post(
+    "/sol/analizar", response_model=Salida, dependencies=[Depends(verificar_token)]
+)
 async def analizar(datos: Entrada):
     if not datos.mensaje.strip() and not datos.descripcion.strip():
-        raise HTTPException(status_code=422, detail="Escribe un mensaje o describe tu proyecto.")
-    estado = {
+        raise HTTPException(
+            status_code=422, detail="Escribe un mensaje o describe tu proyecto."
+        )
+    estado: SolicitudState = {
         "tipo_proyecto": datos.tipo_proyecto,
         "descripcion": datos.descripcion,
         "mensaje_usuario": datos.mensaje,
