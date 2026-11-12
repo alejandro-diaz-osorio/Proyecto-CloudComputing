@@ -251,7 +251,7 @@ class SalidaRedaccion(BaseModel):
         description="Una frase corta (máx. 15 palabras) que reconoce lo último que dijo el cliente. SIN preguntas ni signos de interrogación."
     )
     borrador: str = Field(
-        description="Descripción organizada en primera persona, máximo 180 palabras."
+        description="Un único párrafo fluido en primera persona, sin título, etiquetas ni listas, máximo 180 palabras."
     )
     pregunta: str = Field(
         description="Una pregunta concreta para complementar el proyecto, o cadena vacía si ya está suficientemente descrito."
@@ -276,7 +276,7 @@ SISTEMA_REDACTOR = """Eres Sol, el asistente de SOLUCIA S.A.S. Tu tarea es ayuda
 
 1) `acuse`: UNA frase breve y natural que reconozca lo que contó el cliente. No repitas sus datos como un formulario ni uses elogios exagerados. No hagas preguntas aquí. No des precios, plazos ni aprobaciones.
 
-2) `borrador`: siempre devuelve una versión claramente mejor organizada que el texto original (máx. 180 palabras, uno o dos párrafos), no te limites a cambiar una palabra o repetir la frase. Integra el propósito, los espacios/necesidades y los cambios que la persona sí mencionó. Incluye solo los datos concretos de la ficha: no inventes medidas, normativa, cifras, preferencias ni decisiones de diseño. Ignora los campos 'no sabe' y 'no aplica'.
+2) `borrador`: devuelve una descripción bien redactada en UN SOLO PÁRRAFO (máx. 180 palabras), en primera persona, sin título, etiquetas, listas ni saltos de línea. Mejora la redacción sin cambiar la idea. Integra el propósito, los espacios/necesidades y los cambios que la persona sí mencionó. Incluye solo los datos concretos de la ficha: no inventes medidas, normativa, cifras, preferencias ni decisiones de diseño. Ignora los campos 'no sabe' y 'no aplica'.
 
 3) `pregunta` y `campo_pregunta`: si falta información útil para entender el proyecto, haz UNA sola pregunta breve, abierta y concreta para avanzar. Prioriza el alcance/cambios cuando el proyecto sea una remodelación («¿Qué espacios quieres remodelar y qué te gustaría cambiar?»); si eso ya está claro, pregunta por el uso/personas, luego por los espacios prioritarios. No preguntes por presupuesto, ubicación ni plazos: ya están en el formulario. No repitas preguntas anteriores ni hagas una lista de preguntas. Usa como `campo_pregunta` el campo que esperas que responda. Si la descripción ya está suficientemente clara, devuelve ambos campos vacíos.
 
@@ -421,16 +421,57 @@ def _redactar(
 
 
 def _borrador_desde_ficha(ficha: dict[str, str]) -> str:
-    secciones: dict[str, list[str]] = {}
-    for campo in ORDEN:
-        dato = ficha.get(campo, "")
-        if dato and dato.lower() not in _SIN_DATO:
-            etiqueta = _ETIQUETA_BORRADOR[campo]
-            secciones.setdefault(etiqueta, []).append(dato)
-    return "\n".join(
-        f"{etiqueta}: {', '.join(datos)}."
-        for etiqueta, datos in secciones.items()
-    )[:1200]
+    datos = {
+        campo: dato
+        for campo in ORDEN
+        if (dato := normalizar_texto(ficha.get(campo, "")))
+        and dato.lower() not in _SIN_DATO
+    }
+    tipo = datos.get("tipo", "").rstrip(" .")
+    base = f"El proyecto consiste en {tipo}" if tipo else ""
+    frases: list[str] = []
+
+    uso = [datos[c] for c in ("uso", "personas") if datos.get(c)]
+    if uso:
+        frases.append(f"está pensado para {' y '.join(uso)}")
+
+    caracteristicas = [
+        datos[c]
+        for c in ("pisos", "habitaciones", "banos", "tamano")
+        if datos.get(c)
+    ]
+    if caracteristicas:
+        frases.append(f"contará con {' y '.join(caracteristicas)}")
+
+    espacios = [
+        datos[c]
+        for c in ("espacios_principales", "espacios_adicionales", "distribucion")
+        if datos.get(c)
+    ]
+    if espacios:
+        frases.append(f"incluirá {' y '.join(espacios)}")
+
+    preferencias = [
+        datos[c]
+        for c in ("ambiente", "estilo_materiales", "luz_exterior")
+        if datos.get(c)
+    ]
+    if preferencias:
+        frases.append(f"buscará {' y '.join(preferencias)}")
+    if datos.get("mascotas"):
+        frases.append(f"también tendrá en cuenta las necesidades de {datos['mascotas']}")
+    if datos.get("indispensables"):
+        frases.append(f"priorizará {datos['indispensables']}")
+
+    if not base and not frases:
+        return ""
+    if not base:
+        base = "El proyecto " + frases.pop(0)
+    texto = base
+    if frases:
+        texto += " y " + frases.pop(0)
+        texto += "".join(f"; además, {frase}" for frase in frases)
+    return f"{texto[0].upper()}{texto[1:].rstrip(' .,;')}."[:1200]
 
 
 _ACUSE_FRIO = re.compile(
@@ -514,6 +555,19 @@ def _responder_con_modelo(
             )
         if not b:
             problemas.append("Falta el borrador en `borrador`.")
+        if b and (
+            "\n" in b
+            or re.match(r"^\s*(?:[-*•]|\d+[.)])\s", b)
+            or re.match(
+                r"^\s*(?:proyecto|uso y usuarios|características|necesidades|"
+                r"espacios y distribución|preferencias|prioridades)\s*:",
+                b,
+                re.IGNORECASE,
+            )
+        ):
+            problemas.append(
+                "El borrador debe ser un solo párrafo, sin encabezados ni listas."
+            )
         pregunta = (salida.pregunta or "").strip()
         campo_pregunta = (salida.campo_pregunta or "").strip()
         if bool(pregunta) != bool(campo_pregunta):
@@ -568,52 +622,27 @@ _ORDEN_BORRADOR = re.compile(
     r")\W*$"
 )
 
-_ETIQUETA_BORRADOR = {
-    "tipo": "Proyecto",
-    "uso": "Uso y usuarios",
-    "personas": "Uso y usuarios",
-    "pisos": "Características",
-    "habitaciones": "Características",
-    "banos": "Características",
-    "mascotas": "Necesidades",
-    "tamano": "Características",
-    "espacios_principales": "Espacios y distribución",
-    "distribucion": "Espacios y distribución",
-    "espacios_adicionales": "Espacios y distribución",
-    "ambiente": "Preferencias",
-    "estilo_materiales": "Preferencias",
-    "luz_exterior": "Preferencias",
-    "indispensables": "Prioridades",
-}
-
-
 def _borrador_demo(state: SolicitudState) -> str:
     vistos: set[str] = set()
-    secciones: dict[str, list[str]] = {}
+    partes: list[str] = []
     for t in _textos_cliente(state):
-        for fragmento in re.split(r";|(?<=[.!?])\s+|,\s*|\s+(?:y|ademas|tambien)\s+", t, flags=re.IGNORECASE):
-            texto = fragmento.strip(" \t\r\n,;.!?")
-            clave = _sin_tildes(texto)
-            if (
-                len(texto) < 3
-                or clave in vistos
-                or _SALUDO.fullmatch(clave)
-                or _NO_SABE.fullmatch(clave)
-                or _ORDEN_BORRADOR.fullmatch(clave)
-            ):
-                continue
-            vistos.add(clave)
-            campo = next(
-                (c["id"] for c in CAMPOS if re.search(c["patron"], clave)),
-                None,
-            )
-            etiqueta = _ETIQUETA_BORRADOR.get(campo or "", "Idea general")
-            secciones.setdefault(etiqueta, []).append(texto)
+        texto = normalizar_texto(t).strip(" \t\r\n,;")
+        clave = _sin_tildes(texto).rstrip(".!?")
+        if (
+            len(texto) < 3
+            or clave in vistos
+            or _SALUDO.fullmatch(clave)
+            or _NO_SABE.fullmatch(clave)
+            or _ORDEN_BORRADOR.fullmatch(clave)
+        ):
+            continue
+        vistos.add(clave)
+        texto = texto[0].upper() + texto[1:]
+        if texto[-1] not in ".!?":
+            texto += "."
+        partes.append(texto)
 
-    return "\n".join(
-        f"{etiqueta}: {', '.join(partes)}."
-        for etiqueta, partes in secciones.items()
-    )[:1200]
+    return " ".join(partes)[:1200]
 
 
 def _responder_demo(
