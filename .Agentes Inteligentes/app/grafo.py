@@ -293,7 +293,7 @@ def _llm(temperatura: float = 0.4):
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         return ChatGoogleGenerativeAI(
-            model=os.getenv("SOL_MODEL", "gemini-2.5-flash"),
+            model=os.getenv("SOL_MODEL", "gemini-3.8-flash"),
             temperature=temperatura,
             timeout=30,
             max_retries=1,
