@@ -1,7 +1,9 @@
 // Contrato con el backend (routes/auth.js + authController.js).
 //
 //   POST /api/auth/login     { email, password }                       → { token, usuario }
-//   POST /api/auth/register  { nombre, apellido, email, password, telefono? } → 201 { mensaje, token, usuario }
+//   POST /api/auth/register  { nombre, apellido, email, password, telefono? } → 201 { mensaje }
+//   POST /api/auth/verify-email { token }                               → { mensaje }
+//   POST /api/auth/resend-verification { email }                        → { mensaje }
 //   usuario = { id, nombre, apellido, email, telefono, rol: 'cliente' | 'admin' }
 //   Errores: { mensaje }  (400 datos inválidos · 401 credenciales · 403 cuenta desactivada · 409 email repetido · 429 límite)
 //
@@ -12,6 +14,8 @@ import { http, ApiError } from '../../lib/http.js';
 const RUTAS_API = {
   login: '/auth/login',
   registro: '/auth/register',
+  verificar: '/auth/verify-email',
+  reenviarVerificacion: '/auth/resend-verification',
   recuperar: '/auth/forgot-password',
   restablecer: '/auth/reset-password',
 };
@@ -49,8 +53,19 @@ export const authApi = {
       password,
     };
     if (telefono) cuerpo.telefono = telefono;
-    const data = await http.post(RUTAS_API.registro, cuerpo, { auth: false });
-    return normalizar(data); // el backend ya devuelve token + usuario al registrar
+    return http.post(RUTAS_API.registro, cuerpo, { auth: false });
+  },
+
+  async verificarEmail({ token }) {
+    return http.post(RUTAS_API.verificar, { token }, { auth: false });
+  },
+
+  async reenviarVerificacion({ email }) {
+    return http.post(
+      RUTAS_API.reenviarVerificacion,
+      { email: email.trim().toLowerCase() },
+      { auth: false },
+    );
   },
 
   async solicitarRecuperacion({ email }) {

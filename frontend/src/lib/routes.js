@@ -7,6 +7,7 @@ export const RUTAS = {
   cotizar: '/cotizar',
   nosotros: '/nosotros',
   recuperar: '/recuperar/',
+  verificar: '/verificar/',
   terminos: '/terminos/',
   privacidad: '/privacidad/',
 

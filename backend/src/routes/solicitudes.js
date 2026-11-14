@@ -14,6 +14,7 @@ router.get('/:id', solicitudController.getSolicitudById);                       
 router.patch('/:id', verifyRoles('cliente'), solicitudController.updateSolicitud);
 router.post('/:id/enviar', verifyRoles('cliente'), solicitudController.enviarSolicitud);
 router.post('/:id/tomar', verifyRoles('admin'), solicitudController.tomarSolicitud);
+router.post('/:id/rechazar', verifyRoles('admin'), solicitudController.rechazarSolicitud);
 router.delete('/:id', verifyRoles('cliente'), solicitudController.deleteSolicitud);
 
 module.exports = router;

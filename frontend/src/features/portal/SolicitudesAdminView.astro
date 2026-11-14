@@ -2,45 +2,46 @@
 import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText, Send, Lock, Download } from '@lucide/astro';
 ---
 
-<section class="adm">
-  <div class="a-top">
-    <p class="a-eyebrow">Panel de gestión</p>
-    <h1>Solicitudes de cotización</h1>
-    <p class="a-sub">Evalúa proyectos y responde a tus clientes desde un solo lugar.</p>
+<section class="min-w-0 text-(--p-ink)">
+  <div class="mb-7">
+    <p class="mb-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-(--p-accent)">Panel de gestión</p>
+    <h1 class="m-0 text-[clamp(1.9rem,3vw,2.6rem)] font-extrabold uppercase leading-[1.1] tracking-[-.01em]">Solicitudes de cotización</h1>
+    <p class="mt-1.5 text-[13px] text-(--p-muted)">Evalúa proyectos y responde a tus clientes desde un solo lugar.</p>
   </div>
 
-  <p class="a-msg" id="adm-msg" role="status">Cargando solicitudes…</p>
+  <p class="p-4 text-[13px] text-(--p-muted)" id="adm-msg" role="status">Cargando solicitudes…</p>
 
-  <div class="a-cols" id="adm-cuerpo" hidden>
-    <div class="a-card">
-      <header class="a-toolbar">
-        <div class="a-tabs" id="adm-tabs" role="group" aria-label="Filtrar por estado">
-          <button type="button" class="a-tab" data-filtro="todas" aria-pressed="true">Todas</button>
-          <button type="button" class="a-tab" data-filtro="enviada" aria-pressed="false">
-            Nuevas <span class="a-badge" id="adm-badge" hidden>0</span>
+  <div class="grid grid-cols-1 items-start gap-4.5 xl:grid-cols-[minmax(0,1fr)_380px]" id="adm-cuerpo" hidden>
+    <div class="min-w-0 border border-(--p-line) bg-(--p-card)">
+      <header class="flex flex-wrap items-center justify-between gap-3 border-b border-(--p-line) px-5 py-3.5 max-md:p-3.5">
+        <div class="flex flex-wrap gap-1" id="adm-tabs" role="group" aria-label="Filtrar por estado">
+          <button type="button" class="inline-flex cursor-pointer items-center gap-2 rounded-[3px] border-0 bg-transparent px-3.5 py-2.25 text-[11px] font-semibold text-(--p-ink) hover:bg-[#f3efe6] aria-pressed:bg-[#f9e3df] aria-pressed:text-(--p-accent) motion-safe:transition-[background-color] motion-safe:duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-filtro="todas" aria-pressed="true">Todas</button>
+          <button type="button" class="inline-flex cursor-pointer items-center gap-2 rounded-[3px] border-0 bg-transparent px-3.5 py-2.25 text-[11px] font-semibold text-(--p-ink) hover:bg-[#f3efe6] aria-pressed:bg-[#f9e3df] aria-pressed:text-(--p-accent) motion-safe:transition-[background-color] motion-safe:duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-filtro="enviada" aria-pressed="false">
+            Nuevas <span class="inline-grid h-4.5 min-w-4.5 place-items-center rounded-full bg-(--p-accent) px-1.25 text-2.25 font-bold text-white" id="adm-badge" hidden>0</span>
           </button>
-          <button type="button" class="a-tab" data-filtro="evaluacion" aria-pressed="false">En evaluación</button>
-          <button type="button" class="a-tab" data-filtro="respondida" aria-pressed="false">Respondidas</button>
-          <button type="button" class="a-tab" data-filtro="confirmada" aria-pressed="false">Confirmadas</button>
+          <button type="button" class="inline-flex cursor-pointer items-center gap-2 rounded-[3px] border-0 bg-transparent px-3.5 py-2.25 text-[11px] font-semibold text-(--p-ink) hover:bg-[#f3efe6] aria-pressed:bg-[#f9e3df] aria-pressed:text-(--p-accent) motion-safe:transition-[background-color] motion-safe:duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-filtro="evaluacion" aria-pressed="false">En evaluación</button>
+          <button type="button" class="inline-flex cursor-pointer items-center gap-2 rounded-[3px] border-0 bg-transparent px-3.5 py-2.25 text-[11px] font-semibold text-(--p-ink) hover:bg-[#f3efe6] aria-pressed:bg-[#f9e3df] aria-pressed:text-(--p-accent) motion-safe:transition-[background-color] motion-safe:duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-filtro="rechazada" aria-pressed="false">Rechazadas</button>
+          <button type="button" class="inline-flex cursor-pointer items-center gap-2 rounded-[3px] border-0 bg-transparent px-3.5 py-2.25 text-[11px] font-semibold text-(--p-ink) hover:bg-[#f3efe6] aria-pressed:bg-[#f9e3df] aria-pressed:text-(--p-accent) motion-safe:transition-[background-color] motion-safe:duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-filtro="respondida" aria-pressed="false">Respondidas</button>
+          <button type="button" class="inline-flex cursor-pointer items-center gap-2 rounded-[3px] border-0 bg-transparent px-3.5 py-2.25 text-[11px] font-semibold text-(--p-ink) hover:bg-[#f3efe6] aria-pressed:bg-[#f9e3df] aria-pressed:text-(--p-accent) motion-safe:transition-[background-color] motion-safe:duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-filtro="confirmada" aria-pressed="false">Confirmadas</button>
         </div>
-        <label class="a-search">
+        <label class="flex h-9.5 w-60 max-w-full items-center gap-2 rounded border border-(--p-line) bg-white px-3 text-(--p-muted) focus-within:border-(--p-accent) max-md:w-full">
           <Search size={16} stroke-width={1.6} />
-          <input type="search" id="adm-buscar" placeholder="Buscar solicitud…" autocomplete="off" aria-label="Buscar solicitud" />
+          <input class="min-w-0 flex-1 border-0 bg-transparent font-[inherit] text-[12px] text-(--p-ink) outline-0" type="search" id="adm-buscar" placeholder="Buscar solicitud…" autocomplete="off" aria-label="Buscar solicitud" />
         </label>
       </header>
 
-      <div class="a-head" aria-hidden="true">
+      <div class="hidden grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)_112px_118px] items-center gap-4 border-b border-(--p-line) px-5 py-3 text-2.25 font-bold uppercase tracking-[.08em] text-(--p-muted) md:grid" aria-hidden="true">
         <span>Solicitud / Cliente</span><span>Proyecto</span><span>Fecha</span><span>Estado</span>
       </div>
       <div id="adm-lista"></div>
 
-      <footer class="a-foot">
-        <small id="adm-rango">&nbsp;</small>
-        <nav class="a-pager" id="adm-pager" aria-label="Paginación"></nav>
+      <footer class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
+        <small class="text-[11px] text-(--p-muted)" id="adm-rango">&nbsp;</small>
+        <nav class="flex" id="adm-pager" aria-label="Paginación"></nav>
       </footer>
     </div>
 
-    <aside class="a-card a-detail" id="adm-detalle" aria-live="polite"></aside>
+    <aside class="sticky top-21.5 max-h-[calc(100vh-102px)] min-w-0 overflow-y-auto border border-(--p-line) bg-(--p-card) max-xl:static max-xl:max-h-none max-xl:overflow-visible" id="adm-detalle" aria-live="polite"></aside>
   </div>
 
   <!-- Íconos Lucide para el HTML que se pinta desde JS -->
@@ -62,6 +63,7 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
     listarSolicitudesAdmin,
     detalleSolicitudAdmin,
     tomarSolicitud,
+    rechazarSolicitud,
     subirPropuestaPdf,
     descargarArchivo,
     crearCotizacion,
@@ -72,59 +74,131 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
 
   initSession(); // idempotente: este script corre antes que el del layout
 
+  type Estado = keyof typeof ESTADOS;
+  type Solicitud = {
+    id: string | number;
+    codigo: string;
+    titulo: string;
+    tipoProyecto: string;
+    descripcion: string;
+    ubicacion: string;
+    servicio: string;
+    clienteId: string | number | null;
+    cliente: string | null;
+    clienteEmail: string;
+    area: string;
+    presupuesto: string;
+    plazoInicio: string;
+    estado: Estado;
+    fecha: string;
+    creada: number | null;
+    orden: number;
+  };
+  type Archivo = {
+    id: string | number;
+    nombre: string;
+    categoria: string;
+    tamano: string;
+  };
+  type Cotizacion = {
+    id: string | number;
+    estado: string;
+    version: number;
+    titulo: string;
+    valor: number;
+    moneda: string;
+    vigencia: number | null;
+    ivaIncluido: boolean | null;
+    descripcion: string;
+    archivoId: string | number | null;
+    enviada: string;
+    vence: string;
+  };
+  type SolicitudDetalle = Solicitud & {
+    archivos: Archivo[];
+    cotizacion: Cotizacion | null;
+    borrador: Cotizacion | null;
+  };
+  type EstadoDetalle = 'cargando' | 'error' | 'ok';
+  type RespuestaId = {
+    id?: string | number | null;
+    archivo?: { id?: string | number | null };
+    cotizacion?: { id?: string | number | null };
+  };
+
   const POR_PAGINA = 8;
 
-  const $ = (id) => document.getElementById(id);
-  const esc = (t) =>
-    String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const ico = (n) => $(`ico-${n}`)?.innerHTML ?? '';
-  const norm = (t) => String(t ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const $ = <T extends HTMLElement>(id: string): T => {
+    const element = document.querySelector<T>(`#${id}`);
+    if (!element) throw new Error(`No se encontró el elemento #${id}.`);
+    return element;
+  };
+  const esc = (t: unknown): string => {
+    const entidades: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+    return String(t ?? '').replace(/[&<>"']/g, (c) => entidades[c] ?? c);
+  };
+  const ico = (n: string): string => $<HTMLTemplateElement>(`ico-${n}`).innerHTML;
+  const norm = (t: unknown): string => String(t ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const mensajeError = (err: unknown, fallback: string): string =>
+    err instanceof Error ? err.message : fallback;
 
-  const msg = $('adm-msg');
-  const cuerpo = $('adm-cuerpo');
-  const listaEl = $('adm-lista');
-  const detalleEl = $('adm-detalle');
-  const pagerEl = $('adm-pager');
-  const rangoEl = $('adm-rango');
-  const badgeEl = $('adm-badge');
-  const tabsEl = $('adm-tabs');
-  const buscarEl = $('adm-buscar');
+  const msg = $<HTMLParagraphElement>('adm-msg');
+  const cuerpo = $<HTMLDivElement>('adm-cuerpo');
+  const listaEl = $<HTMLDivElement>('adm-lista');
+  const detalleEl = $<HTMLElement>('adm-detalle');
+  const pagerEl = $<HTMLElement>('adm-pager');
+  const rangoEl = $<HTMLElement>('adm-rango');
+  const badgeEl = $<HTMLSpanElement>('adm-badge');
+  const tabsEl = $<HTMLDivElement>('adm-tabs');
+  const buscarEl = $<HTMLInputElement>('adm-buscar');
 
-  let todas = [];
-  let activa = null;
+  let todas: Solicitud[] = [];
+  let activa: Solicitud | null = null;
   let filtro = 'todas';
   let texto = '';
   let pagina = 1;
   let cargado = false;
-  const cache = new Map(); // solicitudId -> detalle
+  const cache = new Map<string | number, SolicitudDetalle>(); // solicitudId -> detalle
 
-  const CATEGORIAS = { referencia: 'Referencia', plano: 'Plano' };
-  const ESTADOS_COT = { borrador: 'Borrador', vigente: 'Vigente', reemplazada: 'Reemplazada', confirmada: 'Confirmada' };
+  const CATEGORIAS: Record<string, string> = { referencia: 'Referencia', plano: 'Plano' };
+  const ESTADOS_COT: Record<string, string> = { borrador: 'Borrador', vigente: 'Vigente', reemplazada: 'Reemplazada', confirmada: 'Confirmada' };
+  const TONO_CLASES: Record<string, string> = {
+    accent: 'bg-[#f9e3df] text-(--p-accent)',
+    warn: 'bg-[#f3ead4] text-[#8a6a1f]',
+    ok: 'bg-[#dcebe2] text-[#2f6b4a]',
+    info: 'bg-[#e4ecf5] text-[#3f6aa0]',
+  };
 
-  const fmtMoneda = (n, moneda = 'COP') =>
+  const fmtMoneda = (n: number, moneda = 'COP') =>
     new Intl.NumberFormat('es-CO', { style: 'currency', currency: moneda, maximumFractionDigits: 0 }).format(n);
   // Cotizaciones creadas en un intento de envío que falló a medias: se reutilizan al reintentar.
-  const intentos = new Map(); // solicitudId -> { id: cotizacionId, archivoId }
+  const intentos = new Map<string, { id: string | number | null; archivoId: string | number | null }>(); // solicitudId -> { id: cotizacionId, archivoId }
 
-  const nombreDe = (s) => s.cliente ?? `Cliente #${s.clienteId ?? '—'}`;
-  const inicialesDe = (s) => {
+  const nombreDe = (s: Solicitud): string => s.cliente ?? `Cliente #${s.clienteId ?? '—'}`;
+  const inicialesDe = (s: Solicitud): string => {
     if (!s.cliente) return 'CL';
     const p = s.cliente.split(/\s+/).filter(Boolean);
     return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase() || 'CL';
   };
-  const estadoDe = (s) => ESTADOS[s.estado] ?? ESTADOS.enviada;
-  const pill = (s, extra = '') => {
+  const estadoDe = (s: Solicitud) => ESTADOS[s.estado] ?? ESTADOS.enviada;
+  const pill = (s: Solicitud, big = false): string => {
     const e = estadoDe(s);
-    return `<span class="a-pill a-pill--${e.tono} ${extra}"><i class="a-dot"></i>${e.label}</span>`;
+    return `<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-[3px] text-[10px] font-semibold ${TONO_CLASES[e.tono]} ${big ? 'ml-auto self-start px-3 py-1.25 max-md:ml-0' : ''}"><i class="h-1.25 w-1.25 rounded-full bg-current"></i>${e.label}</span>`;
   };
 
-  function mensaje(texto) {
+  function mensaje(texto: string) {
     msg.hidden = false;
     msg.textContent = texto;
   }
 
   // ── Filtrado y lista ───────────────────────────────────────────────────
-  function visibles() {
+  function visibles(): Solicitud[] {
     const q = norm(texto.trim());
     return todas.filter((s) => {
       if (filtro !== 'todas' && s.estado !== filtro) return false;
@@ -136,34 +210,35 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   function pintarBadge() {
     const nuevas = todas.filter((s) => s.estado === 'enviada').length;
     badgeEl.hidden = nuevas === 0;
-    badgeEl.textContent = nuevas;
+    badgeEl.textContent = String(nuevas);
   }
 
-  function filaHtml(s) {
+  function filaHtml(s: Solicitud): string {
     return `
-      <button type="button" class="a-row" data-id="${esc(s.id)}" aria-current="${s.id === activa?.id}">
-        <span class="a-who">
-          <span class="a-avatar">${esc(inicialesDe(s))}</span>
-          <span class="a-stack"><strong>${esc(nombreDe(s))}</strong><small class="a-mono">${esc(s.codigo)}</small></span>
+      <button type="button" class="relative grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-2.5 border-x-0 border-t-0 border-b border-(--p-line) bg-transparent px-5 py-4 text-left [grid-template-areas:'who_state'_'proj_proj'_'date_date'] [font:inherit] text-inherit hover:bg-[#f8f5ee] aria-[current=true]:bg-[#f3efe6] aria-[current=true]:before:absolute aria-[current=true]:before:bottom-0 aria-[current=true]:before:left-0 aria-[current=true]:before:top-0 aria-[current=true]:before:w-[3px] aria-[current=true]:before:bg-(--p-accent) aria-[current=true]:before:content-[''] motion-safe:transition-[background-color] motion-safe:duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent) md:grid-cols-[minmax(0,1.1fr)_minmax(0,1.3fr)_112px_118px] md:gap-4 md:[grid-template-areas:none]" data-id="${esc(s.id)}" aria-current="${s.id === activa?.id}">
+        <span class="[grid-area:who] flex min-w-0 items-center gap-3 md:[grid-area:auto]">
+          <span class="grid h-8 w-8 flex-none place-items-center rounded-full bg-[#ece8df] text-[10px] font-bold text-(--p-ink)">${esc(inicialesDe(s))}</span>
+          <span class="flex min-w-0 flex-col gap-[3px]"><strong class="break-words text-[12px] font-semibold">${esc(nombreDe(s))}</strong><small class="text-[11px] tracking-[.08em] text-(--p-muted)">${esc(s.codigo)}</small></span>
         </span>
-        <span class="a-proj a-stack"><strong>${esc(s.titulo)}</strong><small>${esc(s.servicio)}</small></span>
-        <span class="a-date">${esc(s.fecha)}</span>
-        <span class="a-state">${pill(s)}</span>
+        <span class="[grid-area:proj] flex min-w-0 flex-col gap-[3px] md:[grid-area:auto]"><strong class="break-words text-[12px] font-semibold">${esc(s.titulo)}</strong><small class="text-[11px] text-(--p-muted)">${esc(s.servicio)}</small></span>
+        <span class="[grid-area:date] text-[11px] text-(--p-muted) md:[grid-area:auto]">${esc(s.fecha)}</span>
+        <span class="[grid-area:state] md:[grid-area:auto]">${pill(s)}</span>
       </button>`;
   }
 
-  function pintarPaginador(paginas) {
+  function pintarPaginador(paginas: number) {
     if (paginas <= 1) {
       pagerEl.innerHTML = '';
       return;
     }
     const ini = Math.max(1, Math.min(pagina - 2, paginas - 4));
     const fin = Math.min(paginas, ini + 4);
-    let html = `<button type="button" class="a-pg" data-pag="${pagina - 1}" aria-label="Página anterior" ${pagina === 1 ? 'disabled' : ''}>${ico('prev')}</button>`;
+    const paginaClase = 'ml-[-1px] grid h-8 min-w-8 cursor-pointer place-items-center border border-(--p-line) bg-white px-1.5 text-[11px] enabled:hover:bg-[#f3efe6] disabled:cursor-not-allowed disabled:opacity-45 aria-[current=page]:border-[var(--p-accent)] aria-[current=page]:bg-(--p-accent) aria-[current=page]:font-bold aria-[current=page]:text-white motion-safe:transition-[background-color] motion-safe:duration-150 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)';
+    let html = `<button type="button" class="${paginaClase}" data-pag="${pagina - 1}" aria-label="Página anterior" ${pagina === 1 ? 'disabled' : ''}>${ico('prev')}</button>`;
     for (let p = ini; p <= fin; p++) {
-      html += `<button type="button" class="a-pg" data-pag="${p}" ${p === pagina ? 'aria-current="page"' : ''}>${p}</button>`;
+      html += `<button type="button" class="${paginaClase}" data-pag="${p}" ${p === pagina ? 'aria-current="page"' : ''}>${p}</button>`;
     }
-    html += `<button type="button" class="a-pg" data-pag="${pagina + 1}" aria-label="Página siguiente" ${pagina === paginas ? 'disabled' : ''}>${ico('next')}</button>`;
+    html += `<button type="button" class="${paginaClase}" data-pag="${pagina + 1}" aria-label="Página siguiente" ${pagina === paginas ? 'disabled' : ''}>${ico('next')}</button>`;
     pagerEl.innerHTML = html;
   }
 
@@ -177,7 +252,7 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
 
     listaEl.innerHTML = pag.length
       ? pag.map(filaHtml).join('')
-      : `<p class="a-vacio">${todas.length ? 'Ninguna solicitud coincide con tu búsqueda.' : 'Aún no hay solicitudes enviadas.'}</p>`;
+      : `<p class="m-0 px-5 py-7 text-[12px] text-(--p-muted)">${todas.length ? 'Ninguna solicitud coincide con tu búsqueda.' : 'Aún no hay solicitudes enviadas.'}</p>`;
 
     rangoEl.textContent = total
       ? `Mostrando ${desde + 1}–${desde + pag.length} de ${total} solicitud${total === 1 ? '' : 'es'}`
@@ -187,7 +262,7 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
 
   // ── Detalle ────────────────────────────────────────────────────────────
   // El detalle viene de otro endpoint: lo que ya conocemos de la lista se conserva si falta allí.
-  function unir(s, d) {
+  function unir(s: Solicitud, d: SolicitudDetalle | null): Solicitud | SolicitudDetalle {
     if (!d) return s;
     return {
       ...s,
@@ -199,187 +274,190 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   }
 
   // Fila de archivo con descarga (la ruta exige sesión, por eso es un botón y no un enlace).
-  function htmlArchivo(a, detalle, extra = '') {
+  function htmlArchivo(a: Archivo, detalle: (string | null | undefined)[], quote = false): string {
     return `
-      <button type="button" class="a-file ${extra}" data-descargar="${esc(a.id)}" aria-label="Descargar ${esc(a.nombre)}">
-        <span class="a-file__ico">${ico('clip')}</span>
-        <span class="a-stack"><strong>${esc(a.nombre)}</strong><small>${esc(detalle.filter(Boolean).join(' · '))}</small></span>
-        <span class="a-file__dl">${ico('down')}</span>
+      <button type="button" class="group mb-2 flex w-full items-center gap-3 border border-(--p-line) bg-white p-3 text-left [font:inherit] text-inherit enabled:hover:bg-[#f8f5ee] disabled:cursor-progress disabled:opacity-70 ${quote ? 'mt-[10px] mb-0' : ''} focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-descargar="${esc(a.id)}" aria-label="Descargar ${esc(a.nombre)}">
+        <span class="grid flex-none text-(--p-muted)">${ico('clip')}</span>
+        <span class="flex min-w-0 flex-1 flex-col gap-[3px]"><strong class="break-words text-[12px] font-semibold">${esc(a.nombre)}</strong><small class="text-[11px] text-(--p-muted)">${esc(detalle.filter(Boolean).join(' · '))}</small></span>
+        <span class="grid flex-none text-(--p-muted) group-hover:text-(--p-accent)">${ico('down')}</span>
       </button>`;
   }
 
-  function htmlArchivos(d, estado) {
-    if (estado === 'cargando') return `<p class="a-note">Cargando archivos…</p>`;
-    if (estado === 'error') return `<p class="a-note a-note--error">No pudimos cargar los archivos.</p>`;
+  function htmlArchivos(d: SolicitudDetalle | null, estado: EstadoDetalle): string {
+    if (estado === 'cargando') return `<p class="mb-4.5 text-[12px] text-(--p-muted)">Cargando archivos…</p>`;
+    if (estado === 'error') return `<p class="mb-4.5 text-[12px] text-(--p-accent)">No pudimos cargar los archivos.</p>`;
     // Los archivos de categoría "cotizacion" son de la administración, no del cliente.
     const archivos = (d?.archivos ?? []).filter((a) => a.categoria !== 'cotizacion');
-    if (!archivos.length) return `<p class="a-note">El cliente no adjuntó archivos.</p>`;
+    if (!archivos.length) return `<p class="mb-4.5 text-[12px] text-(--p-muted)">El cliente no adjuntó archivos.</p>`;
     return archivos.map((a) => htmlArchivo(a, [CATEGORIAS[a.categoria] ?? a.categoria, a.tamano])).join('');
   }
 
-  function htmlQuote(c, d) {
+  function htmlQuote(c: Cotizacion, d: SolicitudDetalle | null): string {
     const valor = Number.isFinite(c.valor) ? fmtMoneda(c.valor, c.moneda) : '—';
     const pdf = c.archivoId ? (d?.archivos ?? []).find((a) => String(a.id) === String(c.archivoId)) : null;
-    const meta = [c.enviada && ['Enviada el', c.enviada], c.vence && ['Válida hasta', c.vence]].filter(Boolean);
+    const meta: [string, string][] = [];
+    if (c.enviada) meta.push(['Enviada el', c.enviada]);
+    if (c.vence) meta.push(['Válida hasta', c.vence]);
     return `
-      <div class="a-quote">
-        <div class="a-quote__head">
-          <span class="a-quote__ico">${ico('file')}</span>
-          <span class="a-stack">
-            <strong>${esc(c.titulo)}${c.version > 1 ? ` · versión ${esc(c.version)}` : ''}</strong>
-            <small>${esc([
+      <div class="border border-[#ecd2cc] bg-[#fbf1ee] p-4">
+        <div class="flex items-center gap-3 border-b border-[#ecd2cc] pb-3.5">
+          <span class="grid h-9 w-9 flex-none place-items-center rounded bg-(--p-accent) text-white">${ico('file')}</span>
+          <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
+            <strong class="break-words text-[12px] font-semibold">${esc(c.titulo)}${c.version > 1 ? ` · versión ${esc(c.version)}` : ''}</strong>
+            <small class="text-[11px] text-(--p-muted)">${esc([
               ESTADOS_COT[c.estado] ?? c.estado,
               c.vigencia ? `Vigencia de ${c.vigencia} días` : '',
               c.ivaIncluido === true ? 'IVA incluido' : c.ivaIncluido === false ? 'Más IVA' : '',
             ].filter(Boolean).join(' · '))}</small>
           </span>
         </div>
-        <div class="a-quote__val"><small>Valor de la propuesta</small><strong>${esc(valor)}</strong></div>
-        ${meta.length ? `<dl class="a-info a-quote__meta">${meta.map(([k, t]) => `<div><dt>${k}</dt><dd>${esc(t)}</dd></div>`).join('')}</dl>` : ''}
-        ${c.descripcion ? `<p class="a-quote__desc">${esc(c.descripcion)}</p>` : ''}
+        <div class="flex flex-col gap-1 pt-3.5"><small class="text-[11px] text-(--p-muted)">Valor de la propuesta</small><strong class="text-[22px] font-extrabold">${esc(valor)}</strong></div>
+        ${meta.length ? `<dl class="mt-3.5 grid grid-cols-2 gap-x-5 gap-y-3.5 border-t border-[#ecd2cc] pt-3.5 max-md:grid-cols-1">${meta.map(([k, t]) => `<div><dt class="mb-[3px] text-[10px] text-(--p-muted)">${k}</dt><dd class="m-0 break-words text-[12px] font-semibold">${esc(t)}</dd></div>`).join('')}</dl>` : ''}
+        ${c.descripcion ? `<p class="mt-3 whitespace-pre-line text-[11px] leading-[1.6] text-(--p-muted)">${esc(c.descripcion)}</p>` : ''}
       </div>
-      ${pdf ? htmlArchivo(pdf, ['Propuesta en PDF', pdf.tamano], 'a-file--quote') : ''}`;
+      ${pdf ? htmlArchivo(pdf, ['Propuesta en PDF', pdf.tamano], true) : ''}`;
   }
 
   // Formulario "Preparar cotización": solo con la solicitud En evaluación y sin cotización enviada.
-  function htmlPreparar(v, d) {
+  function htmlPreparar(v: Solicitud, d: SolicitudDetalle | null): string {
     const c = d?.borrador ?? null;
     const valor = c && Number.isFinite(c.valor) ? c.valor : '';
-    const pdfPrevio = c?.archivoId ? (d.archivos ?? []).find((a) => String(a.id) === String(c.archivoId)) : null;
+    const pdfPrevio = c?.archivoId ? (d?.archivos ?? []).find((a) => String(a.id) === String(c.archivoId)) : null;
     const iva = c?.ivaIncluido === false ? '0' : '1';
     return `
-      <form class="a-prep" id="adm-form" novalidate data-solicitud="${esc(v.id)}" data-cotizacion="${esc(c?.id ?? '')}" data-archivo="${esc(c?.archivoId ?? '')}">
-        <h3 class="a-prep__title"><span>02</span> Preparar cotización</h3>
-        ${c ? `<p class="a-note">Hay un borrador guardado: puedes completarlo y enviarlo.</p>` : ''}
+      <form id="adm-form" novalidate data-solicitud="${esc(v.id)}" data-cotizacion="${esc(c?.id ?? '')}" data-archivo="${esc(c?.archivoId ?? '')}">
+        <h3 class="mb-4.5 flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[.02em]"><span class="text-[10px] text-(--p-accent)">02</span> Preparar cotización</h3>
+        ${c ? `<p class="mb-4.5 text-[12px] text-(--p-muted)">Hay un borrador guardado: puedes completarlo y enviarlo.</p>` : ''}
 
-        <div class="a-field">
-          <label for="cot-titulo">Título de la propuesta</label>
-          <input class="a-input" id="cot-titulo" name="titulo" maxlength="120" required value="${esc(c?.titulo ?? 'Propuesta comercial')}" />
+        <div class="mb-4 flex min-w-0 flex-col gap-1.5">
+          <label class="text-[10px] font-semibold text-(--p-muted)" for="cot-titulo">Título de la propuesta</label>
+          <input class="w-full rounded border border-(--p-line) bg-white px-3 py-[11px] text-[12px] text-(--p-ink) focus:border-[var(--p-accent)] focus:outline-0" id="cot-titulo" name="titulo" maxlength="120" required value="${esc(c?.titulo ?? 'Propuesta comercial')}" />
         </div>
 
-        <div class="a-field">
-          <label for="cot-valor">Valor de la propuesta</label>
-          <div class="a-money">
-            <b>$</b>
-            <input id="cot-valor" name="valor" type="number" min="1" step="any" inputmode="decimal" required placeholder="24500000" value="${esc(valor)}" />
-            <em>COP</em>
+        <div class="mb-4 flex min-w-0 flex-col gap-1.5">
+          <label class="text-[10px] font-semibold text-(--p-muted)" for="cot-valor">Valor de la propuesta</label>
+          <div class="flex items-center gap-2.5 rounded border border-(--p-line) bg-white px-3 focus-within:border-(--p-accent)">
+            <b class="text-[12px] text-(--p-accent)">$</b>
+            <input class="min-w-0 flex-1 bg-transparent py-3 text-[13px] font-semibold text-(--p-ink) outline-0" id="cot-valor" name="valor" type="number" min="1" step="any" inputmode="decimal" required placeholder="24500000" value="${esc(valor)}" />
+            <em class="text-[10px] not-italic text-(--p-muted)">COP</em>
           </div>
         </div>
 
-        <div class="a-two">
-          <div class="a-field">
-            <label for="cot-iva">IVA</label>
-            <select class="a-input" id="cot-iva" name="iva">
+        <div class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div class="mb-4 flex min-w-0 flex-col gap-1.5">
+            <label class="text-[10px] font-semibold text-(--p-muted)" for="cot-iva">IVA</label>
+            <select class="w-full rounded border border-(--p-line) bg-white px-3 py-[11px] text-[12px] text-(--p-ink) focus:border-[var(--p-accent)] focus:outline-0" id="cot-iva" name="iva">
               <option value="1" ${iva === '1' ? 'selected' : ''}>Incluido</option>
               <option value="0" ${iva === '0' ? 'selected' : ''}>No incluido</option>
             </select>
           </div>
-          <div class="a-field">
-            <label for="cot-vig">Vigencia (días)</label>
-            <input class="a-input" id="cot-vig" name="vigencia" type="number" min="1" max="365" step="1" required value="${esc(c?.vigencia ?? 30)}" />
+          <div class="mb-4 flex min-w-0 flex-col gap-1.5">
+            <label class="text-[10px] font-semibold text-(--p-muted)" for="cot-vig">Vigencia (días)</label>
+            <input class="w-full rounded border border-(--p-line) bg-white px-3 py-[11px] text-[12px] text-(--p-ink) focus:border-[var(--p-accent)] focus:outline-0" id="cot-vig" name="vigencia" type="number" min="1" max="365" step="1" required value="${esc(c?.vigencia ?? 30)}" />
           </div>
         </div>
 
-        <div class="a-field">
-          <label for="cot-msg">Mensaje para el cliente</label>
-          <textarea class="a-input" id="cot-msg" name="mensaje" rows="5" maxlength="2000"
+        <div class="mb-4 flex min-w-0 flex-col gap-1.5">
+          <label class="text-[10px] font-semibold text-(--p-muted)" for="cot-msg">Mensaje para el cliente</label>
+          <textarea class="w-full resize-y rounded border border-(--p-line) bg-white px-3 py-[11px] text-[12px] leading-[1.6] text-(--p-ink) focus:border-[var(--p-accent)] focus:outline-0" id="cot-msg" name="mensaje" rows="5" maxlength="2000"
             placeholder="Hemos revisado la información de tu proyecto. Adjuntamos nuestra propuesta con el alcance y las etapas sugeridas.">${esc(c?.descripcion ?? '')}</textarea>
         </div>
 
-        <label class="a-drop">
-          <input type="file" name="pdf" accept="application/pdf,.pdf" />
+        <label class="relative mb-4 flex cursor-pointer items-center justify-center gap-2.5 overflow-hidden break-words rounded-[3px] border border-dashed border-[#cfc8b8] p-3.5 text-center text-[11px] font-semibold text-(--p-muted) hover:bg-[#f8f5ee] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--p-accent)]">
+          <input class="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="file" name="pdf" accept="application/pdf,.pdf" />
           ${ico('clip')}
           <span id="cot-pdf-txt">${pdfPrevio ? `${esc(pdfPrevio.nombre)} (adjunto)` : 'Adjuntar propuesta en PDF'}</span>
         </label>
 
-        <p class="a-note a-note--error" id="adm-form-error" role="alert" hidden></p>
-        <button type="submit" class="a-btn a-btn--primary a-btn--block" id="cot-enviar">${ico('send')}<span>Enviar cotización</span></button>
+        <p class="mb-4.5 text-[12px] text-(--p-accent)" id="adm-form-error" role="alert" hidden></p>
+        <button type="submit" class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[3px] border border-transparent bg-(--p-accent) p-4 text-[13px] font-bold text-white shadow-[0_6px_14px_rgb(192_48_31/.25)] disabled:cursor-not-allowed disabled:opacity-55 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" id="cot-enviar">${ico('send')}<span>Enviar cotización</span></button>
       </form>`;
   }
 
   // Zona inferior del detalle según el estado de la solicitud.
-  function seccionCotizacion(v, d, estado) {
-    const envuelve = (html) => `<div class="a-body a-body--cot">${html}</div>`;
-    if (estado === 'cargando') return envuelve(`<h3 class="a-sect">Cotización</h3><p class="a-note">Cargando cotización…</p>`);
-    if (estado === 'error') return envuelve(`<h3 class="a-sect">Cotización</h3><p class="a-note a-note--error">No pudimos cargar la cotización.</p>`);
+  function seccionCotizacion(v: Solicitud, d: SolicitudDetalle | null, estado: EstadoDetalle): string {
+    const envuelve = (html: string): string => `<div class="border-t border-(--p-line) p-5">${html}</div>`;
+    if (estado === 'cargando') return envuelve(`<h3 class="mb-3.5 text-[10px] font-bold uppercase tracking-[.1em] text-(--p-accent)">Cotización</h3><p class="mb-4.5 text-[12px] text-(--p-muted)">Cargando cotización…</p>`);
+    if (estado === 'error') return envuelve(`<h3 class="mb-3.5 text-[10px] font-bold uppercase tracking-[.1em] text-(--p-accent)">Cotización</h3><p class="mb-4.5 text-[12px] text-(--p-accent)">No pudimos cargar la cotización.</p>`);
 
     const c = d?.cotizacion ?? null;
 
     if (v.estado === 'enviada') {
       return envuelve(`
-        <h3 class="a-prep__title a-prep__title--off"><span>02</span> Preparar cotización</h3>
-        <div class="a-lock">${ico('lock')}<span>Toma la solicitud para habilitar este apartado y preparar la cotización.</span></div>`);
+        <h3 class="mb-4.5 flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[.02em] text-(--p-muted)"><span class="text-[10px] text-(--p-accent)">02</span> Preparar cotización</h3>
+        <div class="flex items-center gap-2.5 border border-dashed border-[#cfc8b8] bg-[#f8f5ee] p-3.5 text-[12px] leading-[1.5] text-(--p-muted)">${ico('lock')}<span>Toma la solicitud para habilitar este apartado y preparar la cotización.</span></div>`);
     }
     if (v.estado === 'evaluacion' && !c) return envuelve(htmlPreparar(v, d));
 
     return envuelve(`
-      <h3 class="a-sect">${c ? 'Cotización enviada' : 'Cotización'}</h3>
-      ${c ? htmlQuote(c, d) : `<p class="a-note">Aún no hay una cotización para esta solicitud.</p>`}`);
+      <h3 class="mb-3.5 text-[10px] font-bold uppercase tracking-[.1em] text-(--p-accent)">${c ? 'Cotización enviada' : 'Cotización'}</h3>
+      ${c ? htmlQuote(c, d) : `<p class="mb-4.5 text-[12px] text-(--p-muted)">Aún no hay una cotización para esta solicitud.</p>`}`);
   }
 
   // Acciones de gestión según el estado de la solicitud.
-  function accionesHtml(v) {
+  function accionesHtml(v: Solicitud): string {
     if (v.estado !== 'enviada') return '';
     return `
-      <div class="a-action">
-        <span class="a-stack">
-          <strong>Solicitud nueva</strong>
-          <small>Al tomarla pasa a “En evaluación” y quedas como responsable. El cliente verá el cambio.</small>
+      <div class="flex flex-wrap items-center justify-between gap-3.5 border-b border-[#efe2b8] bg-[#fdf8e8] px-5 py-4">
+        <span class="flex min-w-0 flex-col gap-[3px]">
+          <strong class="break-words text-[12px] font-semibold">Solicitud nueva</strong>
+          <small class="text-[11px] text-[#8a6a1f]">Al tomarla pasa a “En evaluación” y quedas como responsable. El cliente verá el cambio.</small>
         </span>
-        <button type="button" class="a-btn a-btn--primary" data-tomar="${esc(v.id)}">Tomar solicitud</button>
+        <button type="button" class="inline-flex cursor-pointer items-center gap-2 rounded-[3px] border border-transparent bg-(--p-accent) px-4.5 py-[11px] text-[12px] font-bold text-white shadow-[0_6px_14px_rgb(192_48_31/.25)] disabled:cursor-not-allowed disabled:opacity-55 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-tomar="${esc(v.id)}">Tomar solicitud</button>
+        <button type="button" class="inline-flex cursor-pointer items-center gap-2 rounded-[3px] border border-transparent bg-gray-500 px-4.5 py-[11px] text-[12px] font-bold text-white shadow-[0_6px_14px_rgb(192_48_31/.25)] disabled:cursor-not-allowed disabled:opacity-55 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-rechazar="${esc(v.id)}">Rechazar solicitud</button>
       </div>
-      <p class="a-note a-note--error a-note--pad" id="adm-error" role="alert" hidden></p>`;
+      <p class="m-0 border-b border-(--p-line) px-5 py-2.5 text-[12px] text-(--p-accent)" id="adm-error" role="alert" hidden></p>`;
   }
 
-  function pintarDetalle(s, d = null, estado = 'ok') {
+  function pintarDetalle(s: Solicitud | null, d: SolicitudDetalle | null = null, estado: EstadoDetalle = 'ok') {
     if (!s) {
-      detalleEl.innerHTML = `<p class="a-vacio">Selecciona una solicitud para ver su detalle.</p>`;
+      detalleEl.innerHTML = `<p class="m-0 px-5 py-7 text-[12px] text-(--p-muted)">Selecciona una solicitud para ver su detalle.</p>`;
       return;
     }
     const v = unir(s, d);
 
     detalleEl.innerHTML = `
-      <header class="a-detail__head">
+      <header class="flex items-start justify-between gap-4 border-b border-(--p-line) p-5">
         <div>
-          <p class="a-eyebrow a-eyebrow--sm">Detalle de solicitud</p>
-          <h2>${esc(v.codigo)}</h2>
+          <p class="mb-1 text-2.25 font-bold uppercase tracking-[.14em] text-(--p-accent)">Detalle de solicitud</p>
+          <h2 class="m-0 text-4.5 font-semibold">${esc(v.codigo)}</h2>
         </div>
-        <button type="button" class="a-iconbtn" data-cerrar aria-label="Cerrar detalle">${ico('x')}</button>
+        <button type="button" class="grid h-[34px] w-[34px] cursor-pointer place-items-center rounded border border-(--p-line) bg-white hover:bg-[#f3efe6] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--p-accent)" data-cerrar aria-label="Cerrar detalle">${ico('x')}</button>
       </header>
 
-      <div class="a-client">
-        <span class="a-avatar a-avatar--lg">${esc(inicialesDe(v))}</span>
-        <span class="a-stack">
-          <strong>${esc(nombreDe(v))}</strong>
-          ${v.clienteEmail ? `<a class="a-mail" href="mailto:${esc(v.clienteEmail)}">${ico('mail')}${esc(v.clienteEmail)}</a>` : ''}
+      <div class="flex items-center gap-3 border-b border-(--p-line) bg-[#f3efe6] px-5 py-4.5 max-md:flex-wrap">
+        <span class="grid h-11 w-11 flex-none place-items-center rounded-full bg-[#ece8df] text-[12px] font-bold text-(--p-ink)">${esc(inicialesDe(v))}</span>
+        <span class="flex min-w-0 flex-col gap-[3px]">
+          <strong class="break-words text-[12px] font-semibold">${esc(nombreDe(v))}</strong>
+          ${v.clienteEmail ? `<a class="inline-flex items-center gap-1.5 break-words text-[11px] text-(--p-muted) no-underline hover:text-(--p-accent)" href="mailto:${esc(v.clienteEmail)}">${ico('mail')}${esc(v.clienteEmail)}</a>` : ''}
         </span>
-        ${pill(v, 'a-pill--big')}
+        ${pill(v, true)}
       </div>
 
       ${accionesHtml(v)}
 
-      <div class="a-body">
-        <h3 class="a-sect">Proyecto</h3>
-        <p class="a-title">${esc(v.titulo)}</p>
-        <dl class="a-info">
-          <div><dt>Servicio</dt><dd>${esc(v.servicio)}</dd></div>
-          <div><dt>Tipo de proyecto</dt><dd>${esc(v.tipoProyecto)}</dd></div>
-          <div><dt>Ubicación</dt><dd>${esc(v.ubicacion)}</dd></div>
-          <div><dt>Área</dt><dd>${esc(v.area)}</dd></div>
-          <div><dt>Presupuesto</dt><dd>${esc(v.presupuesto)}</dd></div>
-          <div><dt>Plazo de inicio</dt><dd>${esc(v.plazoInicio)}</dd></div>
-          ${v.fecha ? `<div><dt>Enviada el</dt><dd>${esc(v.fecha)}</dd></div>` : ''}
+      <div class="p-5">
+        <h3 class="mb-3.5 text-[10px] font-bold uppercase tracking-[.1em] text-(--p-accent)">Proyecto</h3>
+        <p class="mb-4 text-[16px] font-semibold leading-[1.3]">${esc(v.titulo)}</p>
+        <dl class="mb-4.5 grid grid-cols-1 gap-x-5 gap-y-3.5 md:grid-cols-2">
+          <div><dt class="mb-[3px] text-[10px] text-(--p-muted)">Servicio</dt><dd class="m-0 break-words text-[12px] font-semibold">${esc(v.servicio)}</dd></div>
+          <div><dt class="mb-[3px] text-[10px] text-(--p-muted)">Tipo de proyecto</dt><dd class="m-0 break-words text-[12px] font-semibold">${esc(v.tipoProyecto)}</dd></div>
+          <div><dt class="mb-[3px] text-[10px] text-(--p-muted)">Ubicación</dt><dd class="m-0 break-words text-[12px] font-semibold">${esc(v.ubicacion)}</dd></div>
+          <div><dt class="mb-[3px] text-[10px] text-(--p-muted)">Área</dt><dd class="m-0 break-words text-[12px] font-semibold">${esc(v.area)}</dd></div>
+          <div><dt class="mb-[3px] text-[10px] text-(--p-muted)">Presupuesto</dt><dd class="m-0 break-words text-[12px] font-semibold">${esc(v.presupuesto)}</dd></div>
+          <div><dt class="mb-[3px] text-[10px] text-(--p-muted)">Plazo de inicio</dt><dd class="m-0 break-words text-[12px] font-semibold">${esc(v.plazoInicio)}</dd></div>
+          ${v.fecha ? `<div><dt class="mb-[3px] text-[10px] text-(--p-muted)">Enviada el</dt><dd class="m-0 break-words text-[12px] font-semibold">${esc(v.fecha)}</dd></div>` : ''}
         </dl>
-        <p class="a-desc">${esc(v.descripcion)}</p>
+        <p class="m-0 whitespace-pre-line text-[12px] leading-[1.7]">${esc(v.descripcion)}</p>
 
-        <h3 class="a-sect">Archivos del cliente</h3>
+        <h3 class="mb-3.5 mt-[26px] border-t border-(--p-line) pt-[22px] text-[10px] font-bold uppercase tracking-[.1em] text-(--p-accent)">Archivos del cliente</h3>
         ${htmlArchivos(d, estado)}
       </div>
 
       ${seccionCotizacion(v, d, estado)}`;
   }
 
-  async function seleccionar(id) {
+  async function seleccionar(id: string | number) {
     const s = todas.find((x) => String(x.id) === String(id));
     if (!s) return;
     activa = s;
@@ -389,7 +467,7 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
 
     pintarDetalle(s, null, 'cargando');
     try {
-      const d = await detalleSolicitudAdmin(s.id);
+      const d: SolicitudDetalle = await detalleSolicitudAdmin(s.id);
       cache.set(s.id, d);
       if (activa?.id === s.id) pintarDetalle(s, d, 'ok');
     } catch {
@@ -402,7 +480,7 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
     try {
       todas = await listarSolicitudesAdmin();
     } catch (err) {
-      mensaje(err?.message || 'No pudimos cargar las solicitudes. Recarga la página.');
+      mensaje(mensajeError(err, 'No pudimos cargar las solicitudes. Recarga la página.'));
       return;
     }
     msg.hidden = true;
@@ -416,9 +494,10 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
 
   // ── Eventos ────────────────────────────────────────────────────────────
   tabsEl.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-filtro]');
+    if (!(e.target instanceof Element)) return;
+    const b = e.target.closest<HTMLButtonElement>('[data-filtro]');
     if (!b) return;
-    filtro = b.dataset.filtro;
+    filtro = b.dataset.filtro ?? 'todas';
     pagina = 1;
     tabsEl.querySelectorAll('[data-filtro]').forEach((t) => t.setAttribute('aria-pressed', String(t === b)));
     pintarLista();
@@ -431,22 +510,24 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   });
 
   pagerEl.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-pag]');
+    if (!(e.target instanceof Element)) return;
+    const b = e.target.closest<HTMLButtonElement>('[data-pag]');
     if (!b || b.disabled) return;
     pagina = Number(b.dataset.pag);
     pintarLista();
   });
 
   listaEl.addEventListener('click', (e) => {
-    const b = e.target.closest('[data-id]');
-    if (!b) return;
+    if (!(e.target instanceof Element)) return;
+    const b = e.target.closest<HTMLButtonElement>('[data-id]');
+    if (!b?.dataset.id) return;
     seleccionar(b.dataset.id);
     if (window.matchMedia('(max-width: 1279px)').matches) {
       detalleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
 
-  async function refrescar(id) {
+  async function refrescar(id: string | number) {
     cache.clear();
     todas = await listarSolicitudesAdmin();
     pintarBadge();
@@ -454,6 +535,7 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   }
 
   detalleEl.addEventListener('click', async (e) => {
+    if (!(e.target instanceof Element)) return;
     if (e.target.closest('[data-cerrar]')) {
       activa = null;
       pintarLista();
@@ -461,12 +543,13 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
       return;
     }
 
-    const dl = e.target.closest('[data-descargar]');
+    const dl = e.target.closest<HTMLButtonElement>('[data-descargar]');
     if (dl) {
       if (dl.disabled) return;
-      const archivo = cache.get(activa?.id)?.archivos?.find((a) => String(a.id) === dl.dataset.descargar);
+      const archivo = activa ? cache.get(activa.id)?.archivos.find((a) => String(a.id) === dl.dataset.descargar) : undefined;
       if (!archivo) return;
-      const nota = dl.querySelector('small');
+      const nota = dl.querySelector<HTMLElement>('small');
+      if (!nota) return;
       const original = nota.textContent;
       dl.disabled = true;
       nota.textContent = 'Descargando…';
@@ -474,30 +557,40 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
         await descargarArchivo(archivo);
         nota.textContent = original;
       } catch (err) {
-        nota.textContent = err?.message || 'No pudimos descargar el archivo.';
-        nota.classList.add('a-err');
-        setTimeout(() => { nota.textContent = original; nota.classList.remove('a-err'); }, 5000);
+        nota.textContent = mensajeError(err, 'No pudimos descargar el archivo.');
+        nota.classList.add('text-(--p-accent)');
+        setTimeout(() => { nota.textContent = original; nota.classList.remove('text-(--p-accent)'); }, 5000);
       }
       dl.disabled = false;
       return;
     }
 
-    const btn = e.target.closest('[data-tomar]');
+    const btn = e.target.closest<HTMLButtonElement>('[data-tomar], [data-rechazar]');
     if (!btn || btn.disabled) return;
-    if (!window.confirm('¿Tomar esta solicitud? Pasará a “En evaluación” y quedarás como responsable.')) return;
+    const rechazar = Boolean(btn.dataset.rechazar);
+    const id = btn.dataset.tomar ?? btn.dataset.rechazar;
+    if (!id) return;
+    const confirmacion = rechazar
+      ? '¿Rechazar esta solicitud? El cliente verá que fue rechazada.'
+      : '¿Tomar esta solicitud? Pasará a “En evaluación” y quedarás como responsable.';
+    if (!window.confirm(confirmacion)) return;
 
-    const id = btn.dataset.tomar;
+    const botonesAccion = detalleEl.querySelectorAll<HTMLButtonElement>('[data-tomar], [data-rechazar]');
+    botonesAccion.forEach((boton) => { boton.disabled = true; });
+
     const caja = $('adm-error');
-    btn.disabled = true;
     if (caja) caja.hidden = true;
 
     try {
-      await tomarSolicitud(id);
+      if (rechazar) await rechazarSolicitud(id);
+      else await tomarSolicitud(id);
     } catch (err) {
-      btn.disabled = false;
+      botonesAccion.forEach((boton) => { boton.disabled = false; });
       if (caja) {
         caja.hidden = false;
-        caja.textContent = err?.message || 'No se pudo tomar la solicitud. Intenta de nuevo.';
+        caja.textContent = mensajeError(err, rechazar
+          ? 'No se pudo rechazar la solicitud. Intenta de nuevo.'
+          : 'No se pudo tomar la solicitud. Intenta de nuevo.');
       }
       return;
     }
@@ -505,46 +598,56 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
     try {
       await refrescar(id);
     } catch {
-      mensaje('La solicitud se tomó, pero no pudimos actualizar la lista. Recarga la página.');
+      mensaje(`La solicitud se ${rechazar ? 'rechazó' : 'tomó'}, pero no pudimos actualizar la lista. Recarga la página.`);
     }
   });
 
   detalleEl.addEventListener('change', (e) => {
-    if (e.target.name !== 'pdf') return;
-    const txt = $('cot-pdf-txt');
-    if (txt) txt.textContent = e.target.files[0]?.name ?? 'Adjuntar propuesta en PDF';
+    if (!(e.target instanceof HTMLInputElement) || e.target.name !== 'pdf') return;
+    const txt = document.getElementById('cot-pdf-txt');
+    if (txt) txt.textContent = e.target.files?.[0]?.name ?? 'Adjuntar propuesta en PDF';
   });
 
-  const idDe = (r) => {
-    const id = r?.id ?? r?.archivo?.id ?? r?.cotizacion?.id;
-    if (id === undefined || id === null) throw new Error('El servidor no devolvió el identificador esperado.');
+  const idDe = (r: unknown): string | number => {
+    if (typeof r !== 'object' || r === null) throw new Error('El servidor no devolvió el identificador esperado.');
+    const respuesta = r as RespuestaId;
+    const id = respuesta.id ?? respuesta.archivo?.id ?? respuesta.cotizacion?.id;
+    if (typeof id !== 'string' && typeof id !== 'number') throw new Error('El servidor no devolvió el identificador esperado.');
     return id;
   };
 
   // Enviar cotización: (1) sube el PDF, (2) crea o completa la cotización, (3) la envía.
   // Al enviarla el backend pasa la solicitud de "En evaluación" a "Respondida".
   detalleEl.addEventListener('submit', async (e) => {
-    const form = e.target.closest('#adm-form');
+    if (!(e.target instanceof Element)) return;
+    const form = e.target.closest<HTMLFormElement>('#adm-form');
     if (!form) return;
     e.preventDefault();
 
-    const caja = $('adm-form-error');
-    const btn = $('cot-enviar');
-    const etiqueta = btn.querySelector('span');
+    const caja = $<HTMLParagraphElement>('adm-form-error');
+    const btn = $<HTMLButtonElement>('cot-enviar');
+    const etiqueta = btn.querySelector<HTMLSpanElement>('span');
+    if (!etiqueta) throw new Error('No se encontró la etiqueta del botón de envío.');
     const textoBtn = etiqueta.textContent;
-    const el = form.elements;
 
-    const fallo = (texto, campo) => {
+    const fallo = (texto: string, campo?: string) => {
       caja.hidden = false;
       caja.textContent = texto;
-      el[campo]?.focus();
+      if (campo) form.querySelector<HTMLElement>(`[name="${campo}"]`)?.focus();
     };
     caja.hidden = true;
 
-    const titulo = el.titulo.value.trim();
-    const valor = Number(el.valor.value);
-    const vigencia = Number(el.vigencia.value);
-    const pdf = el.pdf.files[0] ?? null;
+    const tituloInput = $<HTMLInputElement>('cot-titulo');
+    const valorInput = $<HTMLInputElement>('cot-valor');
+    const vigenciaInput = $<HTMLInputElement>('cot-vig');
+    const pdfInput = form.querySelector<HTMLInputElement>('[name="pdf"]');
+    const ivaInput = $<HTMLSelectElement>('cot-iva');
+    const mensajeInput = $<HTMLTextAreaElement>('cot-msg');
+    if (!pdfInput) throw new Error('No se encontró el selector del archivo PDF.');
+    const titulo = tituloInput.value.trim();
+    const valor = Number(valorInput.value);
+    const vigencia = Number(vigenciaInput.value);
+    const pdf = pdfInput.files?.[0] ?? null;
 
     if (!titulo) return fallo('Escribe un título para la propuesta.', 'titulo');
     if (!(valor > 0)) return fallo('Ingresa un valor mayor que cero.', 'valor');
@@ -557,10 +660,13 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
     }
 
     const solicitudId = form.dataset.solicitud;
+    if (!solicitudId) throw new Error('No se encontró el identificador de la solicitud.');
     const s = todas.find((x) => String(x.id) === String(solicitudId));
     if (!window.confirm(`¿Enviar la cotización por ${fmtMoneda(valor)} a ${s ? nombreDe(s) : 'el cliente'}? La solicitud pasará a “Respondida”.`)) return;
 
-    const bloquear = (si) => form.querySelectorAll('input, select, textarea, button').forEach((c) => { c.disabled = si; });
+    const bloquear = (si: boolean) =>
+      form.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | HTMLButtonElement>('input, select, textarea, button')
+        .forEach((c) => { c.disabled = si; });
     bloquear(true);
 
     const sid = String(solicitudId);
@@ -578,9 +684,9 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
         titulo,
         valor,
         moneda: 'COP',
-        iva_incluido: el.iva.value === '1',
+        iva_incluido: ivaInput.value === '1',
         vigencia_dias: vigencia,
-        mensaje: el.mensaje.value.trim() || null,
+        mensaje: mensajeInput.value.trim() || null,
         archivo_id: archivoId ? Number(archivoId) : null,
       };
 
@@ -596,8 +702,8 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
       await enviarCotizacion(cotizacionId);
     } catch (err) {
       bloquear(false);
-      etiqueta.textContent = textoBtn;
-      fallo(err?.message || 'No pudimos enviar la cotización. Intenta de nuevo.');
+      etiqueta.textContent = textoBtn ?? 'Enviar cotización';
+      fallo(mensajeError(err, 'No pudimos enviar la cotización. Intenta de nuevo.'));
       return;
     }
 
@@ -610,7 +716,7 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   });
 
   // ── Sesión: pedir datos solo cuando hay usuario autenticado ────────────
-  function alCambiarSesion(sesion) {
+  function alCambiarSesion(sesion: { status: string }) {
     if (sesion.status !== 'authenticated' || cargado) return;
     cargado = true;
     cargar();
@@ -618,153 +724,3 @@ import { Search, X, Paperclip, ChevronLeft, ChevronRight, Mail, MapPin, FileText
   alCambiarSesion(getSesion());
   suscribirSesion(alCambiarSesion);
 </script>
-
-<!-- Global porque parte del HTML se genera desde JS -->
-<style is:global>
-  .adm h1 { font-size: clamp(1.9rem, 3vw, 2.6rem); font-weight: 800; text-transform: uppercase; letter-spacing: -.01em; line-height: 1.1; margin: 0; }
-  .adm h2 { font-size: 15px; font-weight: 600; margin: 0; }
-  .adm small { font-size: 11px; color: var(--p-muted); }
-  .adm button { font: inherit; color: inherit; }
-  .adm .a-mono { letter-spacing: .08em; }
-  .adm .a-stack { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .adm .a-stack strong { font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
-
-  .adm .a-top { margin-bottom: 28px; }
-  .adm .a-eyebrow { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--p-accent); margin: 0 0 6px; }
-  .adm .a-eyebrow--sm { font-size: 9px; margin-bottom: 4px; }
-  .adm .a-sub { margin: 6px 0 0; font-size: 13px; color: var(--p-muted); }
-  .adm .a-msg { padding: 16px; font-size: 13px; color: var(--p-muted); }
-  .adm .a-vacio { padding: 28px 20px; margin: 0; font-size: 12px; color: var(--p-muted); }
-  .adm .a-note { margin: 0 0 18px; font-size: 12px; color: var(--p-muted); }
-  .adm .a-note--error { color: var(--p-accent); }
-
-  .adm .a-cols { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 18px; align-items: start; }
-  .adm .a-card { background: var(--p-card); border: 1px solid var(--p-line); min-width: 0; }
-
-  /* Barra de herramientas */
-  .adm .a-toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--p-line); }
-  .adm .a-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
-  .adm .a-tab { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; background: none; border: 0; border-radius: 3px; font-size: 11px; font-weight: 600; color: var(--p-ink); cursor: pointer; }
-  .adm .a-tab:hover { background: #f3efe6; }
-  .adm .a-tab[aria-pressed='true'] { background: #f9e3df; color: var(--p-accent); }
-  .adm .a-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--p-accent); color: #fff; font-size: 9px; font-weight: 700; }
-  .adm .a-search { display: flex; align-items: center; gap: 8px; width: 240px; max-width: 100%; padding: 0 12px; height: 38px; background: #fff; border: 1px solid var(--p-line); border-radius: 4px; color: var(--p-muted); }
-  .adm .a-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 12px; color: var(--p-ink); }
-  .adm .a-search:focus-within { border-color: var(--p-accent); }
-
-  /* Tabla */
-  .adm .a-head,
-  .adm .a-row { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.3fr) 112px 118px; gap: 16px; align-items: center; padding: 0 20px; }
-  .adm .a-head { padding-top: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--p-line); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--p-muted); }
-  .adm .a-row { position: relative; width: 100%; padding-top: 16px; padding-bottom: 16px; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--p-line); cursor: pointer; }
-  .adm .a-row:hover { background: #f8f5ee; }
-  .adm .a-row[aria-current='true'] { background: #f3efe6; }
-  .adm .a-row[aria-current='true']::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--p-accent); }
-  .adm .a-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
-  .adm .a-date { font-size: 11px; color: var(--p-muted); }
-  .adm .a-avatar { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: #ece8df; color: var(--p-ink); font-size: 10px; font-weight: 700; }
-  .adm .a-avatar--lg { width: 44px; height: 44px; font-size: 12px; }
-
-  .adm .a-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 20px; }
-  .adm .a-pager { display: flex; }
-  .adm .a-pg { display: grid; place-items: center; min-width: 32px; height: 32px; padding: 0 6px; background: #fff; border: 1px solid var(--p-line); margin-left: -1px; font-size: 11px; cursor: pointer; }
-  .adm .a-pg:hover:not(:disabled) { background: #f3efe6; }
-  .adm .a-pg[aria-current='page'] { background: var(--p-accent); border-color: var(--p-accent); color: #fff; font-weight: 700; }
-  .adm .a-pg:disabled { opacity: .45; cursor: not-allowed; }
-
-  .adm .a-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 600; white-space: nowrap; }
-  .adm .a-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-  .adm .a-pill--accent { background: #f9e3df; color: var(--p-accent); }
-  .adm .a-pill--warn { background: #f3ead4; color: #8a6a1f; }
-  .adm .a-pill--ok { background: #dcebe2; color: #2f6b4a; }
-  .adm .a-pill--info { background: #e4ecf5; color: #3f6aa0; }
-  .adm .a-pill--big { padding: 5px 12px; margin-left: auto; align-self: flex-start; }
-
-  /* Panel de detalle */
-  .adm .a-detail { position: sticky; top: 86px; max-height: calc(100vh - 102px); overflow-y: auto; }
-  .adm .a-detail__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; padding: 20px; border-bottom: 1px solid var(--p-line); }
-  .adm .a-detail__head h2 { font-size: 18px; }
-  .adm .a-iconbtn { display: grid; place-items: center; width: 34px; height: 34px; background: #fff; border: 1px solid var(--p-line); border-radius: 4px; cursor: pointer; }
-  .adm .a-iconbtn:hover { background: #f3efe6; }
-  .adm .a-client { display: flex; align-items: center; gap: 12px; padding: 18px 20px; background: #f3efe6; border-bottom: 1px solid var(--p-line); }
-  .adm .a-mail { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--p-muted); text-decoration: none; overflow-wrap: anywhere; }
-  .adm .a-mail:hover { color: var(--p-accent); }
-  .adm .a-action { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; padding: 16px 20px; background: #fdf8e8; border-bottom: 1px solid #efe2b8; }
-  .adm .a-action small { color: #8a6a1f; }
-  .adm .a-note--pad { margin: 0; padding: 10px 20px; border-bottom: 1px solid var(--p-line); }
-  .adm .a-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 3px; border: 1px solid transparent; font-size: 12px; font-weight: 700; cursor: pointer; }
-  .adm .a-btn--primary { background: var(--p-accent); color: #fff; box-shadow: 0 6px 14px rgb(192 48 31 / .25); }
-  .adm .a-btn:disabled { opacity: .55; cursor: not-allowed; }
-  .adm .a-body { padding: 20px; }
-  .adm .a-body--cot { border-top: 1px solid var(--p-line); }
-  .adm .a-sect { margin: 0 0 14px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--p-accent); }
-  .adm .a-sect:not(:first-child) { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--p-line); }
-  .adm .a-title { margin: 0 0 16px; font-size: 16px; font-weight: 600; line-height: 1.3; }
-  .adm .a-info { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; margin: 0 0 18px; }
-  .adm .a-info dt { font-size: 10px; color: var(--p-muted); margin-bottom: 3px; }
-  .adm .a-info dd { margin: 0; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
-  .adm .a-desc { margin: 0; font-size: 12px; line-height: 1.7; white-space: pre-line; }
-
-  .adm .a-file { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; margin-bottom: 8px; text-align: left; background: #fff; border: 1px solid var(--p-line); cursor: pointer; }
-  .adm .a-file:hover:not(:disabled) { background: #f8f5ee; }
-  .adm .a-file:disabled { cursor: progress; opacity: .7; }
-  .adm .a-file .a-stack { flex: 1; }
-  .adm .a-file__ico, .adm .a-file__dl { color: var(--p-muted); display: grid; flex: none; }
-  .adm .a-file:hover .a-file__dl { color: var(--p-accent); }
-  .adm .a-err { color: var(--p-accent); }
-
-  .adm .a-quote { padding: 16px; background: #fbf1ee; border: 1px solid #ecd2cc; }
-  .adm .a-quote__head { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #ecd2cc; }
-  .adm .a-quote__ico { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 4px; background: var(--p-accent); color: #fff; }
-  .adm .a-quote__val { display: flex; flex-direction: column; gap: 4px; padding-top: 14px; }
-  .adm .a-quote__val strong { font-size: 22px; font-weight: 800; }
-  .adm .a-quote__desc { margin: 12px 0 0; font-size: 11px; line-height: 1.6; color: var(--p-muted); white-space: pre-line; }
-
-  /* Preparar cotización */
-  .adm .a-prep__title { display: flex; align-items: center; gap: 10px; margin: 0 0 18px; font-size: 13px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
-  .adm .a-prep__title span { font-size: 10px; color: var(--p-accent); }
-  .adm .a-prep__title--off { color: var(--p-muted); }
-  .adm .a-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; min-width: 0; }
-  .adm .a-field label { font-size: 10px; font-weight: 600; color: var(--p-muted); }
-  .adm .a-input { width: 100%; padding: 11px 12px; background: #fff; border: 1px solid var(--p-line); border-radius: 4px; font: inherit; font-size: 12px; color: var(--p-ink); }
-  .adm textarea.a-input { resize: vertical; line-height: 1.6; }
-  .adm .a-input:focus, .adm .a-money:focus-within { outline: 0; border-color: var(--p-accent); }
-  .adm .a-money { display: flex; align-items: center; gap: 10px; padding: 0 12px; background: #fff; border: 1px solid var(--p-line); border-radius: 4px; }
-  .adm .a-money b { color: var(--p-accent); font-size: 12px; }
-  .adm .a-money em { font-style: normal; font-size: 10px; color: var(--p-muted); }
-  .adm .a-money input { flex: 1; min-width: 0; padding: 12px 0; border: 0; outline: 0; background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--p-ink); }
-  .adm .a-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .adm .a-drop { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; padding: 14px; border: 1px dashed #cfc8b8; border-radius: 3px; font-size: 11px; font-weight: 600; color: var(--p-muted); cursor: pointer; text-align: center; overflow-wrap: anywhere; }
-  .adm .a-drop:hover { background: #f8f5ee; }
-  .adm .a-drop:focus-within { outline: 2px solid var(--p-accent); outline-offset: 2px; }
-  .adm .a-drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-  .adm .a-btn--block { width: 100%; justify-content: center; padding: 16px; font-size: 13px; }
-  .adm .a-lock { display: flex; align-items: center; gap: 10px; padding: 14px; background: #f8f5ee; border: 1px dashed #cfc8b8; font-size: 12px; color: var(--p-muted); line-height: 1.5; }
-  .adm .a-quote__meta { margin: 14px 0 0; padding-top: 14px; border-top: 1px solid #ecd2cc; }
-  .adm .a-file--quote { margin: 10px 0 0; }
-
-  .adm :is(.a-row, .a-tab, .a-pg, .a-iconbtn, .a-btn, .a-file):focus-visible { outline: 2px solid var(--p-accent); outline-offset: -2px; }
-
-  @media (max-width: 1279px) {
-    .adm .a-cols { grid-template-columns: 1fr; }
-    .adm .a-detail { position: static; max-height: none; overflow: visible; }
-  }
-
-  @media (max-width: 767px) {
-    .adm .a-head { display: none; }
-    .adm .a-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'who state' 'proj proj' 'date date'; gap: 10px 12px; }
-    .adm .a-who { grid-area: who; }
-    .adm .a-state { grid-area: state; }
-    .adm .a-proj { grid-area: proj; }
-    .adm .a-date { grid-area: date; }
-    .adm .a-toolbar { padding: 14px; }
-    .adm .a-search { width: 100%; }
-    .adm .a-info, .adm .a-two { grid-template-columns: 1fr; }
-    .adm .a-client { flex-wrap: wrap; }
-    .adm .a-pill--big { margin-left: 0; }
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .adm .a-row, .adm .a-tab, .adm .a-pg { transition: background-color .15s ease; }
-  }
-</style>

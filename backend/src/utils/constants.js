@@ -1,11 +1,12 @@
 // Estados de una solicitud (borrador → enviada → en_evaluacion → respondida → confirmada)
-const ESTADOS_SOLICITUD = ['borrador', 'enviada', 'en_evaluacion', 'respondida', 'confirmada'];
+const ESTADOS_SOLICITUD = ['borrador', 'enviada', 'en_evaluacion', 'rechazada', 'respondida', 'confirmada'];
 
 // A qué estado puede pasar una solicitud desde cada estado.
 const TRANSICIONES = {
   borrador:      ['enviada'],
-  enviada:       ['en_evaluacion'],
+  enviada:       ['en_evaluacion', 'rechazada'],
   en_evaluacion: ['respondida'],
+  rechazada:     [],
   respondida:    ['confirmada'],
   confirmada:    [],
 };

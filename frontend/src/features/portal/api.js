@@ -21,6 +21,7 @@ export const PASOS = [
 export const ESTADOS = {
   enviada: { label: 'Enviada', tono: 'info' },
   evaluacion: { label: 'En evaluación', tono: 'warn' },
+  rechazada: { label: 'Rechazada', tono: 'accent' },
   respondida: { label: 'Respondida', tono: 'accent' },
   confirmada: { label: 'Confirmada', tono: 'ok' },
 };
@@ -40,6 +41,8 @@ const ALIAS_ESTADO = {
   en_evaluacion: 'evaluacion',
   evaluacion: 'evaluacion',
   en_proceso: 'evaluacion',
+  rechazada: 'rechazada',
+  rechazado: 'rechazada',
   respondida: 'respondida',
   confirmada: 'confirmada',
 };
@@ -497,6 +500,13 @@ export async function detalleSolicitudAdmin(id) {
  */
 export const tomarSolicitud = (id) =>
   post(`/solicitudes/${id}/tomar`);
+
+/**
+ * Rechaza una solicitud nueva.
+ * enviada → rechazada
+ */
+export const rechazarSolicitud = (id) =>
+  post(`/solicitudes/${id}/rechazar`);
 
 /**
  * Sube el PDF de la propuesta comercial (campo multipart "archivo").

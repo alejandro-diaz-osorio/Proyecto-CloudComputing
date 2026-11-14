@@ -88,6 +88,9 @@ const camposTexto = [
     <span data-label>Crear mi cuenta</span>
     <Icon name="user-plus" data-icon />
   </button>
+  <p id="register-verification-link" class="auth-switch" hidden>
+    <a class="auth-link" href={RUTAS.verificar}>Reenviar correo de verificación</a>
+  </p>
 </form>
 
 <script>
@@ -166,7 +169,7 @@ const camposTexto = [
           password: v.password,
           telefono: telefonoParaApi(v.telefono),
         });
-        window.location.replace(`${RUTAS.login}?registro=exitoso`);
+        window.location.replace(RUTAS.verificar);
       } catch (err: any) {
         const delServidor = erroresDelServidor(err);
         if (err.status === 409 && !delServidor.email) {
@@ -180,6 +183,8 @@ const camposTexto = [
             ? 'Revisa los campos marcados.'
             : err.mensaje || 'No pudimos crear tu cuenta. Inténtalo de nuevo.',
         );
+        const enlaceVerificacion = form.querySelector<HTMLElement>('#register-verification-link');
+        if (enlaceVerificacion) enlaceVerificacion.hidden = err.status !== 503;
         enviando = false;
         setEnviando(boton, false);
       }

@@ -1,0 +1,140 @@
+<button
+  class="mb-5 border border-[#1d2433] bg-[#1d2433] px-5 py-3 text-xs font-bold uppercase tracking-wide text-white transition hover:border-[#c0301f] hover:bg-[#c0301f]"
+  type="button"
+  data-perfil-editar
+>
+  Editar información
+</button>
+
+<form
+  class="hidden max-w-180 border border-[#e7e1d4] bg-[#fffdf9] p-7"
+  id="perfil-form"
+  novalidate
+>
+  <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+    <label class="grid gap-2 text-xs font-semibold" for="perfil-nombre">
+      Nombre
+      <input
+        class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]"
+        id="perfil-nombre"
+        name="nombre"
+        autocomplete="given-name"
+        required
+        maxlength="80"
+      />
+    </label>
+    <label class="grid gap-2 text-xs font-semibold" for="perfil-apellido">
+      Apellido
+      <input
+        class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]"
+        id="perfil-apellido"
+        name="apellido"
+        autocomplete="family-name"
+        required
+        maxlength="80"
+      />
+    </label>
+    <label class="grid gap-2 text-xs font-semibold sm:col-span-2" for="perfil-telefono">
+      Teléfono
+      <input
+        class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]"
+        id="perfil-telefono"
+        name="telefono"
+        type="tel"
+        autocomplete="tel"
+        maxlength="25"
+      />
+    </label>
+  </div>
+  <p class="mt-4 text-xs text-[#8a8678]">El correo electrónico no se puede cambiar desde esta pantalla.</p>
+  <p class="mt-3 text-sm text-[#c0301f]" id="perfil-mensaje" role="alert" hidden></p>
+  <div class="mt-5 flex flex-wrap gap-3">
+    <button
+      class="border border-[#1d2433] bg-[#1d2433] px-5 py-3 text-xs font-bold uppercase tracking-wide text-white transition hover:border-[#c0301f] hover:bg-[#c0301f] disabled:cursor-wait disabled:opacity-60"
+      type="submit"
+      data-perfil-guardar
+    >
+      Guardar cambios
+    </button>
+    <button
+      class="border border-[#d8d1c3] px-5 py-3 text-xs font-bold uppercase tracking-wide transition hover:border-[#1d2433]"
+      type="button"
+      data-perfil-cancelar
+    >
+      Cancelar
+    </button>
+  </div>
+</form>
+
+<script>
+  import { actualizarUsuarioSesion, getSesion } from "../../auth/session.js"
+  import { http } from "../../../lib/http.js"
+
+  const form = document.querySelector<HTMLFormElement>("#perfil-form")
+  const editar = document.querySelector<HTMLButtonElement>("[data-perfil-editar]")
+  const guardar = document.querySelector<HTMLButtonElement>("[data-perfil-guardar]")
+  const mensaje = document.querySelector<HTMLElement>("#perfil-mensaje")
+
+  function cargarDatos() {
+    const usuario = getSesion().user as {
+      nombre?: string | null
+      apellido?: string | null
+      telefono?: string | null
+    } | null
+    if (!usuario) return
+
+    const nombre = document.querySelector<HTMLInputElement>("#perfil-nombre")
+    const apellido = document.querySelector<HTMLInputElement>("#perfil-apellido")
+    const telefono = document.querySelector<HTMLInputElement>("#perfil-telefono")
+    if (nombre) nombre.value = usuario.nombre ?? ""
+    if (apellido) apellido.value = usuario.apellido ?? ""
+    if (telefono) telefono.value = usuario.telefono ?? ""
+  }
+
+  function cerrarEdicion() {
+    if (!form || !editar) return
+    form.classList.add("hidden")
+    editar.classList.remove("hidden")
+    if (mensaje) {
+      mensaje.hidden = true
+      mensaje.textContent = ""
+    }
+  }
+
+  editar?.addEventListener("click", () => {
+    cargarDatos()
+    form?.classList.remove("hidden")
+    editar.classList.add("hidden")
+  })
+
+  document.querySelector("[data-perfil-cancelar]")?.addEventListener("click", cerrarEdicion)
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault()
+    if (!form || !guardar || !mensaje) return
+
+    const datos = new FormData(form)
+    const nombre = String(datos.get("nombre") ?? "").trim()
+    const apellido = String(datos.get("apellido") ?? "").trim()
+    const telefono = String(datos.get("telefono") ?? "").trim()
+    if (!nombre || !apellido) {
+      mensaje.textContent = "Nombre y apellido son obligatorios."
+      mensaje.hidden = false
+      return
+    }
+
+    guardar.disabled = true
+    mensaje.hidden = true
+    try {
+      await http.patch("/usuarios/me", { nombre, apellido, telefono })
+      const usuario = getSesion().user
+      if (usuario) actualizarUsuarioSesion({ ...usuario, nombre, apellido, telefono: telefono || null })
+      cerrarEdicion()
+    } catch (error: any) {
+      mensaje.textContent = error?.mensaje ?? "No pudimos actualizar tu perfil. Inténtalo de nuevo."
+      mensaje.hidden = false
+    } finally {
+      guardar.disabled = false
+    }
+  })
+</script>

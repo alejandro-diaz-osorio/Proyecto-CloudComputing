@@ -20,10 +20,11 @@ CREATE TABLE usuarios (
   nombre        VARCHAR(80)  NOT NULL,
   apellido      VARCHAR(80)  NOT NULL,
   email         VARCHAR(190) NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,              -- bcrypt/argon2, nunca texto plano
+  password_hash VARCHAR(255) NOT NULL,
   telefono      VARCHAR(25)  NULL,
   rol           ENUM('cliente','admin') NOT NULL DEFAULT 'cliente',
   activo        TINYINT(1)   NOT NULL DEFAULT 1,
+  email_verificado_en DATETIME NULL,
   created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -43,6 +44,22 @@ CREATE TABLE tokens_recuperacion_contrasena (
   UNIQUE KEY uq_token_recuperacion_hash (token_hash),
   KEY ix_token_recuperacion_usuario (usuario_id),
   CONSTRAINT fk_token_recuperacion_usuario FOREIGN KEY (usuario_id)
+    REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- 1c. TOKENS_VERIFICACION_EMAIL: enlaces temporales de un solo uso
+-- ---------------------------------------------------------------------
+CREATE TABLE tokens_verificacion_email (
+  id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  usuario_id  INT UNSIGNED NOT NULL,
+  token_hash  CHAR(64) NOT NULL,
+  expires_at  DATETIME NOT NULL,
+  created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_token_verificacion_hash (token_hash),
+  KEY ix_token_verificacion_usuario (usuario_id),
+  CONSTRAINT fk_token_verificacion_usuario FOREIGN KEY (usuario_id)
     REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -78,7 +95,7 @@ CREATE TABLE solicitudes (
   presupuesto_min    DECIMAL(14,0) NULL,             -- COP; el desplegable "450 - 600 millones" se guarda como rango
   presupuesto_max    DECIMAL(14,0) NULL,
   plazo_inicio       ENUM('proximo_mes','proximos_3_meses','proximos_6_meses','mas_adelante','sin_definir') NULL,
-  estado             ENUM('borrador','enviada','en_evaluacion','respondida','confirmada')
+  estado             ENUM('borrador','enviada','en_evaluacion','rechazada','respondida','confirmada')
                      NOT NULL DEFAULT 'borrador',    -- 'borrador' no aparece en el seguimiento del cliente
   enviada_en         DATETIME     NULL,
   created_at         DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -171,8 +188,8 @@ CREATE TABLE cotizaciones (
 CREATE TABLE historial_estados (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
   solicitud_id    INT UNSIGNED NOT NULL,
-  estado_anterior ENUM('borrador','enviada','en_evaluacion','respondida','confirmada') NULL,
-  estado_nuevo    ENUM('borrador','enviada','en_evaluacion','respondida','confirmada') NOT NULL,
+  estado_anterior ENUM('borrador','enviada','en_evaluacion','rechazada','respondida','confirmada') NULL,
+  estado_nuevo    ENUM('borrador','enviada','en_evaluacion','rechazada','respondida','confirmada') NOT NULL,
   cambiado_por    INT UNSIGNED NOT NULL,
   nota            VARCHAR(255) NULL,
   created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,

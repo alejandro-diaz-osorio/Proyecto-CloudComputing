@@ -1,0 +1,141 @@
+---
+import AuthHero from '../components/auth/AuthHero.astro';
+import AuthLayout from '../layouts/AuthLayout.astro';
+---
+
+<AuthLayout
+  title="Verificar correo · SOLUCIA"
+  description="Verifica tu correo electrónico o solicita un nuevo enlace para activar tu cuenta de SOLUCIA."
+>
+  <AuthHero mode="login" />
+  <section class="auth-panel">
+    <div class="auth-panel__inner">
+      <nav class="auth-tabs" aria-label="Acceso">
+        <a href="/login/">Iniciar sesión</a>
+        <a href="/registro/">Crear cuenta</a>
+      </nav>
+
+      <header class="auth-heading">
+        <p class="auth-eyebrow">Activa tu cuenta</p>
+        <h1 id="verificar-titulo">Verifica tu correo</h1>
+        <p class="auth-sub" id="verificar-descripcion">
+          Revisa tu bandeja de entrada y abre el enlace que te enviamos. Si no lo encuentras, puedes solicitar otro.
+        </p>
+      </header>
+
+      <div id="verificar-aviso" class="auth-alert auth-alert--info" role="status" aria-live="polite" hidden></div>
+
+      <form id="reenviar-form" class="auth-form" novalidate>
+        <div class="auth-field">
+          <div class="auth-field__head">
+            <label for="verificar-email">Correo electrónico</label>
+          </div>
+          <div class="auth-input">
+            <input
+              id="verificar-email"
+              name="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              maxlength="190"
+              placeholder="nombre@correo.com"
+              required
+              aria-describedby="verificar-error"
+            />
+          </div>
+          <p id="verificar-error" class="auth-field__error" hidden></p>
+        </div>
+        <button type="submit" class="auth-submit" data-label="Reenviar correo">
+          <span class="auth-spinner" aria-hidden="true" hidden></span>
+          <span data-label-text>Reenviar correo de verificación</span>
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        <a class="auth-link" href="/login/">Volver a iniciar sesión</a>
+      </p>
+    </div>
+  </section>
+</AuthLayout>
+
+<script>
+  import { authApi } from '../features/auth/api.js';
+
+  const formulario = document.querySelector<HTMLFormElement>('#reenviar-form');
+  const aviso = document.querySelector<HTMLElement>('#verificar-aviso');
+  const token = new URLSearchParams(window.location.search).get('token');
+
+  function mostrarAviso(mensaje: string, error = false) {
+    if (!aviso) return;
+    aviso.textContent = mensaje;
+    aviso.classList.toggle('auth-alert--error', error);
+    aviso.classList.toggle('auth-alert--info', !error);
+    aviso.hidden = !mensaje;
+  }
+
+  function mostrarError(mensaje: string) {
+    const elemento = document.querySelector<HTMLElement>('#verificar-error');
+    if (!elemento) return;
+    elemento.textContent = mensaje;
+    elemento.hidden = !mensaje;
+  }
+
+  function estadoBoton(enviando: boolean) {
+    const boton = formulario?.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const etiqueta = boton?.querySelector<HTMLElement>('[data-label-text]');
+    const spinner = boton?.querySelector<HTMLElement>('.auth-spinner');
+    if (!boton || !etiqueta) return;
+    boton.disabled = enviando;
+    boton.setAttribute('aria-busy', String(enviando));
+    etiqueta.textContent = enviando ? 'Procesando…' : 'Reenviar correo de verificación';
+    if (spinner) spinner.hidden = !enviando;
+  }
+
+  if (token) {
+    if (formulario) formulario.hidden = true;
+    const titulo = document.querySelector<HTMLElement>('#verificar-titulo');
+    if (titulo) titulo.textContent = 'Verificando tu correo…';
+
+    void (async () => {
+      try {
+        const resultado = await authApi.verificarEmail({ token });
+        mostrarAviso(resultado.mensaje);
+        if (titulo) titulo.textContent = 'Correo verificado';
+      } catch (error) {
+        mostrarAviso(
+          error instanceof Error ? error.message : 'No pudimos verificar el correo. Solicita un enlace nuevo.',
+          true,
+        );
+        if (titulo) titulo.textContent = 'No pudimos verificar tu correo';
+        if (formulario) formulario.hidden = false;
+      } finally {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    })();
+  }
+
+  formulario?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    mostrarAviso('');
+    mostrarError('');
+    const email = new FormData(formulario).get('email')?.toString().trim() ?? '';
+    if (!email) {
+      mostrarError('Ingresa tu correo electrónico.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      mostrarError('El correo no tiene un formato válido.');
+      return;
+    }
+
+    estadoBoton(true);
+    try {
+      const resultado = await authApi.reenviarVerificacion({ email });
+      mostrarAviso(resultado.mensaje);
+    } catch (error) {
+      mostrarAviso(error instanceof Error ? error.message : 'No pudimos enviar la solicitud. Inténtalo de nuevo.', true);
+    } finally {
+      estadoBoton(false);
+    }
+  });
+</script>

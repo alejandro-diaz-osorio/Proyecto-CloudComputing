@@ -37,9 +37,9 @@ El backend requiere las siguientes variables de entorno:
 | `DB_USER` | Usuario de la base de datos. |
 | `DB_PASSWORD` | Contraseña de la base de datos. |
 | `JWT_SECRET` | Secreto usado para firmar los tokens JWT. |
-| `FRONTEND_URL` | URL pública del frontend, usada para crear enlaces de recuperación. |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` | Servidor y conexión SMTP para enviar correos. |
-| `SMTP_USER`, `SMTP_PASSWORD`, `MAIL_FROM` | Credenciales SMTP y remitente del correo. |
+| `FRONTEND_URL` | URL pública del frontend, usada para crear enlaces de verificación y recuperación. |
+| `RESEND_API_KEY` | Clave de API de Resend, usada para enviar correos. |
+| `MAIL_FROM` | Remitente verificado en Resend (por ejemplo, `SOLUCIA <no-reply@tudominio.com>`). |
 | `CORS_ORIGINS` | Orígenes permitidos, separados por comas. |
 | `UPLOADS_DIR` | Carpeta para archivos subidos. Por defecto, `/app/uploads`. |
 
@@ -47,13 +47,22 @@ En producción, `JWT_SECRET` debe tener al menos 32 caracteres. Las
 credenciales deben configurarse mediante variables de entorno y no deben
 guardarse en el repositorio.
 
-La recuperación de contraseña requiere configurar las variables SMTP y
-`FRONTEND_URL`. Los enlaces vencen después de 30 minutos y solo pueden usarse
-una vez. Para bases de datos existentes, ejecuta una vez
-`database/migrations/20261109_renombrar_tokens_recuperacion.sql`; el script de
-inicialización de MySQL solo se ejecuta automáticamente al crear un volumen de
-datos nuevo. Sin SMTP configurado, la solicitud devuelve un error visible en
-lugar de confirmar falsamente que se envió un correo.
+El registro requiere configurar `RESEND_API_KEY`, un `MAIL_FROM` autorizado por
+Resend y `FRONTEND_URL` (obligatorio en producción). Verifica tu dominio en
+Resend antes de usar un remitente propio. La cuenta queda pendiente hasta que el
+usuario verifica su correo; el enlace vence después de 24 horas y solo puede
+usarse una vez. Los tokens se guardan como hashes. La recuperación de contraseña
+usa el mismo servicio de correo; sus enlaces vencen después de 30 minutos y solo
+pueden usarse una vez. Si el servicio de correo falla, la API devuelve un error
+visible y permite solicitar de nuevo la verificación.
+
+Para bases de datos existentes, ejecuta una vez
+`database/migrations/20261113_verificacion_email.sql`; las cuentas ya existentes
+se conservan como verificadas. El script de inicialización de MySQL solo se
+ejecuta automáticamente al crear un volumen de datos nuevo.
+
+Para habilitar el rechazo de solicitudes en una base de datos existente,
+ejecuta una vez `database/migrations/20261113_rechazar_solicitudes.sql`.
 
 ## Desarrollo local
 

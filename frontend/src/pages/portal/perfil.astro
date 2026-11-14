@@ -1,5 +1,6 @@
 ---
 import PortalLayout from "../../layouts/PortalLayout.astro"
+import PerfilEditor from "../../features/portal/components/PerfilEditor.astro"
 ---
 
 <PortalLayout
@@ -17,6 +18,8 @@ import PortalLayout from "../../layouts/PortalLayout.astro"
     >
       Mi perfil
     </h1>
+
+    <PerfilEditor />
 
     <dl
       class="grid max-w-180 grid-cols-1 gap-6 border border-[#e7e1d4] bg-[#fffdf9] p-7 sm:grid-cols-2"
@@ -53,6 +56,7 @@ import PortalLayout from "../../layouts/PortalLayout.astro"
         </dd>
       </div>
     </dl>
+
   </section>
 </PortalLayout>
 

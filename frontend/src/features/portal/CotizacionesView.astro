@@ -139,6 +139,7 @@ import { RUTAS } from '../../lib/routes.js';
   const BANNERS = {
     enviada: ['Recibimos tu solicitud', 'Una administradora la revisará y te avisaremos por correo.'],
     evaluacion: ['Estamos evaluando tu proyecto', 'Te notificaremos por correo cuando la cotización esté lista.'],
+    rechazada: ['Solicitud rechazada', 'La administradora rechazó esta solicitud. Si tienes dudas, puedes comunicarte con nosotros.'],
   };
 
   function htmlBloque(s, cot, estadoCot) {
@@ -199,11 +200,11 @@ import { RUTAS } from '../../lib/routes.js';
 
   function pintarDetalle(s, cot, estadoCot) {
     const e = ESTADOS[s.estado];
-    const idx = PASOS.findIndex((p) => p.id === s.estado);
+    const idx = s.estado === 'rechazada' ? 0 : PASOS.findIndex((p) => p.id === s.estado);
     const sub = { done: 'Completado', current: 'Estado actual', todo: 'Pendiente' };
 
     const pasos = PASOS.map((p, i) => {
-      const st = s.estado === 'confirmada' || i < idx ? 'done' : i === idx ? 'current' : 'todo';
+      const st = s.estado === 'confirmada' || (s.estado === 'rechazada' ? i === 0 : i < idx) ? 'done' : i === idx && s.estado !== 'rechazada' ? 'current' : 'todo';
       return `
         <li class="c-step c-step--${st}">
           <span class="c-step__dot">${st === 'done' ? ico('check') : i + 1}</span>

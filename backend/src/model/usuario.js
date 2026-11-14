@@ -28,8 +28,10 @@ const Usuario = {
   // El password ya debe llegar cifrado (bcrypt) desde el controlador
   create: async ({ nombre, apellido, email, password_hash, telefono, rol }) => {
     const result = await query(
-      'INSERT INTO usuarios (nombre, apellido, email, password_hash, telefono, rol) VALUES (?, ?, ?, ?, ?, ?)',
-      [nombre, apellido, email.toLowerCase().trim(), password_hash, telefono || null, rol || 'cliente']
+      `INSERT INTO usuarios
+       (nombre, apellido, email, password_hash, telefono, rol, email_verificado_en)
+       VALUES (?, ?, ?, ?, ?, ?, CASE WHEN ? = 'admin' THEN UTC_TIMESTAMP() ELSE NULL END)`,
+      [nombre, apellido, email.toLowerCase().trim(), password_hash, telefono || null, rol || 'cliente', rol || 'cliente']
     );
     return result.insertId;
   },

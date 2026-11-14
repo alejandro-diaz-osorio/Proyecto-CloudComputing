@@ -128,6 +128,20 @@ export function aplicarSesion(
   });
 }
 
+export function actualizarUsuarioSesion(usuario) {
+  if (!accessToken || estado.status !== 'authenticated') return;
+
+  const [local] = almacenes();
+  let recordar = false;
+  try {
+    recordar = Boolean(local?.getItem(CLAVE));
+  } catch {
+    // Sin storage: conservar la sesión solo en memoria.
+  }
+
+  aplicarSesion({ accessToken, usuario }, recordar);
+}
+
 export function limpiarSesion() {
   accessToken = null;
 
@@ -214,22 +228,6 @@ export async function iniciarSesion({
   aplicarSesion(sesion, recordar);
 
   return sesion.usuario;
-}
-
-export async function registrarYEntrar(datos) {
-  const sesion = await authApi.register(datos);
-
-  if (sesion.accessToken && sesion.usuario) {
-    aplicarSesion(sesion, false);
-
-    return sesion.usuario;
-  }
-
-  return iniciarSesion({
-    email: datos.email,
-    password: datos.password,
-    recordar: false
-  });
 }
 
 export function cerrarSesion() {

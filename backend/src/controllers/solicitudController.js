@@ -162,6 +162,20 @@ const tomarSolicitud = async (req, res) => {
   }
 };
 
+// enviada → rechazada: la administradora descarta la solicitud
+const rechazarSolicitud = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!esIdValido(id)) return res.status(400).json({ mensaje: 'El ID no es válido' });
+
+    const solicitud = await obtenerSolicitudAccesible(id, req.usuario);
+    await Solicitud.cambiarEstado(solicitud.id, 'rechazada', req.usuario.id, { nota: 'Solicitud rechazada por la administradora' });
+    res.json({ mensaje: 'Solicitud rechazada' });
+  } catch (error) {
+    manejarError(res, error, 'Error al rechazar la solicitud');
+  }
+};
+
 // ── Ambos roles ───────────────────────────────────────────────
 
 // Detalle completo: datos, servicios, archivos, cotizaciones e historial
@@ -198,5 +212,5 @@ const getSolicitudById = async (req, res) => {
 
 module.exports = {
   getMisSolicitudes, createSolicitud, updateSolicitud, enviarSolicitud, deleteSolicitud,
-  getAllSolicitudes, getContadores, tomarSolicitud, getSolicitudById,
+  getAllSolicitudes, getContadores, tomarSolicitud, rechazarSolicitud, getSolicitudById,
 };
