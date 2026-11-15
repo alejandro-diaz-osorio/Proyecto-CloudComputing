@@ -1,0 +1,2067 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro"
+---
+
+<BaseLayout
+	title="Póster del proyecto | SOLUCIA S.A.S."
+	description="Póster interactivo del desarrollo de SOLUCIA: plataforma de cotizaciones en Oracle Cloud y agente de IA Sol."
+>
+	<main class="poster-page">
+		<div class="poster-toolbar" aria-label="Acciones del póster">
+			<a href="/" class="toolbar-link">
+				<span aria-hidden="true">←</span>
+				Volver a SOLUCIA
+			</a>
+			<button class="print-button" id="print-poster" type="button">
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					aria-hidden="true"
+					focusable="false"
+				>
+					<path
+						d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"
+						stroke="currentColor"
+						stroke-width="1.7"
+						stroke-linecap="round"
+						stroke-linejoin="round"></path>
+					<path
+						d="M17 11h.01"
+						stroke="currentColor"
+						stroke-width="2.4"
+						stroke-linecap="round"></path>
+				</svg>
+				Imprimir / Guardar PDF
+			</button>
+		</div>
+
+		<article class="poster-board" aria-labelledby="poster-title">
+			<header class="poster-header" id="inicio">
+				<div class="brand-lockup">
+					<img src="/logo.png" alt="SOLUCIA S.A.S." />
+					<div class="brand-caption">
+						<span>PROYECTO FINAL</span>
+					</div>
+				</div>
+				<a
+					class="live-link"
+					href="https://proyecto.solucia.com.co"
+					target="_blank"
+					rel="noreferrer"
+				>
+					<span class="live-dot" aria-hidden="true"></span>
+					proyecto.solucia.com.co
+					<span aria-hidden="true">↗</span>
+				</a>
+			</header>
+
+			<section class="poster-hero">
+				<div class="hero-copy">
+					<p class="eyebrow">
+						Plataforma cloud · Arquitectura y construcción
+					</p>
+					<h1 id="poster-title">
+						Cotizar mejor,<br />
+						<span>desde la nube.</span>
+					</h1>
+					<p class="hero-description">
+						Una plataforma contenedorizada de cotizaciones de
+						arquitectura con <strong>Sol</strong>, un agente de IA
+						que conversa con el cliente y ayuda a estructurar los
+						requerimientos de su proyecto.
+					</p>
+				</div>
+
+				<aside class="hero-note">
+					<div class="note-mark" aria-hidden="true">S</div>
+					<p class="note-label">EL PROPÓSITO</p>
+					<p>
+						Conectar clientes y equipo profesional en un mismo
+						flujo: desde la idea inicial hasta una solicitud clara,
+						editable y lista para revisión.
+					</p>
+					<div class="hero-meta">
+						<span>Ingeniería de Sistemas y Telecomunicaciones</span>
+						<span>Universidad Católica de Pereira</span>
+					</div>
+				</aside>
+			</section>
+
+			<section class="metrics" aria-label="Datos clave del despliegue">
+				<div class="metric">
+					<strong>5</strong>
+					<p>
+						servicios en<br />
+						Docker Compose
+					</p>
+				</div>
+				<div class="metric">
+					<strong>3</strong>
+					<p>
+						Dockerfiles para<br />
+						frontend, API y agente
+					</p>
+				</div>
+				<div class="metric">
+					<strong>2</strong>
+					<p>
+						volúmenes persistentes<br />
+						para datos y archivos
+					</p>
+				</div>
+				<div class="metric metric-featured">
+					<strong>15</strong>
+					<p>
+						campos en la ficha<br />
+						que Sol ayuda a completar
+					</p>
+				</div>
+			</section>
+			<p class="metrics-caption">
+				Servicios: frontend, backend, agentes, MySQL y phpMyAdmin.
+				Inventario de arquitectura, no métricas de rendimiento.
+			</p>
+
+			<div class="poster-grid">
+				<section class="poster-card architecture-card" id="arquitectura">
+					<div class="section-heading">
+						<span class="section-number">01</span>
+						<div>
+							<p class="section-kicker">INFRAESTRUCTURA</p>
+							<h2>Arquitectura cloud</h2>
+						</div>
+					</div>
+					<p class="card-intro">
+						Despliegue en Oracle Cloud: selecciona un servicio para
+						apagarlo y observa qué partes del sistema reciben el
+						impacto.
+					</p>
+
+					<div class="simulation-controls">
+						<p class="screen-only">
+							<span class="simulation-pulse" aria-hidden="true"></span>
+							Pulsa un componente para apagarlo o encenderlo
+						</p>
+						<button
+							id="reset-simulation"
+							class="reset-simulation screen-only"
+							type="button"
+						>
+							Restablecer
+						</button>
+					</div>
+
+					<div
+						class="architecture-flow"
+						role="group"
+						aria-label="Diagrama interactivo de servicios cloud"
+					>
+						<div class="flow-public">
+							<span class="flow-tag">ENTRADA PÚBLICA</span>
+							<div class="internet-node">Internet · HTTPS</div>
+							<span
+								class="flow-arrow"
+								data-edge="internet-caddy"
+								aria-hidden="true">↓</span
+							>
+							<button
+								class="flow-node service-toggle caddy-node"
+								type="button"
+								role="switch"
+								aria-checked="true"
+								aria-label="Caddy, servicio encendido. Pulsa para apagar."
+								data-service="caddy"
+							>
+								<strong>Caddy</strong>
+								<span>proxy HTTPS en la VM</span>
+								<span class="node-status">EN LÍNEA</span>
+							</button>
+							<span
+								class="flow-arrow"
+								data-edge="caddy-frontend"
+								aria-hidden="true">↓ dominio</span
+							>
+							<button
+								class="flow-node service-toggle frontend-node"
+								type="button"
+								role="switch"
+								aria-checked="true"
+								aria-label="Frontend, servicio encendido. Pulsa para apagar."
+								data-service="frontend"
+							>
+								<strong>Frontend</strong>
+								<span>Astro + NGINX</span>
+								<span class="node-status">EN LÍNEA</span>
+							</button>
+							<span
+								class="flow-arrow"
+								data-edge="frontend-backend"
+								aria-hidden="true">↓ /api</span
+							>
+						</div>
+						<div class="flow-internal">
+							<span class="flow-tag">RED PRIVADA · DOCKER COMPOSE</span>
+							<button
+								class="flow-node service-toggle backend-node"
+								type="button"
+								role="switch"
+								aria-checked="true"
+								aria-label="Backend, servicio encendido. Pulsa para apagar."
+								data-service="backend"
+							>
+								<strong>Backend</strong>
+								<span>Node.js + Express · API REST</span>
+								<span class="node-status">EN LÍNEA</span>
+							</button>
+							<div class="flow-connections" aria-hidden="true">
+								<span data-edge="backend-database">↙ consulta MySQL</span>
+								<span data-edge="backend-agentes">↘ solicita a Sol</span>
+							</div>
+							<div class="flow-branches">
+								<button
+									class="flow-node service-toggle internal-node"
+									type="button"
+									role="switch"
+									aria-checked="true"
+									aria-label="Base de datos MySQL, servicio encendido. Pulsa para apagar."
+									data-service="database"
+								>
+									<strong>MySQL</strong>
+									<span>datos · volumen db_data</span>
+									<span class="node-status">EN LÍNEA</span>
+								</button>
+								<button
+									class="flow-node service-toggle internal-node"
+									type="button"
+									role="switch"
+									aria-checked="true"
+									aria-label="Servicio de agentes Sol, encendido. Pulsa para apagar."
+									data-service="agentes"
+								>
+									<strong>Agentes</strong>
+									<span>Python · FastAPI · LangGraph</span>
+									<span class="node-status">EN LÍNEA</span>
+								</button>
+							</div>
+							<div class="admin-route">
+								<span
+									class="admin-connector"
+									data-edge="phpmyadmin-database"
+									aria-hidden="true">↗</span
+								>
+								<button
+									class="flow-node service-toggle internal-node admin-node"
+									type="button"
+									role="switch"
+									aria-checked="true"
+									aria-label="phpMyAdmin, servicio encendido. Pulsa para apagar."
+									data-service="phpmyadmin"
+								>
+									<strong>phpMyAdmin</strong>
+									<span>administración privada de MySQL</span>
+									<span class="node-status">EN LÍNEA</span>
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<div class="simulation-panel" aria-live="polite">
+						<div class="simulation-panel-heading">
+							<span class="simulation-indicator" id="simulation-indicator"></span>
+							<strong id="simulation-title">Todo operativo</strong>
+						</div>
+						<p id="simulation-summary" role="status">
+							Sitio, API, base de datos y Sol disponibles. Pulsa un
+							servicio para simular una interrupción.
+						</p>
+						<ul id="simulation-impacts" class="simulation-impacts"></ul>
+					</div>
+					<p class="diagram-caption">
+						Simulación visual: no detiene contenedores reales.
+						Caddy corre en la VM; los otros cinco servicios se
+						gestionan con Docker Compose.
+					</p>
+				</section>
+
+				<section class="poster-card sol-card" id="sol">
+					<div class="section-heading">
+						<span class="section-number">02</span>
+						<div>
+							<p class="section-kicker">ASISTENTE DE REQUERIMIENTOS</p>
+							<h2>Conoce a Sol</h2>
+						</div>
+					</div>
+					<p class="card-intro">
+						Guía al cliente para convertir una idea inicial en una
+						descripción más completa, sin reemplazar el criterio
+						del arquitecto.
+					</p>
+
+					<div class="sol-flow">
+						<div class="sol-step">
+							<span>01</span>
+							<p><strong>Cliente</strong> escribe su idea</p>
+						</div>
+						<div class="sol-step">
+							<span>02</span>
+							<p><strong>Sol</strong> identifica lo que falta</p>
+						</div>
+						<div class="sol-step">
+							<span>03</span>
+							<p><strong>Borrador</strong> editable por el cliente</p>
+						</div>
+					</div>
+
+					<div class="agent-engine">
+						<div class="engine-icon" aria-hidden="true">✳</div>
+						<div>
+							<strong>LangGraph + servicio FastAPI</strong>
+							<p>
+								La lógica determina qué preguntar; el modelo
+								apoya la extracción y la redacción. Si no hay
+								clave de IA, funciona un modo basado en reglas.
+							</p>
+						</div>
+					</div>
+
+					<details class="poster-details">
+						<summary>¿Qué hace y qué evita Sol?</summary>
+						<div class="details-content">
+							<p>
+								Pregunta por el tipo y uso del proyecto,
+								personas, pisos, habitaciones, baños,
+								espacios, mascotas, tamaño y distribución.
+								Entrega un borrador pronto y lo actualiza en
+								cada turno.
+							</p>
+							<ul>
+								<li>
+									No repite ubicación, terreno, presupuesto
+									ni plazos: ya los solicita el formulario.
+								</li>
+								<li>
+									No inventa precios o plazos, ni aprueba
+									cotizaciones.
+								</li>
+							</ul>
+						</div>
+					</details>
+				</section>
+
+				<section class="poster-card practices-card" id="buenas-practicas">
+					<div class="section-heading">
+						<span class="section-number">03</span>
+						<div>
+							<p class="section-kicker">DISEÑO Y OPERACIÓN</p>
+							<h2>Buenas prácticas cloud</h2>
+						</div>
+					</div>
+					<ul class="practice-list">
+						<li>
+							<span class="practice-icon" aria-hidden="true">↗</span>
+							<div>
+								<strong>Servicios desacoplados</strong>
+								<p>
+									Frontend, API, agente y base de datos
+									corren en contenedores coordinados por
+									Docker Compose.
+								</p>
+							</div>
+						</li>
+						<li>
+							<span class="practice-icon" aria-hidden="true">◈</span>
+							<div>
+								<strong>Persistencia</strong>
+								<p>
+									Los volúmenes conservan la base de datos
+									y los archivos subidos entre reinicios.
+								</p>
+							</div>
+						</li>
+						<li>
+							<span class="practice-icon" aria-hidden="true">⌑</span>
+							<div>
+								<strong>Configuración segura</strong>
+								<p>
+									Backend stateless con JWT, secretos por
+									variables de entorno y token compartido,
+									validado de forma segura, entre API y
+									agente.
+								</p>
+							</div>
+						</li>
+						<li>
+							<span class="practice-icon" aria-hidden="true">✓</span>
+							<div>
+								<strong>Despliegue resiliente</strong>
+								<p>
+									Healthchecks, imágenes ligeras y
+									ejecución sin privilegios de root en los
+									contenedores de la aplicación.
+								</p>
+							</div>
+						</li>
+					</ul>
+					<p class="security-note">
+						La interfaz expone una sola URL; la comunicación
+						entre servicios ocurre dentro de la red privada.
+					</p>
+				</section>
+			</div>
+
+			<section class="outcomes" id="resultados">
+				<div class="outcomes-title">
+					<p class="section-kicker">QUÉ SE CONSTRUYÓ</p>
+					<h2>Resultados</h2>
+				</div>
+				<div class="outcome">
+					<span class="outcome-index">A</span>
+					<h3>Plataforma cloud</h3>
+					<p>
+						Evolución de un sitio estático a una plataforma con
+						base de datos, roles y seguimiento de cotizaciones.
+					</p>
+				</div>
+				<div class="outcome">
+					<span class="outcome-index">B</span>
+					<h3>Asesoría conversacional</h3>
+					<p>
+						Sol construye un borrador progresivo y editable a
+						partir de la conversación con el cliente.
+					</p>
+				</div>
+				<div class="outcome">
+					<span class="outcome-index">C</span>
+					<h3>Integración completa</h3>
+					<p>
+						Frontend, API y agente se comunican por servicios
+						internos detrás de una única dirección pública.
+					</p>
+				</div>
+			</section>
+
+			<footer class="poster-footer">
+				<div class="conclusion">
+					<span class="conclusion-symbol" aria-hidden="true">“</span>
+					<p>
+						<strong>El código decide; el modelo ayuda.</strong>
+						Separar la lógica de conversación de la generación
+						de texto hace a Sol más predecible y facilita su
+						evolución.
+					</p>
+				</div>
+				<div class="future">
+					<p class="section-kicker">SIGUIENTES PASOS</p>
+					<p>
+						Segmentar redes · almacenamiento externo para archivos
+						· automatizar CI/CD
+					</p>
+				</div>
+				<div class="credits">
+					<span>Alejandro Diaz · Laura Echeverry</span>
+					<span>Universidad Católica de Pereira</span>
+				</div>
+			</footer>
+		</article>
+	</main>
+</BaseLayout>
+
+<script>
+	const printButton = document.querySelector("#print-poster")
+	const resetButton = document.querySelector("#reset-simulation")
+	const serviceToggles = Array.from(
+		document.querySelectorAll<HTMLButtonElement>(".service-toggle"),
+	)
+	const simulationIndicator = document.querySelector("#simulation-indicator")
+	const simulationTitle = document.querySelector("#simulation-title")
+	const simulationSummary = document.querySelector("#simulation-summary")
+	const simulationImpacts = document.querySelector("#simulation-impacts")
+
+	const serviceNames = new Map([
+		["caddy", "Caddy"],
+		["frontend", "Frontend"],
+		["backend", "Backend"],
+		["database", "MySQL"],
+		["agentes", "Agentes Sol"],
+		["phpmyadmin", "phpMyAdmin"],
+	])
+	const impactMessages = new Map([
+		[
+			"caddy",
+			"Caddy apagado: el dominio HTTPS deja de responder desde Internet; los contenedores siguen encendidos.",
+		],
+		[
+			"frontend",
+			"Frontend apagado: el sitio no carga. Backend, MySQL y agentes siguen encendidos, pero el cliente no puede usar la interfaz.",
+		],
+		[
+			"backend",
+			"Backend apagado: el frontend estático puede cargar, pero autenticación, solicitudes y cotizaciones no pueden usar la API.",
+		],
+		[
+			"database",
+			"MySQL apagado: /api/health responde 503 y las operaciones que requieren datos fallan. El volumen db_data no se elimina.",
+		],
+		[
+			"agentes",
+			"Agentes apagados: Sol no puede responder; las demás funciones de la plataforma permanecen disponibles.",
+		],
+		[
+			"phpmyadmin",
+			"phpMyAdmin apagado: no está disponible la consola de administración. La aplicación y MySQL siguen operativos.",
+		],
+	])
+	const serviceEdges = [
+		{ id: "internet-caddy", services: ["caddy"] },
+		{ id: "caddy-frontend", services: ["caddy", "frontend"] },
+		{ id: "frontend-backend", services: ["frontend", "backend"] },
+		{ id: "backend-database", services: ["backend", "database"] },
+		{ id: "backend-agentes", services: ["backend", "agentes"] },
+		{ id: "phpmyadmin-database", services: ["phpmyadmin", "database"] },
+	]
+
+	printButton?.addEventListener("click", () => {
+		window.print()
+	})
+
+	function updateSimulation() {
+		const offlineServices = new Set(
+			serviceToggles
+				.filter((toggle) => toggle.getAttribute("aria-checked") === "false")
+				.map((toggle) => toggle.dataset.service)
+				.filter((service): service is string => Boolean(service)),
+		)
+		const impactedServices = new Set<string>()
+
+		if (offlineServices.has("frontend")) impactedServices.add("caddy")
+		if (offlineServices.has("backend")) impactedServices.add("frontend")
+		if (offlineServices.has("database")) {
+			impactedServices.add("backend")
+			impactedServices.add("frontend")
+			impactedServices.add("phpmyadmin")
+		}
+		if (offlineServices.has("agentes")) impactedServices.add("frontend")
+
+		for (const toggle of serviceToggles) {
+			const service = toggle.dataset.service
+			if (!service) continue
+
+			const isOffline = offlineServices.has(service)
+			const isImpacted = impactedServices.has(service) && !isOffline
+			const serviceName = serviceNames.get(service) || service
+			const state = isOffline
+				? "APAGADO"
+				: isImpacted
+					? "IMPACTO INDIRECTO"
+					: "EN LÍNEA"
+
+			toggle.setAttribute("aria-checked", String(!isOffline))
+			toggle.setAttribute(
+				"aria-label",
+				`${serviceName}, ${isOffline ? "apagado" : isImpacted ? "encendido con impacto indirecto" : "encendido"}. Pulsa para ${isOffline ? "encender" : "apagar"}.`,
+			)
+			toggle.classList.toggle("is-off", isOffline)
+			toggle.classList.toggle("is-impacted", isImpacted)
+
+			const stateLabel = toggle.querySelector(".node-status")
+			if (stateLabel) stateLabel.textContent = state
+		}
+
+		for (const edge of serviceEdges) {
+			const connection = document.querySelector(`[data-edge="${edge.id}"]`)
+			const isBroken = edge.services.some((service) =>
+				offlineServices.has(service),
+			)
+			connection?.classList.toggle("is-broken", isBroken)
+		}
+
+		const affectedAccess =
+			offlineServices.has("caddy") || offlineServices.has("frontend")
+		const outages = Array.from(offlineServices)
+		const title =
+			outages.length === 0
+				? "Todo operativo"
+				: `${outages.length} servicio${outages.length === 1 ? "" : "s"} apagado${outages.length === 1 ? "" : "s"}`
+		const summary =
+			outages.length === 0
+				? "Sitio, API, base de datos y Sol disponibles. Pulsa un servicio para simular una interrupción."
+				: `${affectedAccess ? "El sitio público no está accesible. " : ""}El diagrama marca en rojo el servicio apagado; los componentes dependientes, si los hay, aparecen en ámbar.`
+
+		if (simulationTitle) simulationTitle.textContent = title
+		if (simulationSummary) simulationSummary.textContent = summary
+		simulationIndicator?.classList.toggle("is-interrupted", outages.length > 0)
+
+		if (simulationImpacts) {
+			simulationImpacts.replaceChildren()
+			for (const service of outages) {
+				const message = impactMessages.get(service)
+				if (!message) continue
+				const item = document.createElement("li")
+				item.textContent = message
+				simulationImpacts.append(item)
+			}
+		}
+	}
+
+	serviceToggles.forEach((toggle) => {
+		toggle.addEventListener("click", () => {
+			const isOn = toggle.getAttribute("aria-checked") === "true"
+			toggle.setAttribute("aria-checked", String(!isOn))
+			updateSimulation()
+		})
+	})
+
+	resetButton?.addEventListener("click", () => {
+		serviceToggles.forEach((toggle) => {
+			toggle.setAttribute("aria-checked", "true")
+		})
+		updateSimulation()
+	})
+
+	updateSimulation()
+</script>
+
+<style>
+	:global(body) {
+		background: #e9e6de;
+		color: #17241f;
+		font-family:
+			"Arial", "Helvetica Neue", Helvetica, sans-serif;
+	}
+
+	.poster-page {
+		--poster-ink: #17241f;
+		--poster-muted: #63716b;
+		--poster-line: #dce3db;
+		--poster-green: #1d5c46;
+		--poster-lime: #c9ef72;
+		--poster-paper: #fbfcf8;
+		min-height: 100vh;
+		padding: 24px 0 48px;
+	}
+
+	.poster-toolbar {
+		display: flex;
+		width: min(100%, 1440px);
+		margin: 0 auto 18px;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		padding: 0 clamp(16px, 4vw, 56px);
+	}
+
+	.toolbar-link,
+	.print-button {
+		display: inline-flex;
+		min-height: 42px;
+		align-items: center;
+		justify-content: center;
+		gap: 9px;
+		border: 1px solid #d5d9d2;
+		border-radius: 999px;
+		background: rgba(251, 252, 248, 0.84);
+		color: var(--poster-ink);
+		font-size: 13px;
+		font-weight: 700;
+		text-decoration: none;
+		transition:
+			transform 180ms ease,
+			background-color 180ms ease,
+			border-color 180ms ease;
+	}
+
+	.toolbar-link {
+		padding: 0 16px;
+	}
+
+	.toolbar-link span {
+		color: var(--poster-green);
+		font-size: 18px;
+	}
+
+	.print-button {
+		padding: 0 18px;
+		cursor: pointer;
+	}
+
+	.print-button svg {
+		width: 17px;
+		height: 17px;
+	}
+
+	.toolbar-link:hover,
+	.print-button:hover {
+		transform: translateY(-2px);
+		border-color: var(--poster-green);
+		background: white;
+	}
+
+	.toolbar-link:focus-visible,
+	.print-button:focus-visible,
+	.live-link:focus-visible,
+	.poster-details summary:focus-visible {
+		outline: 3px solid #92bb55;
+		outline-offset: 3px;
+	}
+
+	.poster-board {
+		position: relative;
+		width: min(100%, 70cm);
+		aspect-ratio: 7 / 10;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		gap: 18px;
+		border: 1px solid rgba(23, 36, 31, 0.08);
+		background:
+			radial-gradient(ellipse at 87% 1%, rgba(201, 239, 114, 0.25), transparent 23%),
+			var(--poster-paper);
+		box-shadow: 0 30px 80px rgba(32, 46, 39, 0.13);
+		padding: clamp(28px, 4vw, 66px);
+	}
+
+	.poster-header,
+	.brand-lockup,
+	.live-link,
+	.section-heading {
+		display: flex;
+		align-items: center;
+	}
+
+	.poster-header {
+		justify-content: space-between;
+		gap: 24px;
+		padding-bottom: 22px;
+		border-bottom: 1px solid var(--poster-line);
+	}
+
+	.brand-lockup {
+		gap: 18px;
+	}
+
+	.brand-lockup img {
+		display: block;
+		width: 142px;
+		height: auto;
+	}
+
+	.brand-caption {
+		display: grid;
+		gap: 4px;
+		padding-left: 18px;
+		border-left: 1px solid var(--poster-line);
+		color: var(--poster-muted);
+		font-size: 9px;
+		font-weight: 800;
+		letter-spacing: 0.14em;
+	}
+
+	.brand-caption span:first-child {
+		color: var(--poster-green);
+	}
+
+	.live-link {
+		gap: 8px;
+		color: var(--poster-green);
+		font-size: 12px;
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.live-link:hover {
+		color: #a13e25;
+	}
+
+	.live-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #7aa941;
+		box-shadow: 0 0 0 4px rgba(122, 169, 65, 0.14);
+	}
+
+	.poster-hero {
+		display: grid;
+		grid-template-columns: minmax(0, 1.65fr) minmax(240px, 0.75fr);
+		align-items: center;
+		gap: clamp(28px, 6vw, 90px);
+		padding: clamp(34px, 5vw, 66px) 0 38px;
+	}
+
+	.eyebrow,
+	.section-kicker,
+	.note-label {
+		margin: 0;
+		color: var(--poster-green);
+		font-size: 10px;
+		font-weight: 800;
+		letter-spacing: 0.17em;
+		text-transform: uppercase;
+	}
+
+	.hero-copy h1 {
+		margin: 13px 0 17px;
+		color: var(--poster-ink);
+		font-size: clamp(46px, 7.3vw, 94px);
+		font-weight: 900;
+		letter-spacing: -0.075em;
+		line-height: 0.94;
+	}
+
+	.hero-copy h1 span {
+		color: var(--poster-green);
+	}
+
+	.hero-description {
+		max-width: 700px;
+		margin: 0;
+		color: #4b5c54;
+		font-size: clamp(15px, 1.65vw, 19px);
+		line-height: 1.65;
+	}
+
+	.hero-description strong {
+		color: var(--poster-green);
+	}
+
+	.hero-note {
+		position: relative;
+		padding: 26px 26px 22px;
+		border-radius: 4px 28px 4px 4px;
+		background: var(--poster-green);
+		color: white;
+	}
+
+	.note-mark {
+		display: grid;
+		width: 42px;
+		height: 42px;
+		margin-bottom: 22px;
+		place-items: center;
+		border-radius: 50%;
+		background: var(--poster-lime);
+		color: var(--poster-ink);
+		font-size: 23px;
+		font-weight: 900;
+	}
+
+	.hero-note .note-label {
+		color: var(--poster-lime);
+		font-size: 9px;
+	}
+
+	.hero-note > p:not(.note-label) {
+		margin: 8px 0 20px;
+		font-size: 14px;
+		line-height: 1.65;
+	}
+
+	.hero-meta {
+		display: grid;
+		gap: 5px;
+		padding-top: 15px;
+		border-top: 1px solid rgba(255, 255, 255, 0.22);
+		color: rgba(255, 255, 255, 0.76);
+		font-size: 10px;
+		line-height: 1.5;
+	}
+
+	.metrics {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		border-top: 1px solid var(--poster-line);
+		border-bottom: 1px solid var(--poster-line);
+	}
+
+	.metric {
+		display: flex;
+		min-height: 102px;
+		align-items: center;
+		gap: 15px;
+		padding: 17px clamp(12px, 2.4vw, 34px);
+		border-right: 1px solid var(--poster-line);
+	}
+
+	.metric:first-child {
+		padding-left: 0;
+	}
+
+	.metric:last-child {
+		border-right: 0;
+	}
+
+	.metric strong {
+		color: var(--poster-green);
+		font-size: clamp(35px, 4.4vw, 58px);
+		font-weight: 900;
+		letter-spacing: -0.08em;
+		line-height: 1;
+	}
+
+	.metric p {
+		margin: 0;
+		color: #5c6a63;
+		font-size: clamp(10px, 1vw, 12px);
+		font-weight: 600;
+		line-height: 1.45;
+	}
+
+	.metric-featured strong {
+		color: #ae4c30;
+	}
+
+	.metrics-caption {
+		margin: 8px 0 25px;
+		color: #829087;
+		font-size: 10px;
+	}
+
+	.poster-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		align-items: stretch;
+		gap: 16px;
+	}
+
+	.architecture-card {
+		grid-column: 1 / -1;
+	}
+
+	.poster-card {
+		min-width: 0;
+		padding: clamp(18px, 2vw, 26px);
+		border: 1px solid var(--poster-line);
+		border-radius: 4px 18px 4px 4px;
+		background: rgba(255, 255, 255, 0.66);
+		transition:
+			transform 220ms ease,
+			box-shadow 220ms ease,
+			border-color 220ms ease;
+	}
+
+	.poster-card:hover {
+		transform: translateY(-3px);
+		border-color: #b7c8b7;
+		box-shadow: 0 14px 28px rgba(35, 63, 47, 0.07);
+	}
+
+	.section-heading {
+		align-items: flex-start;
+		gap: 12px;
+		margin-bottom: 13px;
+	}
+
+	.section-number {
+		display: grid;
+		width: 31px;
+		height: 31px;
+		flex: 0 0 auto;
+		place-items: center;
+		border-radius: 50%;
+		background: #edf4e6;
+		color: var(--poster-green);
+		font-size: 11px;
+		font-weight: 900;
+	}
+
+	.section-heading .section-kicker {
+		margin: 1px 0 5px;
+		font-size: 8px;
+	}
+
+	.section-heading h2,
+	.outcomes-title h2 {
+		margin: 0;
+		color: var(--poster-ink);
+		font-size: clamp(19px, 1.8vw, 24px);
+		font-weight: 850;
+		letter-spacing: -0.04em;
+		line-height: 1.1;
+	}
+
+	.card-intro {
+		margin: 0 0 18px;
+		color: #64736a;
+		font-size: 12px;
+		line-height: 1.6;
+	}
+
+	.architecture-flow {
+		display: grid;
+		grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+		gap: 9px;
+	}
+
+	.simulation-controls {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		margin: -3px 0 10px;
+	}
+
+	.simulation-controls p {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		margin: 0;
+		color: #64736a;
+		font-size: 9px;
+		font-weight: 700;
+	}
+
+	.simulation-pulse {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: #76a845;
+		box-shadow: 0 0 0 3px rgba(118, 168, 69, 0.15);
+	}
+
+	.reset-simulation {
+		padding: 6px 10px;
+		border: 1px solid #d5e0d0;
+		border-radius: 999px;
+		background: white;
+		color: var(--poster-green);
+		cursor: pointer;
+		font: inherit;
+		font-size: 9px;
+		font-weight: 800;
+		transition:
+			background-color 160ms ease,
+			border-color 160ms ease;
+	}
+
+	.reset-simulation:hover {
+		border-color: var(--poster-green);
+		background: #f0f5e9;
+	}
+
+	.reset-simulation:focus-visible,
+	.service-toggle:focus-visible {
+		outline: 3px solid #92bb55;
+		outline-offset: 2px;
+	}
+
+	.flow-public,
+	.flow-internal {
+		display: flex;
+		min-width: 0;
+		flex-direction: column;
+		align-items: center;
+		padding: 11px 9px;
+		border-radius: 4px 14px 4px 4px;
+	}
+
+	.flow-public {
+		background: #f0f5e9;
+	}
+
+	.flow-internal {
+		background: #f3f5f2;
+	}
+
+	.flow-tag {
+		margin-bottom: 10px;
+		color: #78877b;
+		font-size: 7px;
+		font-weight: 900;
+		letter-spacing: 0.09em;
+		text-align: center;
+	}
+
+	.internet-node {
+		width: 100%;
+		padding: 5px;
+		border: 1px dashed #b9c9ae;
+		border-radius: 999px;
+		color: #607066;
+		font-size: 8px;
+		font-weight: 800;
+		text-align: center;
+	}
+
+	.flow-node {
+		display: grid;
+		width: 100%;
+		gap: 3px;
+		padding: 9px 7px;
+		border: 1px solid #dce6d6;
+		border-radius: 3px 9px 3px 3px;
+		background: white;
+		color: inherit;
+		font: inherit;
+		text-align: center;
+		transition:
+			background-color 180ms ease,
+			border-color 180ms ease,
+			box-shadow 180ms ease,
+			opacity 180ms ease;
+	}
+
+	.service-toggle {
+		cursor: pointer;
+	}
+
+	.service-toggle:hover {
+		border-color: #93b37b;
+		box-shadow: 0 3px 10px rgba(29, 92, 70, 0.1);
+	}
+
+	.service-toggle.is-off {
+		border-color: #d78c81;
+		background: #fff3f0;
+	}
+
+	.service-toggle.is-impacted {
+		border-color: #d6ad61;
+		background: #fff9e9;
+	}
+
+	.flow-node strong {
+		color: var(--poster-ink);
+		font-size: 10px;
+		font-weight: 800;
+	}
+
+	.flow-node span {
+		color: #718078;
+		font-size: 8px;
+		line-height: 1.35;
+	}
+
+	.flow-node .node-status {
+		justify-self: center;
+		margin-top: 2px;
+		padding: 2px 6px;
+		border-radius: 999px;
+		background: #eaf3e3;
+		color: #47733a;
+		font-size: 6px;
+		font-weight: 900;
+		letter-spacing: 0.04em;
+	}
+
+	.service-toggle.is-off .node-status {
+		background: #f8dcd6;
+		color: #a34032;
+	}
+
+	.service-toggle.is-impacted .node-status {
+		background: #f6e8c6;
+		color: #8a6218;
+	}
+
+	.caddy-node {
+		border-color: #bed4ae;
+	}
+
+	.frontend-node {
+		border-color: #9ebc8d;
+		background: #fcfff8;
+	}
+
+	.backend-node {
+		border-color: #9ebc8d;
+		background: #fafff2;
+	}
+
+	.flow-arrow {
+		padding: 4px 0;
+		color: var(--poster-green);
+		font-size: 9px;
+		font-weight: 900;
+		text-align: center;
+		transition: color 180ms ease;
+	}
+
+	.flow-arrow.is-broken,
+	.flow-connections [data-edge].is-broken,
+	.admin-connector.is-broken {
+		color: #b7493a;
+		text-decoration: line-through;
+	}
+
+	.flow-connections {
+		display: grid;
+		width: 100%;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 5px;
+		margin: 7px 0 0;
+		color: var(--poster-green);
+		font-size: 7px;
+		font-weight: 800;
+		text-align: center;
+	}
+
+	.flow-branches {
+		display: grid;
+		width: 100%;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 5px;
+		margin-top: 4px;
+	}
+
+	.internal-node {
+		padding: 8px 3px;
+		background: #fff;
+	}
+
+	.internal-node strong {
+		font-size: 8px;
+	}
+
+	.internal-node span {
+		font-size: 7px;
+	}
+
+	.admin-route {
+		display: grid;
+		grid-template-columns: 20px minmax(0, 1fr);
+		align-items: center;
+		gap: 4px;
+		width: 100%;
+		margin-top: 7px;
+		padding-top: 7px;
+		border-top: 1px dashed #d1d9d0;
+	}
+
+	.admin-connector {
+		color: var(--poster-green);
+		font-size: 12px;
+		font-weight: 900;
+		text-align: center;
+	}
+
+	.admin-node {
+		grid-template-columns: 1fr auto;
+		align-items: center;
+	}
+
+	.admin-node strong {
+		text-align: left;
+	}
+
+	.admin-node span:not(.node-status) {
+		text-align: right;
+	}
+
+	.admin-node .node-status {
+		grid-column: 1 / -1;
+	}
+
+	.simulation-panel {
+		margin-top: 9px;
+		padding: 10px 12px;
+		border: 1px solid #dce8d5;
+		border-radius: 4px 12px 4px 4px;
+		background: #f5f8f1;
+	}
+
+	.simulation-panel-heading {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		color: var(--poster-green);
+		font-size: 9px;
+	}
+
+	.simulation-indicator {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #75a94a;
+		box-shadow: 0 0 0 3px rgba(117, 169, 74, 0.14);
+	}
+
+	.simulation-indicator.is-interrupted {
+		background: #c54c3c;
+		box-shadow: 0 0 0 3px rgba(197, 76, 60, 0.14);
+	}
+
+	.simulation-panel p {
+		margin: 5px 0 0;
+		color: #627168;
+		font-size: 8px;
+		line-height: 1.5;
+	}
+
+	.simulation-impacts {
+		display: grid;
+		gap: 4px;
+		margin: 6px 0 0;
+		padding-left: 14px;
+		color: #8d4136;
+		font-size: 7px;
+		line-height: 1.45;
+	}
+
+	.diagram-caption {
+		margin: 10px 0 0;
+		color: #76847b;
+		font-size: 9px;
+		line-height: 1.5;
+	}
+
+	.sol-flow {
+		display: grid;
+		gap: 0;
+		margin: 3px 0 16px;
+	}
+
+	.sol-step {
+		display: flex;
+		align-items: center;
+		gap: 11px;
+		padding: 8px 0;
+		border-bottom: 1px solid #edf0ea;
+	}
+
+	.sol-step > span {
+		display: grid;
+		width: 24px;
+		height: 24px;
+		flex: 0 0 auto;
+		place-items: center;
+		border-radius: 50%;
+		background: #edf4e6;
+		color: var(--poster-green);
+		font-size: 8px;
+		font-weight: 900;
+	}
+
+	.sol-step p {
+		margin: 0;
+		color: #66746b;
+		font-size: 11px;
+	}
+
+	.sol-step strong {
+		color: var(--poster-ink);
+	}
+
+	.agent-engine {
+		display: flex;
+		gap: 11px;
+		padding: 13px;
+		border-radius: 4px 12px 4px 4px;
+		background: #f0f5e9;
+	}
+
+	.engine-icon {
+		display: grid;
+		width: 28px;
+		height: 28px;
+		flex: 0 0 auto;
+		place-items: center;
+		border-radius: 50%;
+		background: var(--poster-green);
+		color: var(--poster-lime);
+		font-size: 17px;
+	}
+
+	.agent-engine strong {
+		color: var(--poster-green);
+		font-size: 10px;
+	}
+
+	.agent-engine p {
+		margin: 4px 0 0;
+		color: #607066;
+		font-size: 9px;
+		line-height: 1.55;
+	}
+
+	.poster-details {
+		margin-top: 13px;
+		border-top: 1px solid var(--poster-line);
+	}
+
+	.poster-details summary {
+		padding: 11px 0 3px;
+		color: var(--poster-green);
+		cursor: pointer;
+		font-size: 10px;
+		font-weight: 800;
+		list-style-position: inside;
+	}
+
+	.details-content {
+		padding: 5px 0 0 15px;
+		color: #65736b;
+		font-size: 9px;
+		line-height: 1.55;
+	}
+
+	.details-content p {
+		margin: 4px 0 7px;
+	}
+
+	.details-content ul {
+		display: grid;
+		gap: 4px;
+		margin: 0;
+		padding-left: 14px;
+	}
+
+	.practice-list {
+		display: grid;
+		gap: 15px;
+		margin: 20px 0 16px;
+		padding: 0;
+		list-style: none;
+	}
+
+	.practice-list li {
+		display: flex;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.practice-icon {
+		display: grid;
+		width: 25px;
+		height: 25px;
+		flex: 0 0 auto;
+		place-items: center;
+		border: 1px solid #dbe8d3;
+		border-radius: 50%;
+		color: var(--poster-green);
+		font-size: 13px;
+		font-weight: 800;
+	}
+
+	.practice-list strong {
+		color: var(--poster-ink);
+		font-size: 10px;
+	}
+
+	.practice-list p {
+		margin: 3px 0 0;
+		color: #68766e;
+		font-size: 9px;
+		line-height: 1.5;
+	}
+
+	.security-note {
+		margin: auto 0 0;
+		padding: 10px 11px;
+		border-left: 2px solid #a4c579;
+		background: #f4f7f0;
+		color: #647168;
+		font-size: 9px;
+		line-height: 1.5;
+	}
+
+	.outcomes {
+		display: grid;
+		grid-template-columns: 0.75fr repeat(3, minmax(0, 1fr));
+		gap: 22px;
+		margin-top: 16px;
+		padding: 22px 24px;
+		border-radius: 4px 20px 4px 4px;
+		background: var(--poster-ink);
+		color: white;
+	}
+
+	.outcomes-title {
+		align-self: center;
+	}
+
+	.outcomes-title .section-kicker {
+		margin-bottom: 7px;
+		color: var(--poster-lime);
+		font-size: 8px;
+	}
+
+	.outcomes-title h2 {
+		color: white;
+		font-size: 22px;
+	}
+
+	.outcome {
+		position: relative;
+		padding-left: 15px;
+		border-left: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.outcome-index {
+		color: var(--poster-lime);
+		font-size: 9px;
+		font-weight: 900;
+	}
+
+	.outcome h3 {
+		margin: 5px 0 5px;
+		color: white;
+		font-size: 12px;
+	}
+
+	.outcome p {
+		margin: 0;
+		color: rgba(255, 255, 255, 0.69);
+		font-size: 9px;
+		line-height: 1.5;
+	}
+
+	.poster-footer {
+		display: grid;
+		grid-template-columns: 1.25fr 0.9fr auto;
+		align-items: center;
+		gap: 25px;
+		padding-top: 20px;
+	}
+
+	.conclusion {
+		display: flex;
+		align-items: flex-start;
+		gap: 9px;
+	}
+
+	.conclusion-symbol {
+		color: #80a758;
+		font-family: Georgia, serif;
+		font-size: 35px;
+		font-weight: 800;
+		line-height: 0.8;
+	}
+
+	.conclusion p {
+		margin: 0;
+		color: #68766d;
+		font-size: 10px;
+		line-height: 1.55;
+	}
+
+	.conclusion strong {
+		color: var(--poster-ink);
+	}
+
+	.future {
+		padding-left: 18px;
+		border-left: 1px solid var(--poster-line);
+	}
+
+	.future .section-kicker {
+		margin-bottom: 5px;
+		font-size: 8px;
+	}
+
+	.future p:last-child {
+		margin: 0;
+		color: #68766d;
+		font-size: 9px;
+		line-height: 1.5;
+	}
+
+	.credits {
+		display: grid;
+		gap: 4px;
+		color: #79877d;
+		font-size: 8px;
+		text-align: right;
+	}
+
+	@media (max-width: 1000px) {
+		.poster-page {
+			padding-right: 18px;
+			padding-left: 18px;
+		}
+
+		.poster-board {
+			aspect-ratio: auto;
+		}
+
+		.poster-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.architecture-card {
+			grid-column: 1 / -1;
+		}
+
+		.architecture-flow {
+			grid-template-columns: 0.75fr 1.25fr;
+		}
+
+		.outcomes {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.outcomes-title {
+			grid-column: 1 / -1;
+		}
+
+		.outcomes-title h2 {
+			font-size: 20px;
+		}
+
+		.poster-footer {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.credits {
+			grid-column: 1 / -1;
+			grid-template-columns: 1fr 1fr;
+			text-align: left;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.poster-page {
+			padding: 12px 10px 28px;
+		}
+
+		.poster-toolbar {
+			margin-bottom: 11px;
+		}
+
+		.toolbar-link,
+		.print-button {
+			min-height: 38px;
+			font-size: 11px;
+		}
+
+		.toolbar-link {
+			padding: 0 12px;
+		}
+
+		.print-button {
+			padding: 0 12px;
+		}
+
+		.poster-board {
+			padding: 20px 17px;
+		}
+
+		.poster-header {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 13px;
+			padding-bottom: 16px;
+		}
+
+		.brand-lockup img {
+			width: 120px;
+		}
+
+		.brand-caption {
+			font-size: 8px;
+		}
+
+		.poster-hero {
+			grid-template-columns: 1fr;
+			gap: 22px;
+			padding: 30px 0 24px;
+		}
+
+		.hero-copy h1 {
+			font-size: clamp(49px, 14vw, 72px);
+		}
+
+		.hero-note {
+			padding: 18px;
+		}
+
+		.note-mark {
+			float: right;
+			width: 34px;
+			height: 34px;
+			margin: 0;
+			font-size: 18px;
+		}
+
+		.metrics {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.metric {
+			min-height: 78px;
+			padding: 12px 8px;
+		}
+
+		.metric:nth-child(2) {
+			border-right: 0;
+		}
+
+		.metric:nth-child(-n + 2) {
+			border-bottom: 1px solid var(--poster-line);
+		}
+
+		.metric:first-child {
+			padding-left: 8px;
+		}
+
+		.metric strong {
+			font-size: 38px;
+		}
+
+		.metric p {
+			font-size: 9px;
+		}
+
+		.metrics-caption {
+			font-size: 9px;
+			line-height: 1.5;
+		}
+
+		.poster-grid {
+			grid-template-columns: 1fr;
+			gap: 11px;
+		}
+
+		.architecture-card {
+			grid-column: auto;
+		}
+
+		.architecture-flow {
+			grid-template-columns: 1fr;
+		}
+
+		.flow-public {
+			gap: 5px;
+		}
+
+		.flow-public .flow-tag {
+			margin: 0 0 4px;
+		}
+
+		.flow-public .flow-arrow {
+			padding: 0;
+		}
+
+		.flow-branches {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.flow-internal {
+			padding: 11px;
+		}
+
+		.simulation-controls p {
+			font-size: 8px;
+		}
+
+		.simulation-impacts {
+			font-size: 8px;
+		}
+
+		.outcomes {
+			grid-template-columns: 1fr;
+			gap: 13px;
+			margin-top: 11px;
+			padding: 18px;
+		}
+
+		.outcomes-title {
+			grid-column: auto;
+		}
+
+		.outcome {
+			padding: 0 0 0 12px;
+		}
+
+		.poster-footer {
+			grid-template-columns: 1fr;
+			gap: 15px;
+		}
+
+		.future {
+			padding: 11px 0 0;
+			border-top: 1px solid var(--poster-line);
+			border-left: 0;
+		}
+
+		.credits {
+			grid-column: auto;
+			grid-template-columns: 1fr;
+			padding-top: 11px;
+			border-top: 1px solid var(--poster-line);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		* {
+			scroll-behavior: auto !important;
+			transition-duration: 0.01ms !important;
+		}
+	}
+
+	@page {
+		size: 70cm 100cm;
+		margin: 0;
+	}
+
+	@media print {
+		:global(body) {
+			width: 70cm;
+			height: 100cm;
+			margin: 0;
+			background: white;
+			-webkit-print-color-adjust: exact;
+			print-color-adjust: exact;
+		}
+
+		.poster-page {
+			width: 70cm;
+			height: 100cm;
+			min-height: 100cm;
+			padding: 0;
+		}
+
+		.poster-toolbar {
+			display: none;
+		}
+
+		.simulation-controls {
+			display: none;
+		}
+
+		.poster-board {
+			width: 70cm;
+			height: 100cm;
+			min-height: 100cm;
+			max-width: none;
+			aspect-ratio: auto;
+			gap: 0;
+			overflow: hidden;
+			padding: 2.5cm 3cm;
+			border: 0;
+			box-shadow: none;
+			box-sizing: border-box;
+		}
+
+		.poster-header {
+			padding-bottom: 6mm;
+		}
+
+		.brand-lockup img {
+			width: 6cm;
+		}
+
+		.brand-caption {
+			gap: 2mm;
+			font-size: 9pt;
+		}
+
+		.live-link {
+			font-size: 12pt;
+		}
+
+		.poster-hero {
+			grid-template-columns: 1.65fr 0.75fr;
+			gap: 2cm;
+			padding: 1.8cm 0 1.3cm;
+		}
+
+		.eyebrow,
+		.section-kicker {
+			font-size: 11pt;
+		}
+
+		.hero-copy h1 {
+			margin: 4mm 0 6mm;
+			font-size: 68pt;
+		}
+
+		.hero-description {
+			font-size: 17pt;
+		}
+
+		.hero-note {
+			padding: 1.2cm;
+		}
+
+		.hero-note .note-label {
+			font-size: 10pt;
+		}
+
+		.hero-note > p:not(.note-label) {
+			font-size: 14pt;
+		}
+
+		.hero-meta {
+			font-size: 10pt;
+		}
+
+		.metrics {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+
+		.metric {
+			min-height: 4.8cm;
+			gap: 5mm;
+			padding: 7mm 8mm;
+		}
+
+		.metric strong {
+			font-size: 52pt;
+		}
+
+		.metric p {
+			font-size: 14pt;
+		}
+
+		.metrics-caption {
+			margin: 3mm 0 8mm;
+			font-size: 10pt;
+		}
+
+		.poster-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 8mm;
+		}
+
+		.architecture-card {
+			grid-column: 1 / -1;
+		}
+
+		.poster-card {
+			padding: 8mm;
+			break-inside: avoid;
+		}
+
+		.poster-card:hover {
+			transform: none;
+			box-shadow: none;
+		}
+
+		.section-heading h2,
+		.outcomes-title h2 {
+			font-size: 24pt;
+		}
+
+		.card-intro {
+			margin-bottom: 5mm;
+			font-size: 15pt;
+		}
+
+		.flow-node {
+			padding: 4mm 3mm;
+		}
+
+		.flow-node strong {
+			font-size: 13pt;
+		}
+
+		.flow-node span,
+		.internal-node span {
+			font-size: 10pt;
+		}
+
+		.flow-node .node-status {
+			font-size: 8pt;
+		}
+
+		.flow-connections {
+			font-size: 10pt;
+		}
+
+		.simulation-panel {
+			margin-top: 5mm;
+			padding: 5mm 7mm;
+		}
+
+		.simulation-panel-heading {
+			font-size: 12pt;
+		}
+
+		.simulation-panel p,
+		.simulation-impacts {
+			font-size: 11pt;
+		}
+
+		.admin-route {
+			margin-top: 4mm;
+			padding-top: 4mm;
+		}
+
+		.practice-list {
+			gap: 7mm;
+			margin: 8mm 0 6mm;
+		}
+
+		.practice-list p,
+		.agent-engine p,
+		.details-content,
+		.diagram-caption,
+		.security-note {
+			font-size: 12pt;
+		}
+
+		.practice-list strong,
+		.agent-engine strong {
+			font-size: 14pt;
+		}
+
+		.poster-details summary {
+			padding-top: 4mm;
+			font-size: 12pt;
+		}
+
+		.poster-details:not([open]) .details-content {
+			display: block;
+		}
+
+		.outcomes {
+			grid-template-columns: 0.75fr repeat(3, minmax(0, 1fr));
+			gap: 8mm;
+			margin-top: 8mm;
+			padding: 8mm 10mm;
+			break-inside: avoid;
+		}
+
+		.outcomes-title {
+			grid-column: auto;
+		}
+
+		.outcome h3 {
+			font-size: 15pt;
+		}
+
+		.outcome p {
+			font-size: 12pt;
+		}
+
+		.poster-footer {
+			grid-template-columns: 1.25fr 0.9fr auto;
+			gap: 8mm;
+			padding-top: 8mm;
+		}
+
+		.credits {
+			grid-column: auto;
+			grid-template-columns: 1fr;
+			text-align: right;
+			font-size: 10pt;
+		}
+
+		.conclusion p,
+		.future p:last-child {
+			font-size: 12pt;
+		}
+
+		.poster-details summary {
+			list-style-position: outside;
+		}
+
+		.outcome-index {
+			font-size: 11pt;
+		}
+
+		.future .section-kicker,
+		.outcomes-title .section-kicker {
+			font-size: 10pt;
+		}
+
+		.flow-tag {
+			font-size: 9pt;
+		}
+
+		.internet-node {
+			font-size: 10pt;
+		}
+	}
+</style>
