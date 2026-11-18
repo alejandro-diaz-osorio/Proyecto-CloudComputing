@@ -1,5 +1,5 @@
 ---
-import { FileText, User, CircleHelp, LogOut } from '@lucide/astro';
+import { FileText, User, Users, CircleHelp, LogOut } from '@lucide/astro';
 import { NAV_PORTAL } from '../nav.js';
 import { RUTAS } from '../../../lib/routes.js';
 
@@ -12,12 +12,14 @@ const { pathname, items = NAV_PORTAL, titulo = 'Mi espacio' } = Astro.props;
 
 const sinBarra = (ruta: string) => ruta.replace(/\/+$/, '');
 const actual = sinBarra(pathname);
-const activo = (href: string) => {
-  const h = sinBarra(href);
-  return actual === h || actual.startsWith(`${h}/`);
-};
+const hrefActivo = items.reduce((coincidencia, item) => {
+  const href = sinBarra(item.href);
+  const coincide = actual === href || actual.startsWith(`${href}/`);
+  return coincide && href.length > coincidencia.length ? href : coincidencia;
+}, '');
+const activo = (href: string) => sinBarra(href) === hrefActivo;
 
-const ICONOS = { file: FileText, user: User };
+const ICONOS: Record<string, typeof FileText> = { file: FileText, user: User, users: Users };
 ---
 
 <aside class="fixed bottom-0 left-0 top-[70px] z-20 flex w-[216px] flex-col border-r border-[#e7e1d4] bg-[#fffdf9] p-[28px_12px_16px] transition-transform max-lg:-translate-x-full group-data-[nav-open=true]:translate-x-0" id="portal-sidebar">

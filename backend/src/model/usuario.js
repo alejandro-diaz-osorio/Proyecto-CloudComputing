@@ -26,12 +26,12 @@ const Usuario = {
   },
 
   // El password ya debe llegar cifrado (bcrypt) desde el controlador
-  create: async ({ nombre, apellido, email, password_hash, telefono, rol }) => {
+  create: async ({ nombre, apellido, email, password_hash, telefono, rol, emailVerificado = false }) => {
     const result = await query(
       `INSERT INTO usuarios
        (nombre, apellido, email, password_hash, telefono, rol, email_verificado_en)
-       VALUES (?, ?, ?, ?, ?, ?, CASE WHEN ? = 'admin' THEN UTC_TIMESTAMP() ELSE NULL END)`,
-      [nombre, apellido, email.toLowerCase().trim(), password_hash, telefono || null, rol || 'cliente', rol || 'cliente']
+       VALUES (?, ?, ?, ?, ?, ?, CASE WHEN ? = 1 OR ? = 'admin' THEN UTC_TIMESTAMP() ELSE NULL END)`,
+      [nombre, apellido, email.toLowerCase().trim(), password_hash, telefono || null, rol || 'cliente', emailVerificado ? 1 : 0, rol || 'cliente']
     );
     return result.insertId;
   },
@@ -40,6 +40,16 @@ const Usuario = {
     return await query(
       'UPDATE usuarios SET nombre = ?, apellido = ?, telefono = ? WHERE id = ?',
       [nombre, apellido, telefono || null, id]
+    );
+  },
+
+  updateGestion: async (id, { nombre, apellido, email, telefono, rol, password_hash }) => {
+    return await query(
+      `UPDATE usuarios
+       SET nombre = ?, apellido = ?, email = ?, telefono = ?, rol = ?,
+           password_hash = COALESCE(?, password_hash)
+       WHERE id = ?`,
+      [nombre, apellido, email.toLowerCase().trim(), telefono || null, rol, password_hash || null, id]
     );
   },
 

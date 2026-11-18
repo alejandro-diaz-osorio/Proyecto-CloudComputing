@@ -19,5 +19,6 @@ export const RUTAS = {
 
   // Portal de administración (rol 'admin')
   portalAdmin: '/portal/admin/',
+  portalAdminUsuarios: '/portal/admin/usuarios/',
   portalAdminPerfil: '/portal/admin/perfil/',
 };

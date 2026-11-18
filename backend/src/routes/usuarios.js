@@ -10,8 +10,11 @@ router.patch('/me/password', usuarioController.cambiarPassword);
 
 // Solo administradora
 router.get('/', verifyRoles('admin'), usuarioController.getAllUsuarios);
+router.post('/', verifyRoles('admin'), usuarioController.createUsuario);
 router.post('/administradoras', verifyRoles('admin'), usuarioController.createAdministradora);
 router.get('/:id', verifyRoles('admin'), usuarioController.getUsuarioById);
+router.patch('/:id', verifyRoles('admin'), usuarioController.updateUsuario);
 router.patch('/:id/activo', verifyRoles('admin'), usuarioController.setActivoUsuario);
+router.delete('/:id', verifyRoles('admin'), usuarioController.deleteUsuario);
 
 module.exports = router;

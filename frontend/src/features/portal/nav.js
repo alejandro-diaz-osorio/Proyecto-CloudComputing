@@ -6,5 +6,7 @@ export const NAV_PORTAL = [
 ];
 
 export const NAV_ADMIN = [
-  { id: 'inicio', label: 'Panel de administración', href: RUTAS.portalAdmin, icon: 'file' },
+  { id: 'cotizaciones', label: 'Solicitudes', href: RUTAS.portalAdmin, icon: 'file' },
+  { id: 'usuarios', label: 'Usuarios', href: RUTAS.portalAdminUsuarios, icon: 'users' },
+  { id: 'perfil', label: 'Mi perfil', href: RUTAS.portalAdminPerfil, icon: 'user' },
 ];

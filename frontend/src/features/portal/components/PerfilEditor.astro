@@ -117,8 +117,8 @@
     const nombre = String(datos.get("nombre") ?? "").trim()
     const apellido = String(datos.get("apellido") ?? "").trim()
     const telefono = String(datos.get("telefono") ?? "").trim()
-    if (!nombre || !apellido) {
-      mensaje.textContent = "Nombre y apellido son obligatorios."
+    if (!nombre) {
+      mensaje.textContent = "Nombre es obligatorio."
       mensaje.hidden = false
       return
     }

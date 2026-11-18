@@ -1,0 +1,289 @@
+---
+import { Plus, Search, Pencil, UserRoundX, UserRoundCheck } from '@lucide/astro';
+---
+
+<section class="space-y-6 p-5 lg:p-[36px_48px_56px]">
+  <header class="flex flex-wrap items-end justify-between gap-5">
+    <div>
+      <p class="mb-1.5 text-[10px] font-bold uppercase tracking-[.14em] text-[#c0301f]">Área de administración</p>
+      <h1 class="mb-2 text-[clamp(1.9rem,3vw,2.6rem)] font-extrabold uppercase leading-tight tracking-tight">Usuarios</h1>
+      <p class="m-0 text-sm text-[#706c61]">Crea y administra las cuentas de clientes y administradores.</p>
+    </div>
+    <button
+      class="inline-flex min-h-11 items-center gap-2 border border-[#1d2433] bg-[#1d2433] px-5 text-xs font-bold uppercase tracking-wide text-white transition hover:border-[#c0301f] hover:bg-[#c0301f]"
+      type="button"
+      id="usuarios-crear"
+    >
+      <Plus size={16} stroke-width={2} /> Nuevo usuario
+    </button>
+  </header>
+
+  <p class="border border-[#e7e1d4] bg-[#fffdf9] px-4 py-3 text-xs leading-relaxed text-[#706c61]" role="note">
+    Desactivar una cuenta conserva su historial. Puedes reactivarla desde esta lista.
+  </p>
+
+  <p class="text-sm text-[#706c61]" id="usuarios-mensaje" role="status" aria-live="polite">Cargando usuarios…</p>
+
+  <div id="usuarios-contenido" hidden>
+    <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+      <p class="m-0 text-xs text-[#706c61]" id="usuarios-conteo"></p>
+      <label class="flex min-h-10 items-center gap-2 border border-[#d8d1c3] bg-[#fffdf9] px-3 text-[#706c61]">
+        <Search size={16} stroke-width={1.8} />
+        <span class="sr-only">Buscar usuarios</span>
+        <input
+          class="w-56 border-0 bg-transparent text-sm text-[#1d2433] outline-none placeholder:text-[#8a8678]"
+          id="usuarios-buscar"
+          type="search"
+          placeholder="Nombre o correo"
+          autocomplete="off"
+        />
+      </label>
+    </div>
+
+    <div class="overflow-x-auto border border-[#e7e1d4] bg-[#fffdf9]">
+      <table class="w-full min-w-[760px] border-collapse text-left text-sm">
+        <thead class="bg-[#f3efe6] text-[10px] uppercase tracking-[.1em] text-[#706c61]">
+          <tr>
+            <th class="px-5 py-4 font-bold">Usuario</th>
+            <th class="px-5 py-4 font-bold">Teléfono</th>
+            <th class="px-5 py-4 font-bold">Rol</th>
+            <th class="px-5 py-4 font-bold">Estado</th>
+            <th class="px-5 py-4 text-right font-bold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="usuarios-lista" class="divide-y divide-[#e7e1d4]"></tbody>
+      </table>
+      <p class="hidden px-5 py-10 text-center text-sm text-[#706c61]" id="usuarios-vacio">No hay usuarios que coincidan con la búsqueda.</p>
+    </div>
+  </div>
+</section>
+
+<dialog
+  id="usuario-dialog"
+  class="m-auto w-[min(94vw,640px)] max-w-none border border-[#e7e1d4] bg-[#fffdf9] p-0 text-[#1d2433] shadow-2xl backdrop:bg-[rgb(20_24_34/0.55)]"
+>
+  <form id="usuario-form" class="p-6 sm:p-8" novalidate>
+    <div class="mb-6 flex items-start justify-between gap-4">
+      <div>
+        <p class="mb-1 text-[10px] font-bold uppercase tracking-[.14em] text-[#c0301f]">Administración</p>
+        <h2 class="m-0 text-xl font-extrabold uppercase" id="usuario-dialog-titulo">Nuevo usuario</h2>
+      </div>
+      <button class="border-0 bg-transparent px-2 text-2xl leading-none text-[#706c61] hover:text-[#1d2433]" type="button" data-usuario-cancelar aria-label="Cerrar">×</button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <label class="grid gap-2 text-xs font-semibold" for="usuario-nombre">
+        Nombre
+        <input class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]" id="usuario-nombre" name="nombre" maxlength="80" required />
+      </label>
+      <label class="grid gap-2 text-xs font-semibold" for="usuario-apellido">
+        Apellido
+        <input class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]" id="usuario-apellido" name="apellido" maxlength="80" required />
+      </label>
+      <label class="grid gap-2 text-xs font-semibold sm:col-span-2" for="usuario-email">
+        Correo electrónico
+        <input class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]" id="usuario-email" name="email" type="email" maxlength="190" autocomplete="email" required />
+      </label>
+      <label class="grid gap-2 text-xs font-semibold" for="usuario-telefono">
+        Teléfono
+        <input class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]" id="usuario-telefono" name="telefono" type="tel" maxlength="25" autocomplete="tel" />
+      </label>
+      <label class="grid gap-2 text-xs font-semibold" for="usuario-rol">
+        Rol
+        <select class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]" id="usuario-rol" name="rol" required>
+          <option value="cliente">Cliente</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </label>
+      <label class="grid gap-2 text-xs font-semibold sm:col-span-2" for="usuario-password">
+        <span id="usuario-password-label">Contraseña</span>
+        <input class="min-h-11 border border-[#d8d1c3] bg-white px-3 text-sm font-normal outline-none focus:border-[#c0301f]" id="usuario-password" name="password" type="password" minlength="8" autocomplete="new-password" />
+      </label>
+    </div>
+    <p class="mt-2 text-xs text-[#8a8678]" id="usuario-password-ayuda">Mínimo 8 caracteres, una mayúscula y un número.</p>
+    <p class="mt-3 text-sm text-[#c0301f]" id="usuario-form-error" role="alert" hidden></p>
+    <div class="mt-6 flex flex-wrap justify-end gap-3">
+      <button class="min-h-11 border border-[#d8d1c3] px-5 text-xs font-bold uppercase tracking-wide transition hover:border-[#1d2433]" type="button" data-usuario-cancelar>Cancelar</button>
+      <button class="min-h-11 border border-[#1d2433] bg-[#1d2433] px-5 text-xs font-bold uppercase tracking-wide text-white transition hover:border-[#c0301f] hover:bg-[#c0301f] disabled:cursor-wait disabled:opacity-60" type="submit" id="usuario-guardar">Crear usuario</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import { initSession, getSesion } from '../auth/session.js';
+  import { ApiError, http } from '../../lib/http.js';
+
+  initSession();
+
+  interface Usuario {
+    id: number | string;
+    nombre?: string | null;
+    apellido?: string | null;
+    email?: string | null;
+    telefono?: string | null;
+    rol: 'cliente' | 'admin';
+    activo: number | boolean;
+  }
+
+  const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
+  const entidadesHtml: Record<string, string> = {
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  };
+  const esc = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (char) => entidadesHtml[char] ?? char);
+  const lista = $<HTMLTableSectionElement>('#usuarios-lista');
+  const contenido = $('#usuarios-contenido');
+  const mensaje = $('#usuarios-mensaje');
+  const dialog = $<HTMLDialogElement>('#usuario-dialog');
+  const form = $<HTMLFormElement>('#usuario-form');
+  const errorForm = $('#usuario-form-error');
+  const guardar = $<HTMLButtonElement>('#usuario-guardar');
+  const password = $<HTMLInputElement>('#usuario-password');
+  const passwordLabel = $('#usuario-password-label');
+  const passwordAyuda = $('#usuario-password-ayuda');
+  let usuarios: Usuario[] = [];
+  let usuarioEditando: Usuario | null = null;
+
+  function mensajeDeError(error: unknown, fallback: string) {
+    return error instanceof ApiError ? error.mensaje : fallback;
+  }
+
+  function mostrarMensaje(texto: string, error = false) {
+    mensaje.textContent = texto;
+    mensaje.className = `text-sm ${error ? 'text-[#c0301f]' : 'text-[#706c61]'}`;
+    mensaje.hidden = false;
+  }
+
+  function filtrarUsuarios() {
+    const termino = String($<HTMLInputElement>('#usuarios-buscar').value ?? '').trim().toLocaleLowerCase();
+    const filtrados = usuarios.filter((u) =>
+      `${u.nombre ?? ''} ${u.apellido ?? ''} ${u.email ?? ''}`.toLocaleLowerCase().includes(termino),
+    );
+    $('#usuarios-conteo').textContent = `${filtrados.length} de ${usuarios.length} usuario${usuarios.length === 1 ? '' : 's'}`;
+    $('#usuarios-vacio').classList.toggle('hidden', filtrados.length > 0);
+    lista.innerHTML = filtrados.map((u) => {
+      const activo = Boolean(Number(u.activo));
+      const usuarioActual = getSesion().user as { id?: number | string } | null;
+      const propio = Number(u.id) === Number(usuarioActual?.id);
+      return `
+        <tr class="${activo ? '' : 'bg-[#f8f6f1] text-[#8a8678]'}">
+          <td class="px-5 py-4">
+            <strong class="block font-semibold text-[#1d2433]">${esc([u.nombre, u.apellido].filter(Boolean).join(' '))}</strong>
+            <span class="mt-1 block text-xs">${esc(u.email)}</span>
+          </td>
+          <td class="px-5 py-4">${esc(u.telefono || '—')}</td>
+          <td class="px-5 py-4">${u.rol === 'admin' ? 'Administrador' : 'Cliente'}</td>
+          <td class="px-5 py-4"><span class="${activo ? 'text-[#287454]' : 'text-[#8a8678]'}">${activo ? 'Activo' : 'Inactivo'}</span></td>
+          <td class="px-5 py-4">
+            <div class="flex justify-end gap-2">
+              <button class="inline-flex min-h-9 items-center gap-1.5 border border-[#d8d1c3] px-3 text-xs font-semibold text-[#1d2433] hover:border-[#1d2433]" type="button" data-usuario-editar="${esc(u.id)}" aria-label="Editar ${esc(u.email)}">
+                <span class="hidden sm:inline">Editar</span><span class="sm:hidden"><span class="sr-only">Editar</span>${$('#ico-editar').innerHTML}</span>
+              </button>
+              ${activo && !propio
+                ? `<button class="inline-flex min-h-9 items-center gap-1.5 border border-[#d8d1c3] px-3 text-xs font-semibold text-[#a12a1d] hover:border-[#a12a1d]" type="button" data-usuario-desactivar="${esc(u.id)}"><span class="hidden sm:inline">Desactivar</span><span class="sm:hidden"><span class="sr-only">Desactivar</span>${$('#ico-desactivar').innerHTML}</span></button>`
+                : !activo
+                  ? `<button class="inline-flex min-h-9 items-center gap-1.5 border border-[#d8d1c3] px-3 text-xs font-semibold text-[#287454] hover:border-[#287454]" type="button" data-usuario-activar="${esc(u.id)}"><span class="hidden sm:inline">Reactivar</span><span class="sm:hidden"><span class="sr-only">Reactivar</span>${$('#ico-activar').innerHTML}</span></button>`
+                  : ''}
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  async function cargarUsuarios() {
+    mostrarMensaje('Cargando usuarios…');
+    try {
+      const respuesta = await http.get('/usuarios');
+      usuarios = Array.isArray(respuesta) ? respuesta : [];
+      contenido.hidden = false;
+      mensaje.hidden = true;
+      filtrarUsuarios();
+    } catch (error) {
+      mostrarMensaje(mensajeDeError(error, 'No pudimos cargar los usuarios. Inténtalo de nuevo.'), true);
+    }
+  }
+
+  function abrirFormulario(usuario: Usuario | null = null) {
+    usuarioEditando = usuario;
+    form.reset();
+    errorForm.hidden = true;
+    errorForm.textContent = '';
+    $('#usuario-dialog-titulo').textContent = usuario ? 'Editar usuario' : 'Nuevo usuario';
+    guardar.textContent = usuario ? 'Guardar cambios' : 'Crear usuario';
+    $<HTMLInputElement>('#usuario-nombre').value = usuario?.nombre ?? '';
+    $<HTMLInputElement>('#usuario-apellido').value = usuario?.apellido ?? '';
+    $<HTMLInputElement>('#usuario-email').value = usuario?.email ?? '';
+    $<HTMLInputElement>('#usuario-telefono').value = usuario?.telefono ?? '';
+    $<HTMLSelectElement>('#usuario-rol').value = usuario?.rol ?? 'cliente';
+    password.value = '';
+    password.required = !usuario;
+    passwordLabel.textContent = usuario ? 'Cambiar contraseña (opcional)' : 'Contraseña';
+    passwordAyuda.textContent = usuario
+      ? 'Déjala en blanco para conservar la contraseña actual. Si la cambias: mínimo 8 caracteres, una mayúscula y un número.'
+      : 'Mínimo 8 caracteres, una mayúscula y un número.';
+    dialog.showModal();
+  }
+
+  $('#usuarios-crear').addEventListener('click', () => abrirFormulario());
+  $<HTMLInputElement>('#usuarios-buscar').addEventListener('input', filtrarUsuarios);
+  document.querySelectorAll('[data-usuario-cancelar]').forEach((boton) =>
+    boton.addEventListener('click', () => dialog.close()),
+  );
+
+  lista.addEventListener('click', async (event: MouseEvent) => {
+    if (!(event.target instanceof Element)) return;
+    const button = event.target.closest<HTMLButtonElement>('button');
+    if (!button) return;
+    const usuario = usuarios.find((u) => String(u.id) === String(
+      button.dataset.usuarioEditar ?? button.dataset.usuarioDesactivar ?? button.dataset.usuarioActivar,
+    ));
+    if (!usuario) return;
+    if (button.dataset.usuarioEditar) {
+      abrirFormulario(usuario);
+      return;
+    }
+
+    const activar = Boolean(button.dataset.usuarioActivar);
+    if (!activar && !window.confirm(`¿Desactivar la cuenta de ${usuario.email}? Se conservará su historial.`)) return;
+    button.disabled = true;
+    try {
+      if (activar) await http.patch(`/usuarios/${usuario.id}/activo`, { activo: true });
+      else await http.delete(`/usuarios/${usuario.id}`);
+      await cargarUsuarios();
+    } catch (error) {
+      mostrarMensaje(mensajeDeError(error, `No pudimos ${activar ? 'reactivar' : 'desactivar'} el usuario.`), true);
+      button.disabled = false;
+    }
+  });
+
+  form.addEventListener('submit', async (event: SubmitEvent) => {
+    event.preventDefault();
+    const datos = new FormData(form);
+    const usuarioDatos = {
+      nombre: String(datos.get('nombre') ?? '').trim(),
+      apellido: String(datos.get('apellido') ?? '').trim(),
+      email: String(datos.get('email') ?? '').trim().toLowerCase(),
+      telefono: String(datos.get('telefono') ?? '').trim(),
+      rol: String(datos.get('rol') ?? ''),
+      password: String(datos.get('password') ?? ''),
+    };
+    guardar.disabled = true;
+    errorForm.hidden = true;
+    try {
+      if (usuarioEditando) await http.patch(`/usuarios/${usuarioEditando.id}`, usuarioDatos);
+      else await http.post('/usuarios', usuarioDatos);
+      dialog.close();
+      await cargarUsuarios();
+    } catch (error) {
+      errorForm.textContent = mensajeDeError(error, 'No pudimos guardar el usuario. Revisa los datos e inténtalo de nuevo.');
+      errorForm.hidden = false;
+    } finally {
+      guardar.disabled = false;
+    }
+  });
+
+  cargarUsuarios();
+</script>
+
+<template id="ico-editar"><Pencil size={14} stroke-width={1.8} /></template>
+<template id="ico-desactivar"><UserRoundX size={14} stroke-width={1.8} /></template>
+<template id="ico-activar"><UserRoundCheck size={14} stroke-width={1.8} /></template>
